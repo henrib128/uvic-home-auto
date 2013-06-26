@@ -1,0 +1,31 @@
+DROP TABLE Devices;
+DESC Devices;
+SELECT * from Devices;
+
+-- Type 0 switch (on/off), 1 door sensor (open/close) for TRUE/FALSE
+DROP TABLE Devices;
+CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(20), status TINYINT, active TINYINT);
+INSERT INTO Devices VALUES(10000000000,0,'bedroom lamp',0, 1);
+INSERT INTO Devices VALUES(10000000001,1,'front door',0, 0);
+
+DROP TABLE Credential;
+CREATE TABLE Credential(username VARCHAR(20) PRIMARY KEY, password VARCHAR(20));
+INSERT INTO Credential VALUES('rpi','rpipass');
+
+DROP TABLE Emails;
+CREATE TABLE Emails(email VARCHAR(20) PRIMARY KEY, active TINYINT);
+INSERT INTO Emails VALUES('trihuynh87@gmail.com',1);
+INSERT INTO Emails VALUES('henrib128@gmail.com',0);
+
+--type: 0 public, 1 master, 2 slave
+DROP TABLE Nodes;
+CREATE TABLE Nodes(type TINYINT, ipaddress VARCHAR(16) PRIMARY KEY, mjpgport SMALLINT UNSIGNED);
+INSERT INTO Nodes VALUES(0,'24.68.152.172',NULL);
+INSERT INTO Nodes VALUES(1,'192.168.0.190',8080);
+INSERT INTO Nodes VALUES(2,'192.168.0.191',8081);
+
+
+
+
+
+
