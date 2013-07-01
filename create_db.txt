@@ -1,3 +1,8 @@
+CREATE DATABASE pihome;
+CREATE USER 'ceng499'@'localhost' IDENTIFIED BY 'ceng499';
+GRANT ALL PRIVILEGES ON pihome.* TO 'ceng499'@'localhost';
+USE pihome
+
 DROP TABLE Devices;
 DESC Devices;
 SELECT * from Devices;
