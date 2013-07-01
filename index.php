@@ -31,7 +31,7 @@
         img.onclick = imageOnclick;
         img.width = 512;
         img.height = 384;
-        img.src = "http://192.168.1.68:8080/?action=snapshot&n=" + (++imageNr);
+        img.src = "http://24.68.152.172:8080/?action=snapshot&n=" + (++imageNr);
         var webcam = document.getElementById("webcam");
 		window.info = document.getElementById('info').firstChild;
 		window.ravgFps = document.getElementById('ravgfps').firstChild;
@@ -120,11 +120,21 @@
       </p>
       </div>
 
-    <div id="content"><div id="webcam" style="width:512px;height:394px"><noscript><img src="http://192.168.1.68:8080/?action=snapshot" width="512px" height="384px" /></noscript></div></div>
+    <div id="content"><div id="webcam" style="width:512px;height:394px"></div></div>
 	<?php
 		echo exec('./test.py');
 	?>
   </body>
+  
+  <body>
+	<h1>Add new device</h1>
+	<form action="/addDevice" method="get">
+		Serial Number: <input type="text" name="dserial">
+		Name: <input type="text" name="dname">
+		Type: <input type="text" name="dtype">
+		<input type="submit" value="Add">
+	</form>
+	</body>
 </html>
 
 
