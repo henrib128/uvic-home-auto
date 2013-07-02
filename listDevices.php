@@ -11,8 +11,10 @@
 		require_once('DBManager.php');
 		db_connect();
 		
-		if(isset($_REQUEST['dserial']) && isset($_REQUEST['dtype']) && isset($_REQUEST['dname']))
+		if(isset($_REQUEST['dserial']) && isset($_REQUEST['dtype']) && isset($_REQUEST['dname'])) {
 			addDevice($_REQUEST['dserial'], $_REQUEST['dtype'], $_REQUEST['dname']);
+			header('Location: ' . $_SERVER['PHP_SELF']);
+		}
 		
 		$result = getDevicesResult();
 		
