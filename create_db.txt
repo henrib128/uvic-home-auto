@@ -18,17 +18,17 @@ CREATE TABLE Credential(username VARCHAR(20) PRIMARY KEY, password VARCHAR(20));
 INSERT INTO Credential VALUES('rpi','rpipass');
 
 DROP TABLE Emails;
-CREATE TABLE Emails(email VARCHAR(20) PRIMARY KEY, active TINYINT);
-INSERT INTO Emails VALUES('trihuynh87@gmail.com',1);
-INSERT INTO Emails VALUES('henrib128@gmail.com',0);
+CREATE TABLE Emails(email VARCHAR(20) PRIMARY KEY);
+INSERT INTO Emails VALUES('trihuynh87@gmail.com');
+INSERT INTO Emails VALUES('henrib128@gmail.com');
 
 --type: 0 public, 1 master, 2 slave
 -- TODO: one public ip
 DROP TABLE Nodes;
-CREATE TABLE Nodes(name VARCHAR(20) NOT NULL UNIQUE, type TINYINT, ipaddress VARCHAR(16) PRIMARY KEY, mjpgport SMALLINT UNSIGNED);
-INSERT INTO Nodes VALUES('Public IP',0,'24.68.152.172',NULL);
-INSERT INTO Nodes VALUES('Front Door',1,'192.168.0.190',8080);
-INSERT INTO Nodes VALUES('Back Door',2,'192.168.0.191',8081);
+CREATE TABLE Nodes(nodename VARCHAR(20) PRIMARY KEY, ipaddress VARCHAR(15));
+INSERT INTO Nodes VALUES('Public IP','24.68.152.172');
+INSERT INTO Nodes VALUES('Front Door','192.168.0.190');
+INSERT INTO Nodes VALUES('Back Door','192.168.0.191');
 
 
 

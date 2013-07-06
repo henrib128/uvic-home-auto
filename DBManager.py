@@ -45,7 +45,7 @@ def initDatabase():
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Nodes")
-	dbcur.execute("CREATE TABLE Nodes(nodename VARCHAR(10) PRIMARY KEY, ipadd VARCHAR(15), port SMALLINT UNSIGNED)")
+	dbcur.execute("CREATE TABLE Nodes(nodename VARCHAR(10) PRIMARY KEY, ipaddress VARCHAR(15))")
 	
 	# Commit querry and close db cursor, connection
 	dbcon.commit()
@@ -98,15 +98,19 @@ def getDevice(_serial):
 	# Check if device exists
 	dbcur.execute("SELECT * FROM Devices WHERE serial=%s", _serial)
 	result=dbcur.fetchone()
-	if result is None or result[0] is None:
-		print("Device %s does not exist" % _serial)
-	else:		
-		# Return device info
-		return result
-		
+
 	# Close db cursor, connection
 	dbcur.close()
 	dbcon.close()
+
+	# Return result	
+	if result is None or result[0] is None:
+		print("Device %s does not exist" % _serial)
+		return None
+	else:		
+		# Return device info
+		return result
+
 
 # Function to get all devices
 def getDevices():
@@ -117,12 +121,12 @@ def getDevices():
 	# Find all devices
 	dbcur.execute("SELECT * FROM Devices")
 	results=dbcur.fetchall()
-	return results
 		
 	# Close db cursor, connection
 	dbcur.close()
 	dbcon.close()
-	
+	return results
+		
 # Function to update device status
 def updateDeviceStatus(_serial, _status):
 	# Get database connection and cursor
@@ -232,11 +236,13 @@ def getEmails():
 	# Find all emails
 	dbcur.execute("SELECT * FROM Emails")
 	results=dbcur.fetchall()
-	return results
-		
+
 	# Close db cursor, connection
 	dbcur.close()
 	dbcon.close()
+	
+	return results
+
 
 # Function to add email
 def addEmail(_email):
@@ -281,17 +287,20 @@ def getNode(_nodename):
 	# Get node info if existed
 	dbcur.execute("SELECT * FROM Nodes WHERE nodename=%s", _nodename)
 	result=dbcur.fetchone()
-	if result is None or result[0] is None:
-		print("Node %s does not exist" % _nodename)
-	else:
-		return result
 
 	# Close db cursor, connection
 	dbcur.close()
 	dbcon.close()
+	
+	if result is None or result[0] is None:
+		print("Node %s does not exist" % _nodename)
+		return None
+	else:
+		return result
+
 			
 # Function to add new node
-def addNode(_nodename, _ipadd, _port=80):
+def addNode(_nodename, _ipadd):
 	# Get database connection and cursor
 	dbcon = getDBCon()
 	dbcur = dbcon.cursor()
@@ -300,7 +309,7 @@ def addNode(_nodename, _ipadd, _port=80):
 	dbcur.execute("SELECT * FROM Nodes WHERE nodename=%s", _nodename)
 	result=dbcur.fetchone()
 	if result is None or result[0] is None:
-		dbcur.execute("INSERT INTO Nodes VALUES(%s,%s,%s)", (_nodename,_ipadd,_port))
+		dbcur.execute("INSERT INTO Nodes VALUES(%s,%s)", (_nodename,_ipadd))
 
 	# Commit, close db cursor, connection
 	dbcon.commit()
@@ -327,7 +336,7 @@ def removeNode(_nodename):
 	dbcon.close()
 
 # Function to update node ipaddress and port
-def updateNode(_nodename, _ipadd, _port):
+def updateNode(_nodename, _ipadd):
 	# Get database connection and cursor
 	dbcon = getDBCon()
 	dbcur = dbcon.cursor()
@@ -338,7 +347,7 @@ def updateNode(_nodename, _ipadd, _port):
 	if result is None or result[0] is None:
 		print("Node %s does not exist" % _nodename)
 	else:
-		dbcur.execute("UPDATE Nodes SET ipadd=%s, port=%s WHERE nodename=%s", (_ipadd,_port,_nodename))
+		dbcur.execute("UPDATE Nodes SET ipaddress=%s WHERE nodename=%s", (_ipadd,_nodename))
 
 	# Commit, close db cursor, connection
 	dbcon.commit()
