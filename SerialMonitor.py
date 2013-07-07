@@ -71,12 +71,11 @@ import DBManager as db
 ######################## Functions
            
 # Function to send email
-def sendEmail(_email, _dname, _date, _link):
-	msg = MIMEText("Hello, we have detected your %s was opened at %s.\n \
-	Please click below for live stream update.\n %s" % (_dname,_date,_link))
+def sendEmail():
+	msg = MIMEText("Hello, we have detected your")
 	msg["From"] = "minhtri@uvic.ca"
-	msg["To"] = _email
-	msg["Subject"] = "Yo Notification from UVicPiHome"
+	msg["To"] = "trihuynh87@gmail.com"
+	msg["Subject"] = "Notification from UVicPiHome"
 	p = Popen(["/usr/sbin/sendmail", "-toi"], stdin=PIPE)
 	p.communicate(msg.as_string())
 
@@ -168,9 +167,9 @@ def processEvent(_serial, _status):
 		emails = db.getEmails()
 		for email in emails:
 			print email[0]
-			sendEmail(email[0],dname,localtime,link)
-			#sendMail()
-		
+			#sendEmail(email[0],dname,localtime,link)
+			sendEmail()
+					
 		# Perform camera actions
 		
 	
