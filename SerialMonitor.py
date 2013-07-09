@@ -58,8 +58,8 @@ Scope:
 
 # Python packages
 import sys
-import urllib2
-import time;
+import time
+import serial, threading
 
 from email.mime.text import MIMEText
 from subprocess import Popen, PIPE
@@ -67,7 +67,94 @@ from subprocess import Popen, PIPE
 # Required packages
 import DBManager as db
 		
-          
+######################## Classes
+# Serial thread class
+class SerialThread(threading.Thread):
+	def __init__(self, threadid, data):
+		self.threadid = threadid
+		self.data = data
+		super(SerialThread, self).__init__()
+		print "Serial thread#%d: total threads: %d, data: %s" % (self.threadid, threading.active_count(), self.data)
+
+	def run(self):
+		# Parse data and process request
+		self.processRequest(self.data)
+
+	def processRequest(self, request):
+		# Parse request, if request is indeed (_serial,_status)
+		try:
+			request=request.strip('\n') # strip out eol '\n' char from readline()
+			request_split=request.split(" ")
+			serial = request_split[0]
+			status = request_split[1]
+			print "Serial: %s Status: %s" % (serial, status)
+			# Call processEvent function
+			processEvent(serial, int(status))
+
+		except Exception, e:
+			print "Error parsing request: " + str(e)
+		
+
+# Serial Monitor class
+class SerialMonitor(object):
+    # Static Var (class attribute): accessed by <class>.var or self.__class__.var
+    # server="SerialMonitor"
+
+    # Class constructor __init__ function (default defined by python), ran upon instantiation
+    def __init__(self, sport="/dev/pts/3", sbaud=9600, stimeout=None):
+        # Data attributes (specific for each instance, accessed by self.var)
+        self.ser = serial.Serial()
+        self.sport = sport
+        self.sbaud = sbaud
+        self.stimeout = stimeout
+        self.count = 0
+
+    def start(self):
+		# Initialize serial chanel properties
+		self.ser.port = self.sport
+		self.ser.baudrate = self.sbaud
+		self.ser.timeout = self.stimeout  #None is block read. 1 is non-block read, 2 is timeout block read
+		self.ser.bytesize = serial.EIGHTBITS #number of bits per bytes
+		self.ser.parity = serial.PARITY_NONE #set parity check: no parity
+		self.ser.stopbits = serial.STOPBITS_ONE #number of stop bits
+		self.ser.xonxoff = False     #disable software flow control
+		self.ser.rtscts = False     #disable hardware (RTS/CTS) flow control
+		self.ser.dsrdtr = False       #disable hardware (DSR/DTR) flow control
+		self.ser.writeTimeout = 2     #timeout for write
+		    
+		try: 
+			self.ser.open()
+
+		except Exception, e:
+			print "error open serial port: " + str(e)
+			exit()
+
+		if self.ser.isOpen():
+			try:
+				self.ser.flushInput() #flush input buffer, discarding all its contents
+				self.ser.flushOutput()#flush output buffer, aborting current output 
+							     	  #and discard all that is in buffer
+				while True:
+					response = self.ser.readline() # if block-read, expected eol '\n' char, if not wait forever!
+					print("read data: " + response)
+					# Spawn new thread to take care of this request
+				
+					if (response == 'exit\n'):
+						break
+						
+					if response:
+						self.count += 1
+						SerialThread(self.count,response).start()
+		   
+				self.ser.close()
+
+			except Exception, e1:
+				print "error communicating...: " + str(e1)
+
+		else:
+			print "cannot open serial port "
+
+
 ######################## Functions
            
 # Function to send email
@@ -78,17 +165,6 @@ def sendEmail(_email,_dname):
 	msg["Subject"] = "Notification from UVicPiHome"
 	p = Popen(["/usr/sbin/sendmail", "-toi"], stdin=PIPE)
 	p.communicate(msg.as_string())
-
-
-# Function to submit url to refresh Apache server
-def refreshUI():
-    base = 'home'
-    arg_string = 'Yo=Lo&Ha=y'
-    url = "https://localhost/" + base + "?" + arg_string
-    print url
-    
-    #Performs the actual submission of a URL generated for a command.
-    #urllib2.urlopen(url)
 
 
 # Function to determine Event, assuming input parameters are in correct format
@@ -116,17 +192,24 @@ def processEvent(_serial, _status):
 		
 		# First sanitize database data
 		if dtype != 0 and dtype != 1:
-			print 'Unknown device type: %s' % dtype
-			return 'DB_ERROR'
+			print "Unknown device type: %s" % dtype
+			return
 		if dstatus != 0 and dstatus != 1:
-			print 'Unknown device status: %s' % dstatus
-			return 'DB_ERROR'
+			print "Unknown device status: %s" % dstatus
+			return
 		if dactive != 0 and dactive != 1:
-			print 'Unknown device active: %s' % dactive
-			return 'DB_ERROR'
+			print "Unknown device active: %s" % dactive
+			return
 		
+		# Sanitize status change request
+		if newStatus != 0 and newStatus != 1:
+			print "Unknown device status: %s" % newStatus
+			return
+			
 		# If new status is the same as current status, do nothing
-		if dstatus == newStatus: return 'UNCHANGE'
+		if dstatus == newStatus:
+			print 'UNCHANGE'
+			return
 		
 		# Switch action
 		if dtype == 0: event = 'SWITCH_UPDATE'
@@ -139,24 +222,18 @@ def processEvent(_serial, _status):
 	# Cant find device serial
 	else:
 		print 'Device %s is not found' % _serial
-		return 'NO_DEVICE'
+		return
 
-
+	# Take action for valid event
 	if event == 'SWITCH_UPDATE' or event == 'DOOR_UPDATE' or event == 'DOOR_CLOSE':
 		print 'UPDATE'
 		# Update DB
 		db.updateDeviceStatus(_serial,_status)
-		
-		# Send WebUI refresh request
-		refreshUI()
 			
 	if event == 'DOOR_OPEN':
 		print 'DOOR_OPEN'
 		# Update DB
 		db.updateDeviceStatus(_serial,_status)
-		
-		# Send WebUI refresh request
-		refreshUI()
 		
 		# Send email notifications
 		localtime = time.asctime(time.localtime(time.time()))
@@ -168,85 +245,14 @@ def processEvent(_serial, _status):
 		for email in emails:
 			print email[0]
 			#sendEmail(email[0],dname,localtime,link)
-			sendEmail(email[0],dname)
+			#sendEmail(email[0],dname)
 					
 		# Perform camera actions
 		
 	
-	
+# Main body
+if __name__ == "__main__":
+    SerialMonitor = SerialMonitor("/dev/pts/3", 9600, None)
+    print 'Serial Monitor starting'
+    SerialMonitor.start()
 
-####### Main
-db.initDatabase()
-
-db.addNode('router','24.52.152.172')
-db.addEmail('trihuynh87@gmail.com')
-db.addEmail('minhtri@uvic.ca')
-db.removeEmail('minhtri@uvic.ca')
-
-db.addDevice(1000000000,0,'Living Lamp',0,1)
-db.addDevice(1000000001,1,'Front Door',1,1)
-db.addDevice(1000000002,1,'Back Door',0,1)
-db.addDevice(1000000003,0,'Front Lamp',1,1)
-db.addDevice(1000000004,0,'Back Lamp',0,1)
-
-
-processEvent(10000000,0)
-processEvent(1000000000,0)
-processEvent(1000000000,1)
-processEvent(1000000001,0)
-processEvent(1000000001,1)
-processEvent(1000000002,0)
-#processEvent(1000000002,1)
-processEvent(1000000003,0)
-processEvent(1000000003,1)
-processEvent(1000000004,0)
-processEvent(1000000004,1)
-
-"""
-# Unit test
-db.addDevice(1000000000,0,'Living Lamp',0,0)
-db.addDevice(1000000001,1,'Front Door',0,0)
-db.addDevice(1000000002,1,'Back Door',1,1)
-
-db.removeDevice(1000000002)
-db.removeDevice(1000000003)
-
-db.updateDeviceStatus(1000000000,1)
-db.updateDeviceStatus(1000000001,1)
-db.updateDeviceActive(1000000001,1)
-db.updateDeviceActive(1000000002,1)
-db.changeDeviceName(1000000000,'trideptrai')
-db.changeDeviceName(1000000001,'yolo')
-db.changeDeviceType(1000000000,2)
-db.changeDeviceType(1000000001,1)
-device1 = db.getDevice(1000000000)
-print device1
-device2 = db.getDevice(1000000001)
-print device2
-db.changePassword('pihome','pihomepass','haha')
-db.changePassword('pihome','pihomepass','haha')
-
-db.addEmail('trihuynh87')
-db.addEmail('trihuynh877')
-db.removeEmail('trihuynh')
-#removeEmail('trihuynh877')
-
-emails=db.getEmails()
-for email in emails:
-	print email
-
-db.addNode('router','24.52.152.172')
-db.addNode('master','192.168.1.12')
-db.addNode('camera1','192.168.1.11')
-db.updateNode('camera1','192.168.1.15')
-db.removeNode('router')
-print db.getNode('router')
-nodeinfo=db.getNode('camera1')
-print nodeinfo
-
-devices=db.getDevices()
-for device in devices:
-	print device
-	
-	
-"""
