@@ -23,7 +23,7 @@ while True:
         
 ser.close()
 
-"""
+
 # xbeesend.py
 from xbee import XBee
 from serial import Serial
@@ -49,7 +49,7 @@ print "I will call this other program called xbeetest.py"
 os.system("python xbeetest.py")
 
 ser.close()
-"""
+
 
 
 
