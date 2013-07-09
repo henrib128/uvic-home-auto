@@ -176,7 +176,7 @@ def processEvent(_serial, _status):
 	
 
 ####### Main
-#db.initDatabase()
+db.initDatabase()
 
 db.addNode('router','24.52.152.172')
 db.addEmail('trihuynh87@gmail.com')
