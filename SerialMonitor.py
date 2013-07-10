@@ -58,7 +58,7 @@ Scope:
 
 # Python packages
 import sys
-import os
+import os, subprocess
 import time, datetime
 import serial, threading
 
@@ -297,19 +297,39 @@ Camera actions:
 """
 MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
 def cameraResume():
-	#os.system(MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	#		  MBASE_DIR + '/output_http.so -w ' + MBASE_DIR + '/www" &')
 	MWEB_DIR = MBASE_DIR + '/www'
-	os.system(MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1" -o "' + \
-			  MBASE_DIR + '/output_http.so -w ' + MWEB_DIR + '" &')
 	
-def cameraRecord():
+	#CMD = MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	#	  MBASE_DIR + '/output_http.so -w ' + MWEB_DIR + '" &'
+	
+	# Test command	  
+	CMD = MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1000" -o "' + \
+		  MBASE_DIR + '/output_http.so -w ' + MWEB_DIR + '" &'
+	
+	# Use python subprocess to start mjpg-streamer application
+	sp = subprocess.Popen(CMD, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell='TRUE')
+	# Store mjpg-streamer process id to kill later
+	print('PID is ' + str(sp.pid + 1))
+	
+def cameraRecord(_seconds):
 	DATE_TIME=datetime.datetime.now().strftime("%y%m%d_%H%M%S")
 	MRECORD_DIR = MBASE_DIR + '/record_' + DATE_TIME
+	
 	# Make new directory
 	os.system("mkdir %s" % MRECORD_DIR)
 	
-	# Start outputing webcam image to new dir
-	os.system(MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1" -o "' + \
-			  MBASE_DIR + '/output_file.so -f ' + MRECORD_DIR + '" &')
+	# Command to output webcam image to new dir
+	CMD = MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1000" -o "' + \
+		  MBASE_DIR + '/output_file.so -f ' + MRECORD_DIR + '" &'
+
+	# Use python subprocess to start mjpg-streamer application
+	sp = subprocess.Popen(CMD, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell='TRUE')
+	print('PID is ' + str(sp.pid + 1))		
+	
+	# After certain time, kill this process
+	time.sleep(_seconds)
+	stopProcess(sp.pid + 1)
+
+def stopProcess(_pid):
+	os.system("kill %d" % _pid)
 
