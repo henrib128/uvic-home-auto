@@ -270,7 +270,16 @@ def processEvent(_serial, _status):
 		MRECORD_DIR='/tmp/mjpg-streamer'
 		DATE_TIME = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
 		MRECORD_FOLDER = MRECORD_DIR + '/record_' + DATE_TIME
-	
+		
+		# How to stop mjpg_streamer on other node?
+		# Sending remote command to a local socket listner script running on the remote host at certain port?
+		# For initialization, need to make sure mjpg-streamer is running on the second Pi-Camera module anyway, so plus this script
+		# Or just run this script which gonna control mjpg-streamer and actively listen to new socket request.
+		# But how to access playback file from remote Pi? Again, through this socket request listner, start and stop mjpg-streamer as needed
+		# So the new module should be CameraMonitor.py! Which use socket!
+		
+		# Or a totally new way is to not stop anything, just capture live images from other port and stored locally - Big change
+			
 		# Stop all local mjpg_streamer processes
 		stopAllStream()
 	
@@ -282,7 +291,10 @@ def processEvent(_serial, _status):
 		stopAllStream()
 	
 		# Restart normal stream
-		startHttpStream(MBASE_DIR)	
+		startHttpStream(MBASE_DIR)
+		
+		# Stored links to recording folders for user access
+		#db.addRecording(Ipaddress,DATE_TIME,MRECORD_FOLDER)
 				
 		# Send email notifications
 		localtime = time.asctime(time.localtime(time.time()))
@@ -375,5 +387,5 @@ def startPlayback(_mBaseDir,_mPlaybackFolder):
 	stopAllStream()
 	
 	# Resume normal operation
-	#startHttpStream(_mBaseDir)
+	startHttpStream(_mBaseDir)
 	
