@@ -102,18 +102,14 @@ class SerialMonitor(object):
 
     # Class constructor __init__ function (default defined by python), ran upon instantiation
     def __init__(self, sport="/dev/pts/3", sbaud=9600, stimeout=None):
-        # Data attributes (specific for each instance, accessed by self.var)
-        self.ser = serial.Serial()
-        self.sport = sport
-        self.sbaud = sbaud
-        self.stimeout = stimeout
-        self.count = 0
-
-    def start(self):
+		# Data attributes (specific for each instance, accessed by self.var)
+		self.ser = serial.Serial()
+		self.count = 0
+        
 		# Initialize serial chanel properties
-		self.ser.port = self.sport
-		self.ser.baudrate = self.sbaud
-		self.ser.timeout = self.stimeout  #None is block read. 1 is non-block read, 2 is timeout block read
+		self.ser.port = sport
+		self.ser.baudrate = sbaud
+		self.ser.timeout = stimeout  #None is block read. 1 is non-block read, 2 is timeout block read
 		self.ser.bytesize = serial.EIGHTBITS #number of bits per bytes
 		self.ser.parity = serial.PARITY_NONE #set parity check: no parity
 		self.ser.stopbits = serial.STOPBITS_ONE #number of stop bits
@@ -121,7 +117,9 @@ class SerialMonitor(object):
 		self.ser.rtscts = False     #disable hardware (RTS/CTS) flow control
 		self.ser.dsrdtr = False       #disable hardware (DSR/DTR) flow control
 		self.ser.writeTimeout = 2     #timeout for write
-		    
+		
+    def pollLine(self):
+		# Start reading from serial port
 		try: 
 			self.ser.open()
 
@@ -154,6 +152,32 @@ class SerialMonitor(object):
 		else:
 			print "cannot open serial port "
 
+    def writeLine(self, data):
+		# Start writing to serial port
+		try: 
+			self.ser.open()
+
+		except Exception, e:
+			print "error open serial port: " + str(e)
+			exit()
+
+		if self.ser.isOpen():
+			try:
+				self.ser.flushInput() #flush input buffer, discarding all its contents
+				self.ser.flushOutput()#flush output buffer, aborting current output 
+							     	  #and discard all that is in buffer
+				# Write to serial port with eol char
+				self.ser.write(data + '\n')
+		   		
+		   		# Close port afterward
+				self.ser.close()
+
+			except Exception, e1:
+				print "error communicating...: " + str(e1)
+
+		else:
+			print "cannot open serial port "
+			
 
 ######################## Functions
            
@@ -248,11 +272,5 @@ def processEvent(_serial, _status):
 			#sendEmail(email[0],dname)
 					
 		# Perform camera actions
-		
-	
-# Main body
-if __name__ == "__main__":
-    SerialMonitor = SerialMonitor("/dev/pts/3", 9600, None)
-    print 'Serial Monitor starting'
-    SerialMonitor.start()
+
 
