@@ -257,9 +257,33 @@ def processEvent(_serial, _status):
 			
 	if event == 'DOOR_OPEN':
 		print 'DOOR_OPEN'
+
 		# Update DB
 		db.updateDeviceStatus(_serial,_status)
-		
+
+		# Perform camera actions
+		# Recording time
+		RECORD_SECONDS = 10
+		# Base directory for mjpg_streamer
+		MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
+		# Recording folder
+		MRECORD_DIR='/tmp/mjpg-streamer'
+		DATE_TIME = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
+		MRECORD_FOLDER = MRECORD_DIR + '/record_' + DATE_TIME
+	
+		# Stop all local mjpg_streamer processes
+		stopAllStream()
+	
+		# Start dual streaming from webcam to http AND local recording folder
+		startDualStream(MBASE_DIR,MRECORD_FOLDER)
+	
+		# After sometime, stop all streaming
+		time.sleep(RECORD_SECONDS)
+		stopAllStream()
+	
+		# Restart normal stream
+		startHttpStream(MBASE_DIR)	
+				
 		# Send email notifications
 		localtime = time.asctime(time.localtime(time.time()))
 		print localtime
@@ -272,8 +296,7 @@ def processEvent(_serial, _status):
 			#sendEmail(email[0],dname,localtime,link)
 			#sendEmail(email[0],dname)
 					
-		# Perform camera actions
-
+	
 
 # Function to start camera stream
 """
@@ -295,41 +318,62 @@ Camera actions:
 	After done, recover normal mjpg-streamer operation
 	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" &     			    			    		
 """
-MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
-def cameraResume():
-	MWEB_DIR = MBASE_DIR + '/www'
+
+
+def stopAllStream():
+	os.system("killall mjpg_streamer")
+
+def startHttpStream(_mBaseDir):
+	_mWebDir = _mBaseDir + '/www'
 	
-	#CMD = MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	#	  MBASE_DIR + '/output_http.so -w ' + MWEB_DIR + '" &'
+	# Command for mjpg_streamer
+	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
 	
-	# Test command	  
-	CMD = MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1000" -o "' + \
-		  MBASE_DIR + '/output_http.so -w ' + MWEB_DIR + '" &'
-	
-	# Use python subprocess to start mjpg-streamer application
-	sp = subprocess.Popen(CMD, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell='TRUE')
-	# Store mjpg-streamer process id to kill later
-	print('PID is ' + str(sp.pid + 1))
-	
-def cameraRecord(_seconds):
-	DATE_TIME=datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-	MRECORD_DIR = MBASE_DIR + '/record_' + DATE_TIME
+	# Start streaming
+	os.system(cmd)
+
+def startDualStream(_mBaseDir,_mRecordFolder):
+	_mWebDir = _mBaseDir + '/www'
 	
 	# Make new directory
-	os.system("mkdir %s" % MRECORD_DIR)
+	os.system("mkdir -p %s" % _mRecordFolder)
+
+	# Command for mjpg-streamer dual streaming
+	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
+		  _mBaseDir + '/output_file.so -f ' + _mRecordFolder + '" &'
+
+	# Start streaming
+	os.system(cmd)
+
+def startPlayback(_mBaseDir,_mPlaybackFolder):
+	_mWebDir = _mBaseDir + '/www'
+	_tmpDir = _mBaseDir + '/tmp'
 	
-	# Command to output webcam image to new dir
-	CMD = MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1000" -o "' + \
-		  MBASE_DIR + '/output_file.so -f ' + MRECORD_DIR + '" &'
+	# Make new directory
+	os.system("mkdir -p %s" % _tmpDir)
 
-	# Use python subprocess to start mjpg-streamer application
-	sp = subprocess.Popen(CMD, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell='TRUE')
-	print('PID is ' + str(sp.pid + 1))		
+	# Command for mjpg-streamer to output from a local folder
+	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_file.so -r -d 1 -f ' + _tmpDir + '" -o "' + \
+		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
+
+	# Stop all stream
+	stopAllStream()
 	
-	# After certain time, kill this process
-	time.sleep(_seconds)
-	stopProcess(sp.pid + 1)
-
-def stopProcess(_pid):
-	os.system("kill %d" % _pid)
-
+	# Start streaming
+	os.system(cmd)
+	
+	# Start refreshing script
+	for pic in os.listdir(_mPlaybackFolder):
+		os.system("cp %s/%s %s/playback.jpg" % (_mPlaybackFolder,pic,_tmpDir))
+		time.sleep(1)
+	
+	# Stop all stream
+	stopAllStream()
+	
+	# Resume normal operation
+	#startHttpStream(_mBaseDir)
+	
