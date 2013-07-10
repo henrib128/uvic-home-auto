@@ -58,7 +58,8 @@ Scope:
 
 # Python packages
 import sys
-import time
+import os
+import time, datetime
 import serial, threading
 
 from email.mime.text import MIMEText
@@ -273,4 +274,42 @@ def processEvent(_serial, _status):
 					
 		# Perform camera actions
 
+
+# Function to start camera stream
+"""
+Camera actions:
+	Restart ALL mpjg-streamer servers to perform dual outputs www and internal dir for some period of time
+	Start timer:
+	#./mjpg_streamer -i "./input_testpicture.so" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
+	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
+	
+	End record time: Restart ALL mpjg-streamer with default www output
+	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" & 
+	
+	Playback action: Restart certain mpjg-streamer to ouput www from a tmp directory:
+	./mjpg_streamer -i "./input_file.so -r -d 1 -f ./tmp" -o "./output_http.so -w ./www" &
+
+	Also run an 'update' script to refresh ./tmp/playback.jpg image from specified recorded $picdir directory
+	for pic in $picdir/* do	cp $pic $tmpdir/playback.jpg; sleep 1; done 
+	
+	After done, recover normal mjpg-streamer operation
+	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" &     			    			    		
+"""
+MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
+def cameraResume():
+	#os.system(MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	#		  MBASE_DIR + '/output_http.so -w ' + MBASE_DIR + '/www" &')
+	MWEB_DIR = MBASE_DIR + '/www'
+	os.system(MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1" -o "' + \
+			  MBASE_DIR + '/output_http.so -w ' + MWEB_DIR + '" &')
+	
+def cameraRecord():
+	DATE_TIME=datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+	MRECORD_DIR = MBASE_DIR + '/record_' + DATE_TIME
+	# Make new directory
+	os.system("mkdir %s" % MRECORD_DIR)
+	
+	# Start outputing webcam image to new dir
+	os.system(MBASE_DIR + '/mjpg_streamer -i "' + MBASE_DIR + '/input_testpicture.so -d 1" -o "' + \
+			  MBASE_DIR + '/output_file.so -f ' + MRECORD_DIR + '" &')
 
