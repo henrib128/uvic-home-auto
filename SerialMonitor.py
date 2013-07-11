@@ -174,6 +174,9 @@ def processEvent(_serial, _status):
 	# Current device status (0 for off, 1 for on)
 	newStatus = _status
 	
+	# Default event
+	event = 'UNKNOWN'
+	
 	# Perform actions if device is valid
 	if device is not None:
 		# Extract device info
@@ -205,16 +208,14 @@ def processEvent(_serial, _status):
 			
 		# If new status is the same as current status, do nothing
 		if dstatus == newStatus:
-			print 'UNCHANGE'
-			return
-		
-		# Switch action
-		if dtype == 0: event = 'SWITCH_UPDATE'
-	
-		# Door action
-		if dtype == 1 and dactive == 0: event = 'DOOR_UPDATE'
-		if dtype == 1 and dactive == 1 and dstatus == 1 and newStatus == 0: event = 'DOOR_CLOSE'
-		if dtype == 1 and dactive == 1 and dstatus == 0 and newStatus == 1: event = 'DOOR_OPEN'
+			event = 'UNCHANGE'
+		else: 
+			# Status has changed
+			event = 'UPDATE'
+			
+			# Check for special event such as door open
+			if dtype == 1 and dactive == 1 and dstatus == 1 and newStatus == 0: event = 'DOOR_CLOSE'
+			elif dtype == 1 and dactive == 1 and dstatus == 0 and newStatus == 1: event = 'DOOR_OPEN'
 		
 	# Cant find device serial
 	else:
@@ -222,27 +223,27 @@ def processEvent(_serial, _status):
 		return
 
 	# Take action for valid event
-	if event == 'SWITCH_UPDATE' or event == 'DOOR_UPDATE' or event == 'DOOR_CLOSE':
+	if event == 'UNCHANGE':
+		print "Do nothing!"
+	elif event == 'UPDATE' or event == 'DOOR_CLOSE':
 		print 'UPDATE'
 		# Update DB
 		db.updateDeviceStatus(_serial,_status)
 			
-	if event == 'DOOR_OPEN':
+	elif event == 'DOOR_OPEN':
 		print 'DOOR_OPEN'
 
 		# Update DB
 		db.updateDeviceStatus(_serial,_status)
 
 		# Perform camera actions
-		
-		# Start recording stream to specified local folder
 		DATE_TIME = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
 		MRECORD_FOLDER = 'record_' + DATE_TIME
 		
 		# For each of camera node, send recording request	
 		for (nodename,camclient) in camnodes.items():
 			print nodename, camclient
-			camclient.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)
+			camclient.send("STARTRECORD,%s" % MRECORD_FOLDER)
 
 		# Wait for recording time
 		RECORD_SECONDS=10
@@ -251,11 +252,9 @@ def processEvent(_serial, _status):
 		# For each of camera node, send resume request	
 		for (nodename,camclient) in camnodes.items():
 			print nodename, camclient
-			camclient.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)			
-			# Restart normal stream		
 			camclient.send_wait("INIT")
 			
-			# Stored links to recording folders for user access
+			# Stored playback to database
 			db.addPlayback(nodename,MRECORD_FOLDER)
 
 		# Print all playback
@@ -274,7 +273,11 @@ def processEvent(_serial, _status):
 			print email[0]
 			#sendEmail(email[0],dname,localtime,link)
 			#sendEmail(email[0],dname)
-					
+
+	# All other event are unknown
+	else:
+		print "Unknown event: %s" % event
+		
 # Function to initialize camera client nodes
 def createCamclients():
 	# Create camera client for all camera nodes and store in camenodes

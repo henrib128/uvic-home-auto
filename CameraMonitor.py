@@ -251,7 +251,9 @@ def playFolder(_mFolder):
 #################################################################### Main body
 if __name__ == "__main__":
 	# Hostname and port the script is listening at
-	#host_name = socket.gethostname()
+	#hostname = socket.gethostname() # Just virtural name, i.e. tri-computer
+	#hostname = socket.gethostbyname(hostname) # get actual address '127.0.0.1'
+	#hostname = socket.gethostbyname(socket.getfqdn())
 	hostname = '10.0.2.15'
 	hostport = 44437
 
