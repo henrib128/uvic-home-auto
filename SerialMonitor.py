@@ -61,13 +61,19 @@ import sys
 import os, subprocess
 import time, datetime
 import serial, threading
+import socket
 
 from email.mime.text import MIMEText
 from subprocess import Popen, PIPE
 
 # Required packages
 import DBManager as db
-		
+import CameraClient
+
+cam1 = socket.gethostname()
+camport = 44437
+camclient1 = CameraClient.CameraClient(cam1,camport)
+
 ######################## Classes
 # Serial thread class
 class SerialThread(threading.Thread):
@@ -262,37 +268,24 @@ def processEvent(_serial, _status):
 		db.updateDeviceStatus(_serial,_status)
 
 		# Perform camera actions
-		# Recording time
-		RECORD_SECONDS = 10
+		
+		# Create a list of clients for all available cameras
+		# Then for each of the camera, send the following commands	
+		
+		# Start recording stream to specified local folder
+		DATE_TIME = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
 		# Base directory for mjpg_streamer
 		MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
 		# Recording folder
 		MRECORD_DIR='/tmp/mjpg-streamer'
-		DATE_TIME = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
 		MRECORD_FOLDER = MRECORD_DIR + '/record_' + DATE_TIME
-		
-		# How to stop mjpg_streamer on other node?
-		# Sending remote command to a local socket listner script running on the remote host at certain port?
-		# For initialization, need to make sure mjpg-streamer is running on the second Pi-Camera module anyway, so plus this script
-		# Or just run this script which gonna control mjpg-streamer and actively listen to new socket request.
-		# But how to access playback file from remote Pi? Again, through this socket request listner, start and stop mjpg-streamer as needed
-		# So the new module should be CameraMonitor.py! Which use socket!
-		
-		# Or a totally new way is to not stop anything, just capture live images from other port and stored locally - Big change
-			
-		# Stop all local mjpg_streamer processes
-		stopAllStream()
-	
-		# Start dual streaming from webcam to http AND local recording folder
-		startDualStream(MBASE_DIR,MRECORD_FOLDER)
-	
-		# After sometime, stop all streaming
+		camclient1.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)
+		RECORD_SECONDS=10
 		time.sleep(RECORD_SECONDS)
-		stopAllStream()
-	
-		# Restart normal stream
-		startHttpStream(MBASE_DIR)
 		
+		# Restart normal stream		
+		camclient1.send_wait("INIT")
+			
 		# Stored links to recording folders for user access
 		#db.addRecording(Ipaddress,DATE_TIME,MRECORD_FOLDER)
 				
@@ -308,84 +301,4 @@ def processEvent(_serial, _status):
 			#sendEmail(email[0],dname,localtime,link)
 			#sendEmail(email[0],dname)
 					
-	
 
-# Function to start camera stream
-"""
-Camera actions:
-	Restart ALL mpjg-streamer servers to perform dual outputs www and internal dir for some period of time
-	Start timer:
-	#./mjpg_streamer -i "./input_testpicture.so" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
-	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
-	
-	End record time: Restart ALL mpjg-streamer with default www output
-	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" & 
-	
-	Playback action: Restart certain mpjg-streamer to ouput www from a tmp directory:
-	./mjpg_streamer -i "./input_file.so -r -d 1 -f ./tmp" -o "./output_http.so -w ./www" &
-
-	Also run an 'update' script to refresh ./tmp/playback.jpg image from specified recorded $picdir directory
-	for pic in $picdir/* do	cp $pic $tmpdir/playback.jpg; sleep 1; done 
-	
-	After done, recover normal mjpg-streamer operation
-	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" &     			    			    		
-"""
-
-
-def stopAllStream():
-	os.system("killall mjpg_streamer")
-
-def startHttpStream(_mBaseDir):
-	_mWebDir = _mBaseDir + '/www'
-	
-	# Command for mjpg_streamer
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
-	
-	# Start streaming
-	os.system(cmd)
-
-def startDualStream(_mBaseDir,_mRecordFolder):
-	_mWebDir = _mBaseDir + '/www'
-	
-	# Make new directory
-	os.system("mkdir -p %s" % _mRecordFolder)
-
-	# Command for mjpg-streamer dual streaming
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
-		  _mBaseDir + '/output_file.so -f ' + _mRecordFolder + '" &'
-
-	# Start streaming
-	os.system(cmd)
-
-def startPlayback(_mBaseDir,_mPlaybackFolder):
-	_mWebDir = _mBaseDir + '/www'
-	_tmpDir = _mBaseDir + '/tmp'
-	
-	# Make new directory
-	os.system("mkdir -p %s" % _tmpDir)
-
-	# Command for mjpg-streamer to output from a local folder
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_file.so -r -d 1 -f ' + _tmpDir + '" -o "' + \
-		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
-
-	# Stop all stream
-	stopAllStream()
-	
-	# Start streaming
-	os.system(cmd)
-	
-	# Start refreshing script
-	for pic in os.listdir(_mPlaybackFolder):
-		os.system("cp %s/%s %s/playback.jpg" % (_mPlaybackFolder,pic,_tmpDir))
-		time.sleep(1)
-	
-	# Stop all stream
-	stopAllStream()
-	
-	# Resume normal operation
-	startHttpStream(_mBaseDir)
-	
