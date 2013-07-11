@@ -46,7 +46,14 @@ def initDatabase():
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Nodes")
 	dbcur.execute("CREATE TABLE Nodes(nodename VARCHAR(10) PRIMARY KEY, ipaddress VARCHAR(15))")
-	
+
+	# Create Playbacks table, drop previous table if existed
+	dbcur.execute("SHOW TABLES LIKE 'Playbacks'")
+	result=dbcur.fetchone()
+	if not (result is None or result[0] is None):
+		dbcur.execute("DROP TABLE Playbacks")
+	dbcur.execute("CREATE TABLE Playbacks(nodename VARCHAR(10), recordfolder VARCHAR(24))")
+		
 	# Commit querry and close db cursor, connection
 	dbcon.commit()
 	dbcur.close()
@@ -278,6 +285,23 @@ def removeEmail(_email):
 	dbcur.close()
 	dbcon.close()
 
+# Function to get all nodes
+def getNodes():
+	# Get database connection and cursor
+	dbcon = getDBCon()
+	dbcur = dbcon.cursor()
+	
+	# Find all emails
+	dbcur.execute("SELECT * FROM Nodes")
+	results=dbcur.fetchall()
+
+	# Close db cursor, connection
+	dbcur.close()
+	dbcon.close()
+	
+	return results
+
+
 # Function to get node information
 def getNode(_nodename):
 	# Get database connection and cursor
@@ -353,7 +377,57 @@ def updateNode(_nodename, _ipadd):
 	dbcon.commit()
 	dbcur.close()
 	dbcon.close()
+
+# Function to get all playbacks
+def getPlaybacks():
+	# Get database connection and cursor
+	dbcon = getDBCon()
+	dbcur = dbcon.cursor()
 	
+	# Find all emails
+	dbcur.execute("SELECT * FROM Playbacks")
+	results=dbcur.fetchall()
+
+	# Close db cursor, connection
+	dbcur.close()
+	dbcon.close()
 	
+	return results
+		
+# Function to add new playback
+def addPlayback(_nodename, _recordfolder):
+	# Get database connection and cursor
+	dbcon = getDBCon()
+	dbcur = dbcon.cursor()
+	
+	# Add new playback if not existed
+	dbcur.execute("SELECT * FROM Playbacks WHERE nodename=%s AND recordfolder=%s", (_nodename,_recordfolder))
+	result=dbcur.fetchone()
+	if result is None or result[0] is None:
+		dbcur.execute("INSERT INTO Playbacks VALUES(%s,%s)", (_nodename,_recordfolder))
+
+	# Commit, close db cursor, connection
+	dbcon.commit()
+	dbcur.close()
+	dbcon.close()	
+	
+# Function to remove playback
+def removePlayback(_nodename,_recordfolder):
+	# Get database connection and cursor
+	dbcon = getDBCon()
+	dbcur = dbcon.cursor()
+	
+	# Remove playback if existed
+	dbcur.execute("SELECT * FROM Playbacks WHERE nodename=%s AND recordfolder=%s", (_nodename,_recordfolder))
+	result=dbcur.fetchone()
+	if result is None or result[0] is None:
+		print("Playback %s,%s does not exist" % (_nodename,_recordfolder))
+	else:
+		dbcur.execute("DELETE FROM Playbacks WHERE nodename=%s AND recordfolder=%s", (_nodename,_recordfolder))
+
+	# Commit, close db cursor, connection
+	dbcon.commit()
+	dbcur.close()
+	dbcon.close()
 	
 	

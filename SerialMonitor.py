@@ -7,53 +7,20 @@ Scope:
 - Check DB for serial -> map with device and extract current device status (on/off)
 - If device is valid
 	. Determine nature of Event based on previous status and device type and active
-		+ If Door 
-			Door is inactive -> DoorUpdate
-			Door is active
-			   preStatus = close and curStatus = open -> DoorOpen
-			   PreStatus = open and curStatus = close -> DoorClose
-			   PreStatus = curStatus (open/close) -> DoorUnchange
-	    + If Switch
-	    	Switch is inactive -> SwitchUpdate
-	    	Switch is active -> SwitchUpdate
+		+ newStatus == currentStatus -> Event = UNCHANGE
+		+ If Door is active and currentStatus = close and newStatus = open -> DOOROPEN
+		+ Else -> Event = UPDATE
 
     . Depending on Event, perform the following actions
-    	+ If DoorUpdate
+    	+ If UNCHANGE: Do nothing
+    	+ If UPDATE: Update DB for new device status
+    	+ If DOOROPEN:
     		Update DB for new door status
-    		Update WebUI by sending internal URL 'refresh' request
-    		
-    	+ If DoorOpen
-    		Update DB for new door status
-    		Update WebUI by sending internal URL 'refresh' request
     		Send Email notification based on list of emails from DB
-    		Camera actions:
-    			Restart ALL mpjg-streamer servers to perform dual outputs www and internal dir for some period of time
-    			Start timer:
-    			#./mjpg_streamer -i "./input_testpicture.so" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
-       			./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
-       			
-    			End record time: Restart ALL mpjg-streamer with default www output
-    			./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" & 
-    			
-    			Playback action: Restart certain mpjg-streamer to ouput www from a tmp directory:
-    			./mjpg_streamer -i "./input_file.so -r -d 1 -f ./tmp" -o "./output_http.so -w ./www" &
-
-    			Also run an 'update' script to refresh ./tmp/playback.jpg image from specified recorded $picdir directory
-    			for pic in $picdir/* do	cp $pic $tmpdir/playback.jpg; sleep 1; done 
-    			
-    			After done, recover normal mjpg-streamer operation
-    			./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" & 
-    			    			    		
-    	+ If DoorClose
-    		Update DB for new door status
-    		Update WebUI by sending internal URL 'refresh' request
-
-    	+ If DoorUnchange -> do nothing
-    	
-    	+ If SwithcUpdate
-    		Update DB for new switch status
-    		Update WebUI by sending internal URL 'refresh' request
-    	
+    		Send camera action request to all available camera nodes (each has CameraMonitor actively listnening to request at port 44437)
+				- Start recording
+				- Wait for recording time
+				- Stop recording and resum normal operation
 """
 
 # Python packages
@@ -70,9 +37,8 @@ from subprocess import Popen, PIPE
 import DBManager as db
 import CameraClient
 
-cam1 = socket.gethostname()
-camport = 44437
-camclient1 = CameraClient.CameraClient(cam1,camport)
+# global dictionary to store camera clients
+camnodes = {}
 
 ######################## Classes
 # Serial thread class
@@ -269,26 +235,34 @@ def processEvent(_serial, _status):
 
 		# Perform camera actions
 		
-		# Create a list of clients for all available cameras
-		# Then for each of the camera, send the following commands	
-		
 		# Start recording stream to specified local folder
 		DATE_TIME = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
-		# Base directory for mjpg_streamer
-		MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
-		# Recording folder
-		MRECORD_DIR='/tmp/mjpg-streamer'
-		MRECORD_FOLDER = MRECORD_DIR + '/record_' + DATE_TIME
-		camclient1.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)
+		MRECORD_FOLDER = 'record_' + DATE_TIME
+		
+		# For each of camera node, send recording request	
+		for (nodename,camclient) in camnodes.items():
+			print nodename, camclient
+			camclient.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)
+
+		# Wait for recording time
 		RECORD_SECONDS=10
 		time.sleep(RECORD_SECONDS)
 		
-		# Restart normal stream		
-		camclient1.send_wait("INIT")
+		# For each of camera node, send resume request	
+		for (nodename,camclient) in camnodes.items():
+			print nodename, camclient
+			camclient.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)			
+			# Restart normal stream		
+			camclient.send_wait("INIT")
 			
-		# Stored links to recording folders for user access
-		#db.addRecording(Ipaddress,DATE_TIME,MRECORD_FOLDER)
-				
+			# Stored links to recording folders for user access
+			db.addPlayback(nodename,MRECORD_FOLDER)
+
+		# Print all playback
+		playbacks = db.getPlaybacks()
+		for playback in playbacks:
+			print "Nodename: %s recordfolder: %s" % (playback[0],playback[1])
+		
 		# Send email notifications
 		localtime = time.asctime(time.localtime(time.time()))
 		print localtime
@@ -301,4 +275,20 @@ def processEvent(_serial, _status):
 			#sendEmail(email[0],dname,localtime,link)
 			#sendEmail(email[0],dname)
 					
-
+# Function to initialize camera client nodes
+def createCamclients():
+	# Create camera client for all camera nodes and store in camenodes
+	camport = 44437
+	nodes = db.getNodes()
+	for node in nodes:
+		nodename = node[0]
+		nodeIpAddress = node[1]
+		if nodename != 'router':
+			print "Nodename: %s Ipaddress: %s" % (nodename,nodeIpAddress)
+			# This must be a camera node, create camera client
+			camclient = CameraClient.CameraClient(nodeIpAddress,camport)
+			# Store in dictionary
+			camnodes[nodename] = camclient
+			print camnodes[nodename]
+				
+				
