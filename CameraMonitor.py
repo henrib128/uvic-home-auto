@@ -275,7 +275,7 @@ def getLocalIp():
 
 def getMBaseDir():
 	output = subprocess.check_output('find $HOME -name mjpg-streamer | grep mjpg-streamer/mjpg-streamer', shell=True)
-	return output
+	return str(output)
 
 #################################################################### Main body
 if __name__ == "__main__":
@@ -284,10 +284,13 @@ if __name__ == "__main__":
 	hostport = 44444
 
 	# Base directory for mjpg_streamer
-	MBASE_DIR = getMBaseDir()
+	#MBASE_DIR=getMBaseDir()
+	#MBASE_DIR = '/home/pi/mjpg-streamer/mjpg-streamer' 
+	MBASE_DIR = '/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
+
 	# Default recording base directory (where playbacks are stored)
 	MRECORD_DIR='/tmp/mjpg-streamer'
-	
+
 	# Initialize camera streaming
 	# This can be done by serialListener by sending 'INIT' request
 	stopAllStream()
