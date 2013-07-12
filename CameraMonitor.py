@@ -6,7 +6,7 @@ Or this script can update database directly using socket as well... (maybe not a
 """
 import socket
 import sys
-import os
+import os, subprocess
 import time, datetime
 import threading
 
@@ -49,7 +49,9 @@ class CameraThread(threading.Thread):
 			self.command = "EMPTY_CMD"
 
 		# Retrieve arg if command is STARTPLAYBACK
-		if self.command == 'STARTPLAYBACK' or self.command == 'STARTRECORD':
+		if self.command == 'STARTPLAYBACK' or \
+		   self.command == 'STARTRECORD' or \
+		   self.command == 'DELPLAYBACK':
 			try:
 				self.recordfolder = params[1]
 			except Exception:
@@ -62,7 +64,7 @@ class CameraThread(threading.Thread):
 		# Perform action based on request
 		try:
 			if self.command == "INIT":
-				print "Received %s command" % self.command
+				print "Received command: %s" % self.command
 				response = "Received %s command" % self.command
 				
 				# Stop all local mjpg-streamer
@@ -75,25 +77,22 @@ class CameraThread(threading.Thread):
 				startPlaybackStream()
 												
 			elif self.command == "STOPALL":
-				print "Received %s command" % self.command
+				print "Received command: %s" % self.command
 				response = "Received %s command" % self.command
 				
 				# Stop all local mjpg-streamer
 				stopAllStream()
 
 			elif self.command == "STARTHTTP":
-				print "Received %s command" % self.command
+				print "Received command: %s" % self.command
 				response = "Received %s command" % self.command
 				
 				# Start http streaming
 				startHttpStream()
 
 			elif self.command == "STARTRECORD":
-				print "Received %s command %s recordfolder" % (self.command, self.recordfolder)
+				print "Received command: %s,%s" % (self.command, self.recordfolder)
 				response = "Received %s command" % self.command
-				
-				# Pass record folder
-				MRECORD_FOLDER = self.recordfolder
 				
 				# First stop all stream
 				stopAllStream()
@@ -103,18 +102,22 @@ class CameraThread(threading.Thread):
 				
 				# Start dual streaming for record stream and http stream
 				# Need to start at the same time for real webcam
-				startRecordStream(MRECORD_FOLDER)
+				startRecordStream(self.recordfolder)
 				
 			elif self.command == "STARTPLAYBACK":
-				print "Received %s command %s recordfolder" % (self.command, self.recordfolder)
+				print "Received command: %s,%s" % (self.command, self.recordfolder)
+				response = "Received %s command" % self.command
+					
+				# Start playback from certain folder to port 8081
+				playFolder(self.recordfolder)
+
+			elif self.command == "DELPLAYBACK":
+				print "Received command: %s,%s" % (self.command, self.recordfolder)
 				response = "Received %s command" % self.command
 				
-				# Pass record folder
-				MRECORD_FOLDER = self.recordfolder
-				
-				# Start playback from certain folder to port 8081
-				playFolder(MRECORD_FOLDER)
-								
+				# Delete specified folder
+				delPlayback(self.recordfolder)
+												
 			elif self.command == "EMPTY_CMD":
 				print "Empty command"
 			
@@ -126,9 +129,8 @@ class CameraThread(threading.Thread):
 			self.conn.send(response)
 
 		except Exception, err:
-			sys.stderr.write("CameraThread error: %s\n" % str(err))
 			print "CameraThread error: %s" % str(err)
-			response = 'FAIL'
+			response = "CameraThread error: %s" % str(err)
 			self.conn.send(response)
 
 
@@ -203,8 +205,8 @@ def startHttpStream():
 	_mWebDir = _mBaseDir + '/www'
 	
 	# Command for mjpg_streamer
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
 		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
 	
 	# Start streaming
@@ -227,17 +229,18 @@ def startPlaybackStream():
 	
 def startRecordStream(_mFolder):
 	_mBaseDir = MBASE_DIR
+	_mWebDir = _mBaseDir + '/www'
 	_mRecordDir = MRECORD_DIR
-	_mRecordFolder = _mRecordDir + '/' + _mFolder
+	_mPlaybackFolder = _mRecordDir + '/' + _mFolder
 	
 	# Make new directory
-	os.system("mkdir -p %s" % _mRecordFolder)
+	os.system("mkdir -p %s" % _mPlaybackFolder)
 
 	# Command for mjpg-streamer dual streaming
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
 		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
-		  _mBaseDir + '/output_file.so -f ' + _mRecordFolder + '" &'
+		  _mBaseDir + '/output_file.so -f ' + _mPlaybackFolder + '" &'
 
 	# Start streaming
 	os.system(cmd)
@@ -252,25 +255,37 @@ def playFolder(_mFolder):
 	# Start refreshing script
 	for pic in os.listdir(_mPlaybackFolder):
 		os.system("cp %s/%s %s/playback.jpg" % (_mPlaybackFolder,pic,_tmpDir))
-		time.sleep(1)
+		time.sleep(0.1)
 
+# Function to delete playback folder
+def delPlayback(_mFolder):
+	_mRecordDir = MRECORD_DIR
+	_mPlaybackFolder = _mRecordDir + '/' + _mFolder
 	
-	
+	# Remove directory
+	os.system("rm -rf %s" % _mPlaybackFolder)
+
+# Function to get local ipaddress (i.e. 192.168.0.190)
+def getLocalIp():
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.connect(("gmail.com",80))
+	ipaddr = s.getsockname()[0]
+	s.close()
+	return ipaddr
+
+def getMBaseDir():
+	output = subprocess.check_output('find $HOME -name mjpg-streamer | grep mjpg-streamer/mjpg-streamer', shell=True)
+	return output
+
 #################################################################### Main body
 if __name__ == "__main__":
 	# Hostname and port the script is listening at
-	#hostname = socket.gethostname() # Just virtural name, i.e. tri-computer
-	#hostname = socket.gethostbyname(hostname) # get actual address '127.0.0.1'
-	#hostname = socket.gethostbyname(socket.getfqdn())
-	#hostname = '10.0.2.15'
-	# Need a way to get this dynamically, probably using ifconfig for either l0 or wlan0
-	hostname = '192.168.0.190'
+	hostname = getLocalIp()
 	hostport = 44444
 
-	# This also needs to be extracted dynamically
 	# Base directory for mjpg_streamer
-	MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
-	# Recording folder
+	MBASE_DIR = getMBaseDir()
+	# Default recording base directory (where playbacks are stored)
 	MRECORD_DIR='/tmp/mjpg-streamer'
 	
 	# Initialize camera streaming
@@ -281,5 +296,7 @@ if __name__ == "__main__":
 	
 	# Creating camera monitor object
 	CameraMonitor = CameraMonitor(hostname,hostport)
-	print "Camera monitor starting on %s,%s" % (hostname,hostport)
 	CameraMonitor.start()
+	print "Camera monitor starting on %s,%s" % (hostname,hostport)
+	
+
