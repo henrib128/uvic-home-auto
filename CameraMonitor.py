@@ -236,7 +236,7 @@ def startRecordStream(_mFolder):
 	# Command for mjpg-streamer dual streaming
 	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
 	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "'
+		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
 		  _mBaseDir + '/output_file.so -f ' + _mRecordFolder + '" &'
 
 	# Start streaming
