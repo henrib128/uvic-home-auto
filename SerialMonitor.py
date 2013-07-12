@@ -243,7 +243,7 @@ def processEvent(_serial, _status):
 		# For each of camera node, send recording request	
 		for (nodename,camclient) in camnodes.items():
 			print nodename, camclient
-			camclient.send("STARTRECORD,%s" % MRECORD_FOLDER)
+			camclient.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)
 
 		# Wait for recording time
 		RECORD_SECONDS=10
@@ -281,7 +281,7 @@ def processEvent(_serial, _status):
 # Function to initialize camera client nodes
 def createCamclients():
 	# Create camera client for all camera nodes and store in camenodes
-	camport = 44437
+	camport = 44444
 	nodes = db.getNodes()
 	for node in nodes:
 		nodename = node[0]

@@ -14,7 +14,7 @@ if __name__ == "__main__":
 	# Nodes
 	db.addNode('router','24.52.152.172')
 	db.addNode('cam1','10.0.2.15')
-	#db.addNode('cam2','192.168.0.191')
+	db.addNode('cam2','192.168.0.190')
 	
 	# Emails
 	db.addEmail('trihuynh87@gmail.com')

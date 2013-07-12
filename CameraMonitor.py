@@ -94,8 +94,15 @@ class CameraThread(threading.Thread):
 				
 				# Pass record folder
 				MRECORD_FOLDER = self.recordfolder
-								
-				# Start http streaming
+				
+				# First stop all stream
+				stopAllStream()
+				
+				# Resume playback stream on port 8081
+				startPlaybackStream()
+				
+				# Start dual streaming for record stream and http stream
+				# Need to start at the same time for real webcam
 				startRecordStream(MRECORD_FOLDER)
 				
 			elif self.command == "STARTPLAYBACK":
@@ -196,8 +203,8 @@ def startHttpStream():
 	_mWebDir = _mBaseDir + '/www'
 	
 	# Command for mjpg_streamer
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
 		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
 	
 	# Start streaming
@@ -227,8 +234,9 @@ def startRecordStream(_mFolder):
 	os.system("mkdir -p %s" % _mRecordFolder)
 
 	# Command for mjpg-streamer dual streaming
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "'
 		  _mBaseDir + '/output_file.so -f ' + _mRecordFolder + '" &'
 
 	# Start streaming
@@ -254,9 +262,12 @@ if __name__ == "__main__":
 	#hostname = socket.gethostname() # Just virtural name, i.e. tri-computer
 	#hostname = socket.gethostbyname(hostname) # get actual address '127.0.0.1'
 	#hostname = socket.gethostbyname(socket.getfqdn())
-	hostname = '10.0.2.15'
-	hostport = 44437
+	#hostname = '10.0.2.15'
+	# Need a way to get this dynamically, probably using ifconfig for either l0 or wlan0
+	hostname = '192.168.0.190'
+	hostport = 44444
 
+	# This also needs to be extracted dynamically
 	# Base directory for mjpg_streamer
 	MBASE_DIR='/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
 	# Recording folder
