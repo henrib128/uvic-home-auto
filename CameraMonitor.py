@@ -140,7 +140,7 @@ class CameraMonitor(object):
 	#server="CameraMonitor"
 
 	# Class constructor __init__ function (default defined by python), ran upon instantiation
-	def __init__(self, hostname=socket.gethostname(), port=44437):
+	def __init__(self, hostname=socket.gethostname(), port=44444):
 		# Data attributes (specific for each instance, accessed by self.var)
 		self.hostname = hostname
 		self.port = port
