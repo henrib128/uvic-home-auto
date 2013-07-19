@@ -46,7 +46,7 @@
 
 	<body onload="createImageLayer();">
 		<h1>Cameras</h1>
-		Camera: <select onchange="createImageLayer();" name="cam" id="cam_id">
+		<select onchange="createImageLayer();" name="cam" id="cam_id" size=4>
 <?
 		require_once('DBManager.php');
 		db_connect();

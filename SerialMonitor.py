@@ -32,6 +32,7 @@ import socket
 
 from email.mime.text import MIMEText
 from subprocess import Popen, PIPE
+from struct import *
 
 # Required packages
 import DBManager as db
@@ -124,7 +125,7 @@ class SerialMonitor(object):
 
 		else:
 			print "cannot open serial port "
-
+		
     def writeLine(self, data):
 		# Start writing to serial port
 		try: 
@@ -151,7 +152,34 @@ class SerialMonitor(object):
 		else:
 			print "cannot open serial port "
 			
-
+    def sendState(self, data):
+		self.ser.open()
+		
+		if self.ser.isOpen():
+			self.ser.flushInput()
+			self.ser.flushOutput()
+			self.ser.write(data)
+			self.ser.close()
+		else:
+			print "cannot open serial port "
+			
+    def stateListener(self):
+    	
+		self.ser.open()
+		
+		if self.ser.isOpen():
+			self.ser.flushInput()
+			self.ser.flushOutput()
+			
+			while True:
+				bytes = self.ser.read(calcsize('QB'))
+				serial, state = unpack('QB', bytes)
+				print("serial: " + str(serial) + " state: " + str(state))
+				db.updateDeviceStatus(serial, state)
+				
+		else:
+			print "cannot open serial port "
+			
 ######################## Functions
            
 # Function to send email

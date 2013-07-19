@@ -10,6 +10,9 @@ class NodeType {
 	const Slave = 2;
 }
 
+define('SCRIPTS_PATH', '/var/www/');
+define('SENDER_PATH', SCRIPTS_PATH . 'write.py');
+
 function db_connect() {
 	$link = mysql_connect('localhost', 'ceng499', 'ceng499');
 	if(!$link) {
@@ -57,5 +60,23 @@ function addDevice($dserial, $dtype, $dname) {
 	);
 	
 	db_query($query);
+}
+
+# temporary
+/*function setDeviceState($dserial, $state) {
+	$query = sprintf("UPDATE Devices SET status=%s WHERE serial=%s",
+		mysql_real_escape_string($state),
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}*/
+
+function setDeviceState($dserial, $state) {
+	$non_num_pattern = "/[^0-9]/";
+	if(preg_match($non_num_pattern, $dserial) || preg_match($non_num_pattern, $state)) {
+		die('Invalid input');
+	}
+	exec(SENDER_PATH . ' ' . $dserial . ' ' . $state);
 }
 ?>

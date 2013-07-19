@@ -20,8 +20,9 @@ if(!$fp) {
 	$urlstring = "GET /?action=" . $action . '&n=' . $n . " HTTP/1.0\r\n\r\n";
 	fputs ($fp, $urlstring);
 	
-	while ($str = trim(fgets($fp, 4096)))
+	while ($str = trim(fgets($fp, 4096))) {
 		header($str);
+	}
 		
 	fpassthru($fp);
 	fclose($fp);
