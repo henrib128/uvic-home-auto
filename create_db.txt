@@ -3,15 +3,11 @@ CREATE USER 'ceng499'@'localhost' IDENTIFIED BY 'ceng499';
 GRANT ALL PRIVILEGES ON pihome.* TO 'ceng499'@'localhost';
 USE pihome
 
-DROP TABLE Devices;
-DESC Devices;
-SELECT * from Devices;
-
 -- Type 0 switch (on/off), 1 door sensor (open/close) for TRUE/FALSE
 DROP TABLE Devices;
-CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(20), status TINYINT, active TINYINT);
-INSERT INTO Devices VALUES(10000000000,0,'bedroom lamp',0, 1);
-INSERT INTO Devices VALUES(10000000001,1,'front door',0, 0);
+CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(20), status TINYINT, active TINYINT, message VARCHAR(50));
+INSERT INTO Devices VALUES(10000000000,0,'bedroom lamp',0, 1, 'NEW');
+INSERT INTO Devices VALUES(10000000001,1,'front door',0, 0, 'NEW');
 
 DROP TABLE Credential;
 CREATE TABLE Credential(username VARCHAR(20) PRIMARY KEY, password VARCHAR(20));
