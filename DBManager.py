@@ -23,7 +23,7 @@ def initDatabase():
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Devices")
-	dbcur.execute("CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(20), status TINYINT, active TINYINT)")
+	dbcur.execute("CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(20), status TINYINT, active TINYINT, message VARCHAR(50))")
 
 	# Create Credential table, drop previous table if existed
 	dbcur.execute("SHOW TABLES LIKE 'Credential'")
@@ -60,7 +60,8 @@ def initDatabase():
 	dbcon.close()
 
 # Function to add new device
-def addDevice(_serial, _type, _name, _status, _active):
+#db.addDevice(0013a20040a57ae9,0,'Switch',0,1,'New')
+def addDevice(_serial, _type, _name, _status, _active, _message):
 	# Get database connection and cursor
 	dbcon = getDBCon()
 	dbcur = dbcon.cursor()
@@ -70,7 +71,7 @@ def addDevice(_serial, _type, _name, _status, _active):
 	result=dbcur.fetchone()
 	if result is None or result[0] is None:
 		# Insert new entry to Devices table
-		dbcur.execute("INSERT INTO Devices VALUES(%s,%s,%s,%s,%s)", (_serial,_type,_name,_status,_active))
+		dbcur.execute("INSERT INTO Devices VALUES(%s,%s,%s,%s,%s,%s)", (_serial,_type,_name,_status,_active,_message))
 		
 	# Commit querry and close db cursor, connection
 	dbcon.commit()
@@ -102,8 +103,8 @@ def getDevice(_serial):
 	dbcon = getDBCon()
 	dbcur = dbcon.cursor()
 	
-	# Check if device exists
-	dbcur.execute("SELECT * FROM Devices WHERE serial=%s", _serial)
+	# Get device
+	dbcur.execute("SELECT serial,type,name,status,active,message FROM Devices WHERE serial=%s", _serial)
 	result=dbcur.fetchone()
 
 	# Close db cursor, connection
@@ -154,6 +155,26 @@ def updateDeviceStatus(_serial, _status):
 	dbcur.close()
 	dbcon.close()
 
+# Function to update device message
+def updateDeviceMessage(_serial, _message):
+	# Get database connection and cursor
+	dbcon = getDBCon()
+	dbcur = dbcon.cursor()
+	
+	# Check if device exists
+	dbcur.execute("SELECT * FROM Devices WHERE serial=%s", _serial)
+	result=dbcur.fetchone()
+	if result is None or result[0] is None:
+		print("Device %s does not exist" % _serial)
+	else:		
+		# Update status of device
+		dbcur.execute("UPDATE Devices SET message=%s WHERE serial=%s", (_message,_serial))
+		
+	# Commit querry and close db cursor, connection
+	dbcon.commit()
+	dbcur.close()
+	dbcon.close()
+	
 # Function to activate or deactivate device
 def updateDeviceActive(_serial, _active):
 	# Get database connection and cursor
