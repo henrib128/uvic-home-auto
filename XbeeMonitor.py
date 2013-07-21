@@ -16,6 +16,7 @@ from subprocess import Popen, PIPE
 # Required packages
 import DBManager as db
 import CameraClient
+from struct import *
 
 # global dictionary to store camera clients
 camnodes = {}
@@ -40,11 +41,20 @@ class XbeeMonitor(object):
 		self.xbee.halt()
 		self.ser.close()
 
-	# Function to send a frame with given destination address, command, and parameter
-	def sendFrame(self,_destAddr,_command,_parameter=''):
+	def sendFrameHex(self,_destAddr,_command,_parameter=''):
 		_destAddrString=str(_destAddr)
 		_parameterString=str(_parameter)
 		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrString.decode('hex'),command=_command, parameter=_parameterString.decode('hex'))
+		
+	# Function to send a frame with given destination address, command, and parameter
+	def sendFrameInt(self,_destAddrInt,_command,_param=0):
+		_destAddr = pack('Q', _destAddrInt)
+		if _param:
+			_param = pack('B', _param)
+		else:
+			_param = ''
+
+		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddr,command=_command, parameter=_param)
 
 	# Function to process incoming frame
 	def processFrame(self,xbeeframe):
@@ -179,9 +189,7 @@ class XbeeMonitor(object):
 									db.updateDeviceMessage(dserial,"Done")
 									
 									# Send D0 command to check for device status
-									#dserialHex = '%x' % dserial
-									#self.sendFrame(dserialHex,'D0')
-									self.sendFrame(dserial,'D0')
+									self.sendFrameInt(dserial.decode('base64'),'D0')
 								
 							else:
 								# Unknown frame status

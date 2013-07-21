@@ -5,6 +5,7 @@ Main PiHome script
 
 import XbeeMonitor as xm
 import DBManager as db
+from struct import *
 
 if __name__ == "__main__":
 	XbeeMonitor = xm.XbeeMonitor("/dev/ttyAMA0", 9600, None)
@@ -36,10 +37,11 @@ if __name__ == "__main__":
 	while True:
 		try:
 			parameter = raw_input()
+			if parameter != '':
+				parameter = int(parameter)
 			command = 'D0'
 			#device='0013a20040a57ae9'
-			device='0013a20040a57b39'
-			XbeeMonitor.sendFrame(device, command, parameter)
+			XbeeMonitor.sendFrameInt(0x0013a20040a57b39, command, parameter)
 	
 		except KeyboardInterrupt:
 			break	
