@@ -37,11 +37,12 @@ if __name__ == "__main__":
 	while True:
 		try:
 			parameter = raw_input()
-			if parameter != '':
-				parameter = int(parameter)
+			#if parameter != '':
+				#parameter = int(parameter)
 			command = 'D0'
-			#device='0013a20040a57ae9'
-			XbeeMonitor.sendFrameInt(0x0013a20040a57b39, command, parameter)
+			device='0013a20040a57ae9'
+			XbeeMonitor.sendFrameHex(device,command,parameter)
+			#XbeeMonitor.sendFrameInt(0x0013a20040a57b39, command, parameter)
 	
 		except KeyboardInterrupt:
 			break	

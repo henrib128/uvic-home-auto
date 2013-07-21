@@ -41,20 +41,11 @@ class XbeeMonitor(object):
 		self.xbee.halt()
 		self.ser.close()
 
-	def sendFrameHex(self,_destAddr,_command,_parameter=''):
-		_destAddrString=str(_destAddr)
-		_parameterString=str(_parameter)
-		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrString.decode('hex'),command=_command, parameter=_parameterString.decode('hex'))
-		
-	# Function to send a frame with given destination address, command, and parameter
-	def sendFrameInt(self,_destAddrInt,_command,_param=0):
-		_destAddr = pack('Q', _destAddrInt)
-		if _param:
-			_param = pack('B', _param)
-		else:
-			_param = ''
-
-		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddr,command=_command, parameter=_param)
+	# Function to send Xbee frame given the address input is in hex string format, i.e. '0013a20040a57ae9'
+	def sendFrameHex(self,_destAddrHex,_command,_parameter=''):
+		_destAddrHexString = str(_destAddrHex)
+		_parameterString = str(_parameter)
+		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrHexString.decode('hex'),command=_command, parameter=_parameterString.decode('hex'))
 
 	# Function to process incoming frame
 	def processFrame(self,xbeeframe):
@@ -145,7 +136,7 @@ class XbeeMonitor(object):
 					
 					elif fid == 'remote_at_response':
 						# This should be passive xbee response from switches
-						print "Passive response from D0 or D0 0X command"
+						#print "Passive response from D0 or D0 0X command"
 					
 						# Parse for status
 						if xbeeframe.has_key('status'):
@@ -154,7 +145,7 @@ class XbeeMonitor(object):
 							fstatusString = fstatusHex.encode('hex')
 							if fstatusString == '04':
 								# Failure frame status, remote Xbee module maybe down
-								print "Frame status is failed. Xbee may be off!"
+								print "Response frame status is failed. Xbee may be off!"
 								db.updateDeviceMessage(dserial,"XBeeOff")
 								
 							elif fstatusString == '00':
@@ -181,19 +172,22 @@ class XbeeMonitor(object):
 										db.updateDeviceMessage(dserial,"SwitchOn")
 									else:
 										# Unknown parameter
-										print "Unknown frame parameter %s" % fparameterString
+										print "Response error: Unknown frame parameter %s" % fparameterString
 										db.updateDeviceMessage(dserial,"UnknownStatus")									
 								else:
 									# No parameter field! This is response from D0 0X command
-									print "Response from D0 0X command, sending D0 command to confirm status"
+									print "Response from D0 0X: %s\nSending D0 command to confirm status" % dname
 									db.updateDeviceMessage(dserial,"Done")
 									
 									# Send D0 command to check for device status
-									self.sendFrameInt(dserial.decode('base64'),'D0')
+									# Need to convert decimal string to hex string and add extra byte '00' at front
+									#dserialHex ='00'+hex(dserial).strip('0x').strip('L')
+									dserialHex='00%x' % int(dserial)
+									self.sendFrameHex(dserialHex,'D0')
 								
 							else:
 								# Unknown frame status
-								print "Unknown frame status %s" % fstatusString
+								print "Response error: Unknown frame status %s" % fstatusString
 								db.updateDeviceMessage(dserial,"UnknownFrameStatus")
 								
 						else:
