@@ -42,21 +42,21 @@ class XbeeMonitor(object):
 
 	# Function to send a frame with given destination address, command, and parameter
 	def sendFrame(self,_destAddrString,_command,_parameterString):
-		xbee.remote_at(frame_id='A',dest_addr_long=_destAddrString.decode('hex'),command=_command, parameter=_parameterString.decode('hex'))
+		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrString.decode('hex'),command=_command, parameter=_parameterString.decode('hex'))
 
 	# Function to process incoming frame
-	def processFrame(xbeeframe):
+	def processFrame(self,xbeeframe):
 		# Try to parse for 'source_addr_long'
 		if xbeeframe.has_key('source_addr_long'):
 			# Source address in Hex, need to convert to String
 			fsourceAddrHex = xbeeframe['source_addr_long']
-			fsourceAddrString = source_addr_hex.encode('hex')
-			# Example: 0013a20040a57ae9
+			fsourceAddrString = fsourceAddrHex.encode('hex')
+			# Example: fsourceAddrHex = '\x01\xjd', fsourceAddrString='0013a20040a57ae9'
 			# Now need to use this hex string to look up for device in database
-			#db.getDevice(0013a20040a57ae9)
+			#db.getDevice(int('0013a20040a57ae9',16))
 			
 			# Check database if device serial is valid
-			device = db.getDevice('0x'+fsourceAddrString) 
+			device = db.getDevice(int(fsourceAddrString,16)) 
 			if device is not None:
 				# Extract device info
 				dserial = device[0]
@@ -195,7 +195,7 @@ class XbeeMonitor(object):
 					db.updateDeviceMessage(dserial,"NoIdField")
 			else:
 				# Cannot find device, ignore frame
-				print "Device serial %s not found. IGNORE." % source_addr_string
+				print "Device serial %s not found. IGNORE." % fsourceAddrString
 			
 		else:
 			# Frame does not have 'source_addr_long' field. Ignore frame
