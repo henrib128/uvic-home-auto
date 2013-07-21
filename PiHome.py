@@ -6,6 +6,11 @@ Main PiHome script
 import XbeeMonitor as xm
 import DBManager as db
 from struct import *
+import socket
+import serial
+
+host = '142.104.165.35'
+port = 50000
 
 if __name__ == "__main__":
 	XbeeMonitor = xm.XbeeMonitor("/dev/ttyAMA0", 9600, None)
@@ -34,16 +39,39 @@ if __name__ == "__main__":
 	print 'PiHome starting!'
 	XbeeMonitor.start()
 	
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.bind((host, port))
+	s.listen(10)
+	
 	while True:
 		try:
-			parameter = raw_input()
-			#if parameter != '':
-				#parameter = int(parameter)
+			conn, addr = s.accept()
+			data = conn.recv(1024)
+			conn.close()
+		
+			words = data.split()
+			if len(words) != 2 or len(words[1]) != 16:
+				print 'Invalid input'
+				continue
+		
+			param = ''
 			command = 'D0'
-			device='0013a20040a57ae9'
-			XbeeMonitor.sendFrameHex(device,command,parameter)
+			
+			if words[0] == 'off':
+				param = '04'
+			elif words[0] == 'on':
+				param = '05'
+			else:
+				print 'Invalid input'
+				continue
+				
+			XbeeMonitor.sendFrameHex(words[1],command,param)
 			#XbeeMonitor.sendFrameInt(0x0013a20040a57b39, command, parameter)
 	
 		except KeyboardInterrupt:
-			break	
+			exit()
+		except Exception as e:
+			print str(e)
+			exit()
+			
 

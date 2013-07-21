@@ -4,19 +4,24 @@ class DeviceType {
 	const Sensor = 1;
 }
 
+class DeviceState {
+	const Off = 0;
+	const On = 1;
+}
+
 class NodeType {
 	const PublicIP = 0;
 	const Master = 1;
 	const Slave = 2;
 }
 
-define('SCRIPTS_PATH', '/var/www/');
-define('SENDER_PATH', SCRIPTS_PATH . 'write.py');
+define('SCRIPT_IP', '142.104.165.35');
+define('SCRIPT_PORT', 50000);
 
 function db_connect() {
 	$link = mysql_connect('localhost', 'ceng499', 'ceng499');
 	if(!$link) {
-		die('Could not connect: ' . mysql_error());
+		die('Could not connect: 50000' . mysql_error());
 	}
 	
 	$db_selected = mysql_select_db('pihome', $link);
@@ -49,7 +54,7 @@ function getCamNamesResult() {
 }
 
 function getDevicesResult() {
-	return db_query("SELECT * FROM Devices");
+	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type, name, status, active FROM Devices");
 }
 
 function addDevice($dserial, $dtype, $dname) {
@@ -72,11 +77,39 @@ function addDevice($dserial, $dtype, $dname) {
 	db_query($query);
 }*/
 
-function setDeviceState($dserial, $state) {
+/*function setDeviceState($dserial, $state) {
 	$non_num_pattern = "/[^0-9]/";
 	if(preg_match($non_num_pattern, $dserial) || preg_match($non_num_pattern, $state)) {
 		die('Invalid input');
 	}
 	exec(SENDER_PATH . ' ' . $dserial . ' ' . $state);
+}*/
+
+function setDeviceState($dserial, $state) {
+	$non_num_pattern = "/[^0-9]/";
+	
+	if(preg_match($non_num_pattern, $dserial) || preg_match($non_num_pattern, $state)) {
+		die('Invalid input');
+	}
+	
+	$state = intval($state, 10);
+	
+	if($state == DeviceState::Off) $msg = 'off';
+	else if($state == DeviceState::On) $msg = 'on';
+	else die('Invalid input');
+	
+	$msg .= ' ' . $dserial;
+	
+	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+	if(!$sock) die('1');
+	
+	if(!socket_connect($sock, SCRIPT_IP, SCRIPT_PORT)) {
+		socket_close($sock);
+		die('2');
+	}
+	
+	socket_send($sock, $msg, strlen($msg), 0);
+	
+	socket_close($sock);
 }
 ?>
