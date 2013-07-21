@@ -6,7 +6,7 @@ import sys
 
 class CameraClient(object):
 	# Function to open new socket connection and send transaction request
-	def __init__(self, hostname=socket.gethostname(), port=44437):
+	def __init__(self, hostname=socket.gethostname(), port=44444):
 		# open TCP socket for SYNCHRONOUS streaming
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.connect((hostname, port))

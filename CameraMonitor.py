@@ -13,7 +13,8 @@ import threading
 # Camera thread class
 class CameraThread(threading.Thread):
 	# Default class constructor __init__ function, ran upon instantiation
-	def __init__(self, server, conn):
+	def __init__(self, main, server, conn):
+		self.main = main
 		self.server = server
 		self.conn = conn
 		super(CameraThread, self).__init__() # trigger run method
@@ -68,55 +69,55 @@ class CameraThread(threading.Thread):
 				response = "Received %s command" % self.command
 				
 				# Stop all local mjpg-streamer
-				stopAllStream()
+				self.main.stopAllStream()
 
 				# Start http stream at port 8080
-				startHttpStream()
+				self.main.startHttpStream()
 				
 				# Start playback stream at port 8081
-				startPlaybackStream()
+				self.main.startPlaybackStream()
 												
 			elif self.command == "STOPALL":
 				print "Received command: %s" % self.command
 				response = "Received %s command" % self.command
 				
 				# Stop all local mjpg-streamer
-				stopAllStream()
+				self.main.stopAllStream()
 
 			elif self.command == "STARTHTTP":
 				print "Received command: %s" % self.command
 				response = "Received %s command" % self.command
 				
 				# Start http streaming
-				startHttpStream()
+				self.main.startHttpStream()
 
 			elif self.command == "STARTRECORD":
 				print "Received command: %s,%s" % (self.command, self.recordfolder)
 				response = "Received %s command" % self.command
 				
 				# First stop all stream
-				stopAllStream()
+				self.main.stopAllStream()
 				
 				# Resume playback stream on port 8081
-				startPlaybackStream()
+				self.main.startPlaybackStream()
 				
 				# Start dual streaming for record stream and http stream
 				# Need to start at the same time for real webcam
-				startRecordStream(self.recordfolder)
+				self.main.startRecordStream(self.recordfolder)
 				
 			elif self.command == "STARTPLAYBACK":
 				print "Received command: %s,%s" % (self.command, self.recordfolder)
 				response = "Received %s command" % self.command
 					
 				# Start playback from certain folder to port 8081
-				playFolder(self.recordfolder)
+				self.main.playFolder(self.recordfolder)
 
 			elif self.command == "DELPLAYBACK":
 				print "Received command: %s,%s" % (self.command, self.recordfolder)
 				response = "Received %s command" % self.command
 				
 				# Delete specified folder
-				delPlayback(self.recordfolder)
+				self.main.delPlayback(self.recordfolder)
 												
 			elif self.command == "EMPTY_CMD":
 				print "Empty command"
@@ -140,17 +141,24 @@ class CameraMonitor(object):
 	#server="CameraMonitor"
 
 	# Class constructor __init__ function (default defined by python), ran upon instantiation
-	def __init__(self, hostname=socket.gethostname(), port=44444):
+	def __init__(self,hostname=socket.gethostname(),port=44444,mbasedir='/home/pi/mjpg-streamer/mjpg-streamer',mrecordir='/tmp/mjpg-streamer'):
 		# Data attributes (specific for each instance, accessed by self.var)
 		self.hostname = hostname
 		self.port = port
+		self.mbasedir = mbasedir
+		self.mrecordir = mrecordir
 		self.should_run = True
 
 	# class methods, can be used by all instances of class
 	def process_request(self, conn):
-		CameraThread(self.hostname, conn).start()
+		CameraThread(self,self.hostname, conn).start()
 
 	def start(self):
+		# First initialize default mjpg_streamer
+		self.stopAllStream()
+		self.startHttpStream()
+		self.startPlaybackStream()
+		
 		# open and bind TCP socket for synchronous streaming
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -173,97 +181,80 @@ class CameraMonitor(object):
 	def stop(self):
 		self.should_run = False
 
-	
+	# Function to stop all instances of mjpg-streamer
+	def stopAllStream(self):
+		os.system("killall mjpg_streamer")
 
-# Function to start camera stream
-"""
-Camera actions:
-	Restart ALL mpjg-streamer servers to perform dual outputs www and internal dir for some period of time
-	Start timer:
-	#./mjpg_streamer -i "./input_testpicture.so" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
-	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_file.so -f ./record_DATE_TIME" -o "./output_http.so -w ./www" & 
+	# Function to start single instance of mjpg-streamer for http stream at port 8080
+	def startHttpStream(self):
+		_mBaseDir = self.mbasedir
+		_mWebDir = _mBaseDir + '/www'
 	
-	End record time: Restart ALL mpjg-streamer with default www output
-	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" & 
+		# Command for mjpg_streamer
+		#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+			  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
 	
-	Playback action: Restart certain mpjg-streamer to ouput www from a tmp directory:
-	./mjpg_streamer -i "./input_file.so -r -d 1 -f ./tmp" -o "./output_http.so -w ./www" &
+		# Start streaming
+		os.system(cmd)
 
-	Also run an 'update' script to refresh ./tmp/playback.jpg image from specified recorded $picdir directory
-	for pic in $picdir/* do	cp $pic $tmpdir/playback.jpg; sleep 1; done 
+	# Function to start single instance of mjpg-streamer for playback stream at port 8081
+	def startPlaybackStream(self):
+		_mBaseDir = self.mbasedir
+		_mWebDir = _mBaseDir + '/www'
+		_tmpDir = _mBaseDir + '/tmp'
 	
-	After done, recover normal mjpg-streamer operation
-	./mjpg_streamer -i "./input_uvc.so -f 30 -r 640x480" -o "./output_http.so -w ./www" &     			    			    		
-"""
+		# Make new directory
+		os.system("mkdir -p %s" % _tmpDir)
 
+		# Command for mjpg-streamer to output from a local folder
+		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_file.so -r -f ' + _tmpDir + '" -o "' + \
+			  _mBaseDir + '/output_http.so -p 8081 -w ' + _mWebDir + '" &'
 
-def stopAllStream():
-	os.system("killall mjpg_streamer")
-
-def startHttpStream():
-	_mBaseDir = MBASE_DIR
-	_mWebDir = _mBaseDir + '/www'
+		# Start streaming
+		os.system(cmd)
 	
-	# Command for mjpg_streamer
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
+	# Function to start single instance of mjpg-streamer for dual streaming to http and a local directory
+	def startRecordStream(self,_mFolder):
+		_mBaseDir = self.mbasedir
+		_mRecordDir = self.mrecordir
+		_mWebDir = _mBaseDir + '/www'
+		_mPlaybackFolder = _mRecordDir + '/' + _mFolder
 	
-	# Start streaming
-	os.system(cmd)
+		# Make new directory
+		os.system("mkdir -p %s" % _mPlaybackFolder)
 
-def startPlaybackStream():
-	_mBaseDir = MBASE_DIR
-	_mWebDir = _mBaseDir + '/www'
-	_tmpDir = _mBaseDir + '/tmp'
-	
-	# Make new directory
-	os.system("mkdir -p %s" % _tmpDir)
+		# Command for mjpg-streamer dual streaming
+		#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+			  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
+			  _mBaseDir + '/output_file.so -f ' + _mPlaybackFolder + '" &'
 
-	# Command for mjpg-streamer to output from a local folder
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_file.so -r -d 1 -f ' + _tmpDir + '" -o "' + \
-		  _mBaseDir + '/output_http.so -p 8081 -w ' + _mWebDir + '" &'
+		# Start streaming
+		os.system(cmd)
+	
+	# Function to copy pictures from recordfolder to playback stream tmp folder to simulate playback
+	def playFolder(self,_mFolder):
+		_mBaseDir = self.mbasedir
+		_mRecordDir = self.mrecordir
+		_mPlaybackFolder = _mRecordDir + '/' + _mFolder
+		_tmpDir = _mBaseDir + '/tmp'
+		
+		#print "Playing from this folder: %s to this folder: %s" % (_mPlaybackFolder,_tmpDir)
+		# Start refreshing script
+		for pic in os.listdir(_mPlaybackFolder):
+			os.system("cp %s/%s %s/playback.jpg" % (_mPlaybackFolder,pic,_tmpDir))
+			#print "copied this pic %s" % pic
+			time.sleep(0.1)
 
-	# Start streaming
-	os.system(cmd)
+	# Function to delete playback folder
+	def delPlayback(self,_mFolder):
+		_mRecordDir = self.mrecordir
+		_mPlaybackFolder = _mRecordDir + '/' + _mFolder
 	
-def startRecordStream(_mFolder):
-	_mBaseDir = MBASE_DIR
-	_mWebDir = _mBaseDir + '/www'
-	_mRecordDir = MRECORD_DIR
-	_mPlaybackFolder = _mRecordDir + '/' + _mFolder
-	
-	# Make new directory
-	os.system("mkdir -p %s" % _mPlaybackFolder)
+		# Remove directory
+		os.system("rm -rf %s" % _mPlaybackFolder)
 
-	# Command for mjpg-streamer dual streaming
-	#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-	cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-		  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
-		  _mBaseDir + '/output_file.so -f ' + _mPlaybackFolder + '" &'
-
-	# Start streaming
-	os.system(cmd)
-	
-# Function to copy pictures from recordfolder to playback stream tmp folder to simulate playback
-def playFolder(_mFolder):
-	_mBaseDir = MBASE_DIR
-	_mRecordDir = MRECORD_DIR
-	_mPlaybackFolder = _mRecordDir + '/' + _mFolder
-	_tmpDir = _mBaseDir + '/tmp'
-	
-	# Start refreshing script
-	for pic in os.listdir(_mPlaybackFolder):
-		os.system("cp %s/%s %s/playback.jpg" % (_mPlaybackFolder,pic,_tmpDir))
-		time.sleep(0.1)
-
-# Function to delete playback folder
-def delPlayback(_mFolder):
-	_mRecordDir = MRECORD_DIR
-	_mPlaybackFolder = _mRecordDir + '/' + _mFolder
-	
-	# Remove directory
-	os.system("rm -rf %s" % _mPlaybackFolder)
 
 # Function to get local ipaddress (i.e. 192.168.0.190)
 def getLocalIp():
@@ -272,34 +263,4 @@ def getLocalIp():
 	ipaddr = s.getsockname()[0]
 	s.close()
 	return ipaddr
-
-def getMBaseDir():
-	output = subprocess.check_output('find $HOME -name mjpg-streamer | grep mjpg-streamer/mjpg-streamer', shell=True)
-	return str(output)
-
-#################################################################### Main body
-if __name__ == "__main__":
-	# Hostname and port the script is listening at
-	hostname = getLocalIp()
-	hostport = 44444
-
-	# Base directory for mjpg_streamer
-	#MBASE_DIR=getMBaseDir()
-	#MBASE_DIR = '/home/pi/mjpg-streamer/mjpg-streamer' 
-	MBASE_DIR = '/home/tri/ceng499/mjpg-streamer/mjpg-streamer'
-
-	# Default recording base directory (where playbacks are stored)
-	MRECORD_DIR='/tmp/mjpg-streamer'
-
-	# Initialize camera streaming
-	# This can be done by serialListener by sending 'INIT' request
-	stopAllStream()
-	startHttpStream()
-	startPlaybackStream()
-	
-	# Creating camera monitor object
-	CameraMonitor = CameraMonitor(hostname,hostport)
-	CameraMonitor.start()
-	print "Camera monitor starting on %s,%s" % (hostname,hostport)
-	
 
