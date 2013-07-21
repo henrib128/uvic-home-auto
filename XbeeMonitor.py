@@ -41,7 +41,9 @@ class XbeeMonitor(object):
 		self.ser.close()
 
 	# Function to send a frame with given destination address, command, and parameter
-	def sendFrame(self,_destAddrString,_command,_parameterString):
+	def sendFrame(self,_destAddr,_command,_parameter=''):
+		_destAddrString=str(_destAddr)
+		_parameterString=str(_parameter)
 		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrString.decode('hex'),command=_command, parameter=_parameterString.decode('hex'))
 
 	# Function to process incoming frame
@@ -153,27 +155,33 @@ class XbeeMonitor(object):
 									fparameterString = fparameterHex.encode('hex')
 									if fparameterString == '03':
 										# Unexpected door response from D0
-										print "Unexpected door response from D0 command"
+										print "Response from D0: Door is 03 (Unexpected querry to DoorSensor)"
 										db.updateDeviceMessage(dserial,"UnexpectedDoorChecked")
 										
 									elif fparameterString == '04':
 										# Switch is off as acknowledgement for D0
+										print "Response from D0: Switch is off"
 										db.updateDeviceStatus(dserial,0)
 										db.updateDeviceMessage(dserial,"SwitchOff")
 										
 									elif fparameterString == '05': 
 										# Switch is on as acknowledgement for D0
+										print "Response from D0: Switch is on"
 										db.updateDeviceStatus(dserial,1)
 										db.updateDeviceMessage(dserial,"SwitchOn")
 									else:
 										# Unknown parameter
+										print "Unknown frame parameter %s" % fparameterString
 										db.updateDeviceMessage(dserial,"UnknownStatus")									
 								else:
 									# No parameter field! This is response from D0 0X command
+									print "Response from D0 0X command, sending D0 command to confirm status"
 									db.updateDeviceMessage(dserial,"Done")
 									
 									# Send D0 command to check for device status
-									self.sendFrame(dserial,'D0','')
+									#dserialHex = '%x' % dserial
+									#self.sendFrame(dserialHex,'D0')
+									self.sendFrame(dserial,'D0')
 								
 							else:
 								# Unknown frame status

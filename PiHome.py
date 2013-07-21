@@ -37,7 +37,8 @@ if __name__ == "__main__":
 		try:
 			parameter = raw_input()
 			command = 'D0'
-			device='0013a20040a57ae9'
+			#device='0013a20040a57ae9'
+			device='0013a20040a57b39'
 			XbeeMonitor.sendFrame(device, command, parameter)
 	
 		except KeyboardInterrupt:
