@@ -21,7 +21,7 @@
 	  img.style.zIndex = -1;
 	  img.onload = imageOnload;
 	  img.onclick = imageOnclick;
-	  img.src = "/webcamproxy.php?action=snapshot&n=" + (++imageNr) + "&cam=" + escape(document.getElementById("cam_id").value + "&port=8080");
+	  img.src = "/webcamproxy.php?action=snapshot&n=" + (++imageNr) + "&cam=" + escape(document.getElementById("cam_id").value) + "&port=8080";
 	  var webcam = document.getElementById("webcam");
 	  webcam.insertBefore(img, webcam.firstChild);
 	}
