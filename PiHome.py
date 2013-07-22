@@ -21,7 +21,7 @@ if __name__ == "__main__":
 	db.initDatabase()
 
 	# Populate database with some test values
-	db.addNode('router','24.52.152.172')
+	#db.addNode('router','24.52.152.172')
 	db.addNode('Main Cam','142.104.165.35')
 	db.addEmail('trihuynh87@gmail.com')
 	db.addDevice(0x0013a20040a57ae9,0,'First Switch',0,1,'New')

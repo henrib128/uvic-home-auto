@@ -10,7 +10,10 @@ ser.baudrate='9600'
 
 def processFrame(data):
 		print data
-		time.sleep(10)
+		time.sleep(2)
+		Parameter = ''
+		dest_addr='0013a20040a57ae9'
+		xbee.remote_at(frame_id='A',dest_addr_long=dest_addr.decode('hex'), command='D0', parameter=Parameter.decode('hex'))
 		print 'done'
 
 try:
@@ -30,6 +33,7 @@ while True:
 		Parameter = raw_input()
 		dest_addr='0013a20040a57ae9'
 		xbee.remote_at(frame_id='A',dest_addr_long=dest_addr.decode('hex'), command='D0', parameter=Parameter.decode('hex'))
+		print 'sent'
 	
 	except KeyboardInterrupt:
 		break

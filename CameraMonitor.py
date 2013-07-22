@@ -191,9 +191,10 @@ class CameraMonitor(object):
 		_mWebDir = _mBaseDir + '/www'
 	
 		# Command for mjpg_streamer
-		#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-			  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
+		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+			_mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
+		#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+		#	_mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" &'
 	
 		# Start streaming
 		os.system(cmd)
@@ -209,7 +210,7 @@ class CameraMonitor(object):
 
 		# Command for mjpg-streamer to output from a local folder
 		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_file.so -r -f ' + _tmpDir + '" -o "' + \
-			  _mBaseDir + '/output_http.so -p 8081 -w ' + _mWebDir + '" &'
+			_mBaseDir + '/output_http.so -p 8081 -w ' + _mWebDir + '" &'
 
 		# Start streaming
 		os.system(cmd)
@@ -225,10 +226,13 @@ class CameraMonitor(object):
 		os.system("mkdir -p %s" % _mPlaybackFolder)
 
 		# Command for mjpg-streamer dual streaming
-		#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
-		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
-			  _mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
-			  _mBaseDir + '/output_file.so -f ' + _mPlaybackFolder + '" &'
+		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
+                	_mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
+                	_mBaseDir + '/output_file.so -d 1000 -f ' + _mPlaybackFolder + '" &'
+		
+		#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
+		#	_mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
+		#	_mBaseDir + '/output_file.so -f ' + _mPlaybackFolder + '" &'
 
 		# Start streaming
 		os.system(cmd)
@@ -245,7 +249,7 @@ class CameraMonitor(object):
 		for pic in os.listdir(_mPlaybackFolder):
 			os.system("cp %s/%s %s/playback.jpg" % (_mPlaybackFolder,pic,_tmpDir))
 			#print "copied this pic %s" % pic
-			time.sleep(0.1)
+			time.sleep(1)
 
 	# Function to delete playback folder
 	def delPlayback(self,_mFolder):
@@ -254,6 +258,7 @@ class CameraMonitor(object):
 	
 		# Remove directory
 		os.system("rm -rf %s" % _mPlaybackFolder)
+
 
 
 

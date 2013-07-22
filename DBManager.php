@@ -42,15 +42,15 @@ function db_query($query) {
 	return $result;
 }
 
-function getCamIPPort($name) {
+function getCamIP($name) {
 	$name = mysql_real_escape_string($name);
-	$result = db_query("SELECT ipaddress, mjpgport FROM Nodes WHERE name = " . "'$name'");
+	$result = db_query("SELECT ipaddress FROM Nodes WHERE nodename = " . "'$name'");
 	$row = mysql_fetch_row($result);
 	return $row;
 }
 
 function getCamNamesResult() {
-	return db_query("SELECT name FROM Nodes WHERE mjpgport IS NOT NULL");
+	return db_query("SELECT nodename FROM Nodes");
 }
 
 function getDevicesResult() {

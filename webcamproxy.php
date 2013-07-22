@@ -7,9 +7,9 @@ db_connect();
 $cam_sel = $_REQUEST['cam'];
 $action = $_REQUEST['action'];
 $n = $_REQUEST['n'];
-$row = getCamIPPort($cam_sel);
+$row = getCamIP($cam_sel);
 $ip = $row[0];
-$port = $row[1];
+$port = 8080;
 
 set_time_limit(0);
 $fp = fsockopen($ip, $port, $errno, $errstr, 30);

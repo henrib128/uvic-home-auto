@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #basic script to listen to the serial port
 import CameraClient as cl
-hostname=cl.getLocalIp()
+hostname='142.104.165.35'
 port=44444
 camClient = cl.CameraClient(hostname,port)
 
