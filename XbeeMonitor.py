@@ -15,26 +15,18 @@ from subprocess import Popen, PIPE
 
 # Required packages
 import DBManager as db
-import CameraClient
-from struct import *
-
-# global dictionary to store camera clients
-camnodes = {}
-
-
-
-
 
 # Xbee Monitor class
 class XbeeMonitor(object):
 
 	# Class constructor __init__ function (default defined by python), ran upon instantiation
-	def __init__(self, sport="/dev/ttyAMA0", sbaud=9600, stimeout="None"):
+	def __init__(self, camnodes, sport="/dev/ttyAMA0", sbaud=9600, stimeout="None"):
 		# Data attributes (specific for each instance, accessed by self.var)
 		self.ser = serial.Serial()
 		self.ser.port = sport
 		self.ser.baudrate = sbaud
 		self.ser.timeout = stimeout  #None is block read. 1 is non-block read, 2 is timeout block read
+		self.camnodes = camnodes
 	
 	# Function to stop xbee background listening thread and close serial port	
 	def stop(self):
@@ -113,7 +105,7 @@ class XbeeMonitor(object):
 											db.updateDeviceMessage(dserial,"DoorOpenedAndActive")
 											
 											# Spawn new thread to perform door open actions
-											#DoorOpenThread(dserial).start()
+											DoorOpenThread(dserial,self.camnodes).start()
 											
 										elif dactive == 0:
 											# Door is unactive, do nothing
@@ -136,8 +128,6 @@ class XbeeMonitor(object):
 					
 					elif fid == 'remote_at_response':
 						# This should be passive xbee response from switches
-						#print "Passive response from D0 or D0 0X command"
-					
 						# Parse for status
 						if xbeeframe.has_key('status'):
 							# Status is in Hex, need to convert to String
@@ -225,32 +215,33 @@ class XbeeMonitor(object):
 
 # Door Thread class
 class DoorOpenThread(threading.Thread):
-	def __init__(self, dserial):
+	def __init__(self, dserial, camnodes):
 		self.dserial = dserial
+		self.camnodes = camnodes
+		self.recordtime = 10
 		super(DoorOpenThread, self).__init__()
 		print "Total active Door threads: %d, Door: %s" % (threading.active_count(), self.dserial)
 
 	def run(self):
 		# Perform camera actions
-		DATE_TIME = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
-		MRECORD_FOLDER = 'record_' + DATE_TIME
+		timestamp = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
+		mrecordfolder = 'record_' + timestamp
 		
 		# For each of camera node, send recording request	
-		for (nodename,camclient) in camnodes.items():
+		for (nodename,camclient) in self.camnodes.items():
 			print nodename, camclient
-			camclient.send_wait("STARTRECORD,%s" % MRECORD_FOLDER)
+			camclient.send_wait("STARTRECORD,%s" % mrecordfolder)
 
 		# Wait for recording time
-		RECORD_SECONDS=10
-		time.sleep(RECORD_SECONDS)
+		time.sleep(self.recordtime)
 		
 		# For each of camera node, send resume request	
-		for (nodename,camclient) in camnodes.items():
+		for (nodename,camclient) in self.camnodes.items():
 			print nodename, camclient
 			camclient.send_wait("INIT")
 			
 			# Stored playback to database
-			db.addPlayback(nodename,MRECORD_FOLDER)
+			db.addPlayback(nodename,mrecordfolder)
 
 		# Print all playback
 		playbacks = db.getPlaybacks()
@@ -266,32 +257,17 @@ class DoorOpenThread(threading.Thread):
 		emails = db.getEmails()
 		for email in emails:
 			print email[0]
-			#sendEmail(email[0],dname,localtime,link)
-			#sendEmail(email[0],dname)
+			#self.sendEmail(email[0],dname,localtime,link)
+			#self.sendEmail(email[0],dname)
+
+	# Function to send email
+	def sendEmail(self,_email,_dname):
+		msg = MIMEText("Hello, we have detected your %s was opened Please click below for live stream update" % (_dname))
+		msg["From"] = "minhtri@uvic.ca"
+		msg["To"] = _email
+		msg["Subject"] = "Notification from UVicPiHome"
+		p = Popen(["/usr/sbin/sendmail", "-toi"], stdin=PIPE)
+		p.communicate(msg.as_string())
 
 
-# Function to send email
-def sendEmail(_email,_dname):
-	msg = MIMEText("Hello, we have detected your %s was opened Please click below for live stream update" % (_dname))
-	msg["From"] = "minhtri@uvic.ca"
-	msg["To"] = _email
-	msg["Subject"] = "Notification from UVicPiHome"
-	p = Popen(["/usr/sbin/sendmail", "-toi"], stdin=PIPE)
-	p.communicate(msg.as_string())
-
-# Function to initialize camera client nodes
-def createCamclients():
-	# Create camera client for all camera nodes and store in camenodes
-	camport = 44444
-	nodes = db.getNodes()
-	for node in nodes:
-		nodename = node[0]
-		nodeIpAddress = node[1]
-		if nodename != 'router':
-			print "Nodename: %s Ipaddress: %s" % (nodename,nodeIpAddress)
-			# This must be a camera node, create camera client
-			camclient = CameraClient.CameraClient(nodeIpAddress,camport)
-			# Store in dictionary
-			camnodes[nodename] = camclient
-			print camnodes[nodename]
 			
