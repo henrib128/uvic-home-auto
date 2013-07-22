@@ -251,9 +251,9 @@ class DoorOpenThread(threading.Thread):
 		# Send email notifications
 		localtime = time.asctime(time.localtime(time.time()))
 		print localtime
-		router_ip=db.getNode('router')[1]
- 		link = "http://%s/camera" % router_ip
- 		print link
+		#router_ip=db.getNode('router')[1]
+ 		#link = "http://%s/camera" % router_ip
+ 		#print link
 		emails = db.getEmails()
 		for email in emails:
 			print email[0]
