@@ -1,5 +1,5 @@
 <?
-if(!isset($_REQUEST['cam']) || !isset($_REQUEST['action']) || !isset($_REQUEST['n'])) exit();
+if(!isset($_REQUEST['cam']) || !isset($_REQUEST['port']) || !isset($_REQUEST['action']) || !isset($_REQUEST['n'])) exit();
 
 require_once('DBManager.php');
 db_connect();
@@ -9,7 +9,7 @@ $action = $_REQUEST['action'];
 $n = $_REQUEST['n'];
 $row = getCamIP($cam_sel);
 $ip = $row[0];
-$port = 8080;
+$port = $_REQUEST['port'];
 
 set_time_limit(0);
 $fp = fsockopen($ip, $port, $errno, $errstr, 30);
