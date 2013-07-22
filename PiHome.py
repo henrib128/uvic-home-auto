@@ -69,8 +69,10 @@ if __name__ == "__main__":
 			#XbeeMonitor.sendFrameInt(0x0013a20040a57b39, command, parameter)
 	
 		except KeyboardInterrupt:
+			conn.close()
 			exit()
 		except Exception as e:
+			conn.close()
 			print str(e)
 			exit()
 			
