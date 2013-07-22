@@ -54,7 +54,7 @@ function getCamNamesResult() {
 }
 
 function getDevicesResult() {
-	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type, name, status, active FROM Devices");
+	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type as Type, name as Name, status as Status, message as Message, active as Active FROM Devices");
 }
 
 function addDevice($dserial, $dtype, $dname) {
@@ -86,17 +86,17 @@ function addDevice($dserial, $dtype, $dname) {
 }*/
 
 function setDeviceState($dserial, $state) {
-	$non_num_pattern = "/[^0-9]/";
+	#$non_num_pattern = "/[^0-9A-Z]/";
 	
-	if(preg_match($non_num_pattern, $dserial) || preg_match($non_num_pattern, $state)) {
-		die('Invalid input');
-	}
+	#if(preg_match($non_num_pattern, $dserial) || preg_match($non_num_pattern, $state)) {
+	#	die('Non decimal character detected');
+	#}
 	
 	$state = intval($state, 10);
 	
 	if($state == DeviceState::Off) $msg = 'off';
 	else if($state == DeviceState::On) $msg = 'on';
-	else die('Invalid input');
+	else die('Invalid state' . $state);
 	
 	$msg .= ' ' . $dserial;
 	

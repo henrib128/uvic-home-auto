@@ -48,9 +48,9 @@ if __name__ == "__main__":
 			conn, addr = s.accept()
 			data = conn.recv(1024)
 			conn.close()
-		
+			print data
 			words = data.split()
-			if len(words) != 2 or len(words[1]) != 16:
+			if len(words) != 2 or len(words[1]) < 16:
 				print 'Invalid input'
 				continue
 		
