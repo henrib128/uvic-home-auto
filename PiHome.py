@@ -9,9 +9,14 @@ import XbeeMonitor as xm
 import DBManager as db
 import CameraClient as cl
 
-host = '142.104.165.35'
-port = 50000
 
+# Function to get local ipaddress (i.e. 192.168.0.190)
+def getLocalIp():
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.connect(("gmail.com",80))
+	ipaddr = s.getsockname()[0]
+	s.close()
+	return ipaddr
 
 if __name__ == "__main__":
 
@@ -23,6 +28,7 @@ if __name__ == "__main__":
 	# Populate database with some test values
 	#db.addNode('router','24.52.152.172')
 	db.addNode('Main Cam','142.104.165.35')
+	db.addNode('Rear Cam','142.104.167.186')
 	db.addEmail('trihuynh87@gmail.com')
 	db.addDevice(0x0013a20040a57ae9,0,'First Switch',0,1,'New')
 	db.addDevice(0x0013a20040a57b39,1,'Front Door',1,1,'New')
@@ -44,13 +50,16 @@ if __name__ == "__main__":
 	XbeeMonitor.start()
 	print "Start listnening to XBee frames in background..."
 	
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.bind((host, port))
-	s.listen(10)
+	# Create socket to listen to PHP Webserver request
+	host = getLocalIp()
+	port = 50000
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind((host, port))
+	sock.listen(100)
 	
 	while True:
 		try:
-			conn, addr = s.accept()
+			conn, addr = sock.accept()
 			data = conn.recv(1024)
 			conn.close()
 			print data
@@ -75,9 +84,11 @@ if __name__ == "__main__":
 	
 		except KeyboardInterrupt:
 			conn.close()
+			sock.close()
 			exit()
 		except Exception as e:
 			conn.close()
+			sock.close()
 			print str(e)
 			exit()
 			
