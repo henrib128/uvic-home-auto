@@ -228,7 +228,7 @@ class CameraMonitor(object):
 		# Command for mjpg-streamer dual streaming
 		cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_uvc.so -f 30 -r 640x480" -o "' + \
                 	_mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
-                	_mBaseDir + '/output_file.so -d 1000 -f ' + _mPlaybackFolder + '" &'
+                	_mBaseDir + '/output_file.so -d 500 -f ' + _mPlaybackFolder + '" &'
 		
 		#cmd = _mBaseDir + '/mjpg_streamer -i "' + _mBaseDir + '/input_testpicture.so -d 1000" -o "' + \
 		#	_mBaseDir + '/output_http.so -p 8080 -w ' + _mWebDir + '" -o "' + \
@@ -246,7 +246,7 @@ class CameraMonitor(object):
 		
 		#print "Playing from this folder: %s to this folder: %s" % (_mPlaybackFolder,_tmpDir)
 		# Start refreshing script
-		for pic in os.listdir(_mPlaybackFolder):
+		for pic in sorted(os.listdir(_mPlaybackFolder)):
 			os.system("cp %s/%s %s/playback.jpg" % (_mPlaybackFolder,pic,_tmpDir))
 			#print "copied this pic %s" % pic
 			time.sleep(1)
