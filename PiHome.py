@@ -19,10 +19,16 @@ def getLocalIp():
 
 
 # Function to try checking frames
-def checkCommandResponse(_xbm,_command):
-	# Try receiving up to 5 frames for ok response
+def checkCommandResponse(_xbm,_txtype,_dserial,_command,_param):
 	OK = False
 	for i in range(1, 5):
+		if _txtype == "coor":
+			_xbm.sendCoorHexApply(_command,_param)
+		elif _txtype == "dapply":
+			_xbm.sendRemoteHexApply(_dserial,_command,_param)
+		elif _txtype == "dnotapply":
+			_xbm.sendRemoteHexNotApply(_dserial,_command,_param)
+
 		response = _xbm.waitReadFrame(_command)
 		print "Done waiting frame"
 		if response: 
@@ -39,66 +45,54 @@ def addXbeeDevice(_xbm,_dserial):
 	default_key='012345'
 	# 0. Retrieve network key
 	network_key='0ABCDE'
+	# Try receiving up to 5 frames for ok response
 	print "Entering addXbeeDevice"
 	# 1. Change Coordinator to default KY
-	_xbm.sendCoorHexApply('KY',default_key)
-	print "Done sending coor hex"
-	if not checkCommandResponse(_xbm,'KY'):
+	if not checkCommandResponse(_xbm,'coor','','KY',default_key):
 		print "Failed to change coordinator to default KY"
 		return False
-	
 	print "Done Coordinator KY default"
+
 	# 1b. Confirm if Coordinator can talk to EndDevice now
-	_xbm.sendRemoteHexApply(_dserial,'SL')
-	print "Done send remote"
-	if not checkCommandResponse(_xbm,'SL'):		
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):		
 		print "Failed to talk to end device with default KY"
 		return False
 	print "Done checking talking in default KY"
 	
 	# 2. Change EndDevice to network KY
-	_xbm.sendRemoteHexApply(_dserial,'KY',network_key)
-	# Try receiving up to 5 frames for ok response
-	if not checkCommandResponse(_xbm,'KY'):	
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'KY',network_key):	
 		print "Failed to change end device to network KY"
 		return False
 	print "Done changing Device KY network"
 	
 	# 3. Change Coordinator to network KY
-	_xbm.sendCoorHexApply('KY',network_key)
-	# Try receiving up to 5 frames for ok response
-	if not checkCommandResponse(_xbm,'KY'):
+	if not checkCommandResponse(_xbm,'coor','','KY',network_key):
 		print "Failed to change coordinator to network KY"
 		return False
 	print "Done changing Coordinator KY network"	
 
 	# 3.b Confirm if coordinator can talk to end device using network KY
-	_xbm.sendRemoteHexApply(_dserial,'SL')
-	# Try receiving up to 5 frames for ok response
-	if not checkCommandResponse(_xbm,'SL'):	
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
 		print "Failed to talk to end device with network KY"
 		return False
 	print "Done talking to device in network KY"
 
 	# 4. Lock EndDevice to Coordinator
-	_xbm.sendRemoteHexApply(_dserial,'A1','04')
-	# Try receiving up to 5 frames for ok response
-	if not checkCommandResponse(_xbm,'A1'):	
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'A1','04'):	
 		print "Failed to lock end device with coordinator"
 		return False
 	print "Done locking device to network KY"
+
 	# 5. Write changes to EndDevice
-	_xbm.sendRemoteHexApply(_dserial,'WR')
-	# Try receiving up to 5 frames for ok response
-	if not checkCommandResponse(_xbm,'WR'):
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'WR',''):
 		print "Failed to write to end device"
 		return False
 	print "Done writing lock"
+
 	# Retrieving device type based on NI field
-	_xbm.sendRemoteHexApply(_dserial,'NI')
-	# Try receiving up to 5 frames for ok response
 	OK = False
 	for i in range(1,5):
+		_xbm.sendRemoteHexApply(_dserial,'NI')
 		dtype = _xbm.waitReadFrame('NI')
 		if dtype: 
 			OK = True
@@ -114,32 +108,30 @@ def addXbeeDevice(_xbm,_dserial):
 		print "Unknown device type %s" % dtype
 		return False
 	print "Done checking NI %s" % dtype
+
 	# Store device type to database ('0013A20040A57AE9') -> 0x0013A20040A57AE9
 	db.changeDeviceType(int(_dserial,16),dtype)
 	
 	# Set sleep mode if it's a DoorSensor
 	if dtype == 1:
 		# 6. Set EndDevice SLEEP mode to 1 WITHOUT APPLYING CHANGE
-		_xbm.sendRemoteHexNotApply(_dserial,'SM','01')
-		# Try receiving up to 5 frames for ok response
-		if not checkCommandResponse(_xbm,'SM'):
+		if not checkCommandResponse(_xbm,'dnotapply',_dserial,'SM','01'):
 			print "Failed to configure sleep mode for end device"
 			return False
 		print "Done sleep mode"
+
 		# 7. Write changes to EndDevice
-		_xbm.sendRemoteHexApply(_dserial,'WR')
-		# Try receiving up to 5 frames for ok response
-		if not checkCommandResponse(_xbm,'WR'):	
+		if not checkCommandResponse(_xbm,'dapply',_dserial,'WR',''):	
 			print "Failed to write to end device"
 			return False
 		print "Done sleep write"
+
 		# 8. Apply changes to enable SLEEP MODE
-		_xbm.sendRemoteHex(_dserial,'AC')
-		# Try receiving up to 5 frames for ok response
-		if not checkCommandResponse(_xbm,'AC'):
+		if not checkCommandResponse(_xbm,'dapply',_dserial,'AC',''):
 			print "Failed to apply changes to end device"
 			return False
 		print "Done apply changes"
+
 		# Everything went through! Return okay
 		return True
 
