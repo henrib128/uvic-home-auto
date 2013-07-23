@@ -144,20 +144,23 @@ if __name__ == "__main__":
 	print "PiHome starting!"
 	
 	# Initialize database
-	db.initDatabase()
+	#db.initDatabase()
 
 	# Populate database with some test values
-	#db.addNode('router','24.52.152.172')
-	db.addNode('Main Cam','142.104.165.35')
-	db.addNode('Rear Cam','142.104.167.186')
+	mainnodename = 'Main Pi'
+	mainnodeaddr = getLocalIp()
+	db.addNode(mainnodename,mainnodeaddr)
+	#db.addNode('Rear Cam','142.104.167.186')
 	db.addEmail('trihuynh87@gmail.com')
-	#db.addDevice(0x0013a20040a57ae9,0,'First Switch',0,1,'New')
-	hexstring = '0013a20040a57ae9'
-	db.addDevice(int(hexstring,16),0,'First Switch',0,1,'New')
-	#db.addDevice(0x0013a20040a57b39,1,'Front Door',1,1,'New')
-	db.addDevice(0x0013a20040a184ce,1,'Back Door',1,0,'New')
+	testswitch = '0013a20040a57ae9'
+	testdoor = '0013a20040a184ce'
+	db.addDevice(int(testswitch,16),0,'First Switch',0,1,'New')
+	db.addDevice(int(testdoor,16),1,'Back Door',1,0,'New')
 	
 	# Create a list of camera clients for each camera node
+	# TODOO: This should be removed and should NOT be passed to XBeeMonitor.
+	# All camera node socket clients should be stored in database, and XBeeMonitor should retrieved a list of clients from DB
+	# So if new camera is added, all it's needed to do is create new socket client for that camera, add to datbase, and thats it
 	camnodes={}
 	nodes = db.getNodes()
 	for node in nodes:

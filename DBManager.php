@@ -70,6 +70,15 @@ function addDevice($dserial, $dname) {
 	db_query($query);
 }
 
+function addNode($nodename, $nodeaddress) {
+	$query = sprintf("INSERT INTO Nodes VALUES('%s','%s')",
+		mysql_real_escape_string($nodename),
+		mysql_real_escape_string($nodeaddress)
+	);
+	
+	db_query($query);
+}
+
 # temporary
 /*function setDeviceState($dserial, $state) {
 	$query = sprintf("UPDATE Devices SET status=%s WHERE serial=%s",
@@ -88,6 +97,30 @@ function addDevice($dserial, $dname) {
 	exec(SENDER_PATH . ' ' . $dserial . ' ' . $state);
 }*/
 
+function sendCommandToPiHome($command, $param) {
+	# Check for non-empty command and parameter
+	if(strlen($command) == 0 or strlen($param) == 0) die('Command and Parameter are empty' . $command . $param);
+	
+	# Build command message consists of "command param"
+	$message = $command. ' ' . $param;
+	
+	# Create one-time socket to local PiHome.py to send command to it
+	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+	if(!$sock) die('Cannot create socket');
+	
+	if(!socket_connect($sock, SCRIPT_IP, SCRIPT_PORT)) {
+		socket_close($sock);
+		die('Cannot connect to PiHome.py ip and port');
+	}
+	
+	# Send command through socket
+	socket_send($sock, $message, strlen($message), 0);
+	
+	# Do not wait for socket response, close right away.
+	# This may need to change if we want to wait for confirmation from PiHome.py
+	socket_close($sock);
+}
+
 function setDeviceState($dserial, $state) {
 	#$non_num_pattern = "/[^0-9A-Z]/";
 	
@@ -99,7 +132,6 @@ function setDeviceState($dserial, $state) {
 	
 	if($state == DeviceState::Off) $msg = 'off';
 	else if($state == DeviceState::On) $msg = 'on';
-	else if($state == 3) $msg = 'add';
 	else die('Invalid state' . $state);
 	
 	$msg .= ' ' . $dserial;
