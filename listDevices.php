@@ -12,7 +12,7 @@
 		db_connect();
 		
 		if(isset($_REQUEST['dserial']) && isset($_REQUEST['dname']) && isset($_REQUEST['add'])) {
-			addDevice($_REQUEST['dserial'], $_REQUEST['dname']);
+			addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			setDeviceState($_REQUEST['dserial'], $_REQUEST['add']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}

@@ -86,14 +86,14 @@ def addXbeeDevice(_xbm,_dserial):
 	if not checkCommandResponse(_xbm,'A1'):	
 		print "Failed to lock end device with coordinator"
 		return False
-
+	print "Done locking device to network KY"
 	# 5. Write changes to EndDevice
 	_xbm.sendRemoteHexApply(_dserial,'WR')
 	# Try receiving up to 5 frames for ok response
 	if not checkCommandResponse(_xbm,'WR'):
 		print "Failed to write to end device"
 		return False
-		
+	print "Done writing lock"
 	# Retrieving device type based on NI field
 	_xbm.sendRemoteHexApply(_dserial,'NI')
 	# Try receiving up to 5 frames for ok response
@@ -113,7 +113,7 @@ def addXbeeDevice(_xbm,_dserial):
 	else:
 		print "Unknown device type %s" % dtype
 		return False
-		
+	print "Done checking NI %s" % dtype
 	# Store device type to database ('0013A20040A57AE9') -> 0x0013A20040A57AE9
 	db.changeDeviceType(int(_dserial,16),dtype)
 	
@@ -125,21 +125,21 @@ def addXbeeDevice(_xbm,_dserial):
 		if not checkCommandResponse(_xbm,'SM'):
 			print "Failed to configure sleep mode for end device"
 			return False
-			
+		print "Done sleep mode"
 		# 7. Write changes to EndDevice
 		_xbm.sendRemoteHexApply(_dserial,'WR')
 		# Try receiving up to 5 frames for ok response
 		if not checkCommandResponse(_xbm,'WR'):	
 			print "Failed to write to end device"
 			return False
-	
+		print "Done sleep write"
 		# 8. Apply changes to enable SLEEP MODE
 		_xbm.sendRemoteHex(_dserial,'AC')
 		# Try receiving up to 5 frames for ok response
 		if not checkCommandResponse(_xbm,'AC'):
 			print "Failed to apply changes to end device"
 			return False
-		
+		print "Done apply changes"
 		# Everything went through! Return okay
 		return True
 
