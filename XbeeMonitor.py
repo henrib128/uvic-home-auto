@@ -47,33 +47,37 @@ class XbeeMonitor(object):
 
 	# Function to send Xbee frame to local coordinator
 	def sendCoorHexApply(self,_command,_parameter=''):
-		_parameterString = str(_parameter)
-		self.xbee.at(frame_id='A',command=_command,parameter=_parameterString.decode('hex'))
+		#_parameterString = str(_parameter)
+		self.xbee.at(frame_id='A',command=_command,parameter=_parameter.decode('hex'))
 
 	# Function to BLOCK and Wait for Xbee frame
 	def waitReadFrame(self,_command):
 		# BLOCK WAIT for valid Xbee frame
 		_frame = self.xbee.wait_read_frame()
 
+		print "Received frame %s" % _frame
 		# Try parsing the frame for crucial fields
-		if _frame.has_key['id']: _fid = _frame['id']
+		if _frame.has_key('id'): _fid = _frame['id']
 		else:
 			print "No frame id field."
 			return False
-		if _frame.has_key['status']: _fstatus = _frame['status']
+		print "frame id %s" % _fid
+		if _frame.has_key('status'): _fstatus = _frame['status']
 		else:
 			print "No frame status field."
 			return False
-		if _frame.has_key['command']: _fcommand = _frame['command']
+		if _frame.has_key('command'): _fcommand = _frame['command']
 		else:
 			print "No frame command field."
 			return False
 		
 		# Ignore frame with 'id' field is 'rx_long_addr' (garbage)
 		if _fid != 'rx_long_addr':
+			print "fid: %s" % _fid
 			# Valid frame, check for frame status
-			if _fstatus.endcode['hex'] == '00' and _fcommand == _command:
+			if _fstatus  == '\x00' and _fcommand == _command:
 				# Success repsonse
+				print "Status 00 and correct command %s" % _command
 				if _command == 'NI':
 					# Return parameter field
 					if _frame.has_key('parameter'):

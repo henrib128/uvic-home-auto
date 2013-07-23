@@ -11,16 +11,13 @@
 		require_once('DBManager.php');
 		db_connect();
 		
-		if(isset($_REQUEST['dserial']) && isset($_REQUEST['dtype']) && isset($_REQUEST['dname'])) {
-			addDevice($_REQUEST['dserial'], $_REQUEST['dtype'], $_REQUEST['dname']);
+		if(isset($_REQUEST['dserial']) && isset($_REQUEST['dname']) && isset($_REQUEST['add'])) {
+			addDevice($_REQUEST['dserial'], $_REQUEST['dname']);
+			setDeviceState($_REQUEST['dserial'], $_REQUEST['add']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['dserial']) && isset($_REQUEST['toggle'])) {
 			setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
-			header('Location: ' . $_SERVER['PHP_SELF']);
-		}
-		else if(isset($_REQUEST['dserial']) && isset($_REQUEST['add'])) {
-			setDeviceState($_REQUEST['dserial'], $_REQUEST['add']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 

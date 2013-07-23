@@ -22,8 +22,9 @@ def getLocalIp():
 def checkCommandResponse(_xbm,_command):
 	# Try receiving up to 5 frames for ok response
 	OK = False
-	for i in range(1,5):
+	for i in range(1, 5):
 		response = _xbm.waitReadFrame(_command)
+		print "Done waiting frame"
 		if response: 
 			OK = True
 			break
@@ -38,25 +39,30 @@ def addXbeeDevice(_xbm,_dserial):
 	default_key='012345'
 	# 0. Retrieve network key
 	network_key='0ABCDE'
-
+	print "Entering addXbeeDevice"
 	# 1. Change Coordinator to default KY
 	_xbm.sendCoorHexApply('KY',default_key)
+	print "Done sending coor hex"
 	if not checkCommandResponse(_xbm,'KY'):
 		print "Failed to change coordinator to default KY"
 		return False
 	
+	print "Done Coordinator KY default"
 	# 1b. Confirm if Coordinator can talk to EndDevice now
 	_xbm.sendRemoteHexApply(_dserial,'SL')
+	print "Done send remote"
 	if not checkCommandResponse(_xbm,'SL'):		
 		print "Failed to talk to end device with default KY"
 		return False
-		
+	print "Done checking talking in default KY"
+	
 	# 2. Change EndDevice to network KY
 	_xbm.sendRemoteHexApply(_dserial,'KY',network_key)
 	# Try receiving up to 5 frames for ok response
 	if not checkCommandResponse(_xbm,'KY'):	
 		print "Failed to change end device to network KY"
 		return False
+	print "Done changing Device KY network"
 	
 	# 3. Change Coordinator to network KY
 	_xbm.sendCoorHexApply('KY',network_key)
@@ -64,14 +70,16 @@ def addXbeeDevice(_xbm,_dserial):
 	if not checkCommandResponse(_xbm,'KY'):
 		print "Failed to change coordinator to network KY"
 		return False
-	
+	print "Done changing Coordinator KY network"	
+
 	# 3.b Confirm if coordinator can talk to end device using network KY
 	_xbm.sendRemoteHexApply(_dserial,'SL')
 	# Try receiving up to 5 frames for ok response
 	if not checkCommandResponse(_xbm,'SL'):	
 		print "Failed to talk to end device with network KY"
 		return False
-	
+	print "Done talking to device in network KY"
+
 	# 4. Lock EndDevice to Coordinator
 	_xbm.sendRemoteHexApply(_dserial,'A1','04')
 	# Try receiving up to 5 frames for ok response
@@ -96,7 +104,7 @@ def addXbeeDevice(_xbm,_dserial):
 			OK = True
 			break
 	# If still havent got ok resposne, abort!
-	if !OK:		
+	if not OK:		
 		print "Failed to write to end device"
 		return False
 	
@@ -214,12 +222,12 @@ if __name__ == "__main__":
 				print "This is add command from the web for %s\nShut XbeeMonitor down. Wait 10 sec. Then turn it back on." % dserial
 				# Stop XBeeMonitor
 				XbeeMonitor.stop()
-				
+				print "Stop current Xbee"
 				# Start XbeeMonitor with synchronous mode
 				XbeeMonitor.startSync()
-				
+				print "Start new Sycn Xbee"
 				# Adding new device command
-				result = addXbeeDevice(dserial)
+				result = addXbeeDevice(XbeeMonitor,dserial)
 				if result:
 					db.updateDeviceMessage(dserial,"Added")
 				else:
