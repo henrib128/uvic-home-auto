@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-Main PiHome script
+PiCam script
 """
 import socket
 

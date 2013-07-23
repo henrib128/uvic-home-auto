@@ -33,12 +33,23 @@ class XbeeMonitor(object):
 		self.xbee.halt()
 		self.ser.close()
 
-	# Function to send Xbee frame given the address input is in hex string format, i.e. '0013a20040a57ae9'
-	def sendFrameHex(self,_destAddrHex,_command,_parameter=''):
+	# Function to send Xbee frame to remote device AND apply change right away (need hex address '0013a20040a57ae9')
+	def sendRemoteHexApply(self,_destAddrHex,_command,_parameter=''):
 		_destAddrHexString = str(_destAddrHex)
 		_parameterString = str(_parameter)
-		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrHexString.decode('hex'),command=_command, parameter=_parameterString.decode('hex'))
+		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrHexString.decode('hex'),command=_command,parameter=_parameterString.decode('hex'))
 
+	# Function to send Xbee frame to remote device BUT NOT apply change right away (need hex address '0013a20040a57ae9')
+	def sendRemoteHexNotApply(self,_destAddrHex,_command,_parameter=''):
+		_destAddrHexString = str(_destAddrHex)
+		_parameterString = str(_parameter)
+		self.xbee.remote_at(frame_id='A',dest_addr_long=_destAddrHexString.decode('hex'),command=_command,parameter=_parameterString.decode('hex'),options='\x00')
+
+	# Function to send Xbee frame to local coordinator
+	def sendCoorHexApply(self,_command,_parameter=''):
+		_parameterString = str(_parameter)
+		self.xbee.at(frame_id='A',command=_command,parameter=_parameterString.decode('hex'))
+		
 	# Function to process incoming frame
 	def processFrame(self,xbeeframe):
 		# Try to parse for 'source_addr_long'
@@ -173,7 +184,7 @@ class XbeeMonitor(object):
 									# Need to convert decimal string to hex string and add extra byte '00' at front
 									#dserialHex ='00'+hex(dserial).strip('0x').strip('L')
 									dserialHex='00%x' % int(dserial)
-									self.sendFrameHex(dserialHex,'D0')
+									self.sendRemoteHexApply(dserialHex,'D0')
 								
 							else:
 								# Unknown frame status

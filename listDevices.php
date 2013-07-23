@@ -19,7 +19,11 @@
 			setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
-		
+		else if(isset($_REQUEST['dserial']) && isset($_REQUEST['add'])) {
+			setDeviceState($_REQUEST['dserial'], $_REQUEST['add']);
+			header('Location: ' . $_SERVER['PHP_SELF']);
+		}
+
 		$result = getDevicesResult();
 		
 		echo '<tr>';
@@ -48,10 +52,17 @@
 					<input type="hidden" name="toggle" value="<? echo $t_m; ?>">
 					<input type="submit" value="Turn <? echo $t_str; ?>">
 				</form><?
+
+				?><form action="listDevices.php" method="post">
+					<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+					<input type="hidden" name="add" value="3">
+					<input type="submit" value="Add">
+				</form><?
 			}
 			echo '</td>';
 			echo "</tr>\n";
 		}
+
 ?>
 		</table>
 	</body>

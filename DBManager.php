@@ -100,6 +100,7 @@ function setDeviceState($dserial, $state) {
 	
 	if($state == DeviceState::Off) $msg = 'off';
 	else if($state == DeviceState::On) $msg = 'on';
+	else if($state == 3) $msg = 'add';
 	else die('Invalid state' . $state);
 	
 	$msg .= ' ' . $dserial;
