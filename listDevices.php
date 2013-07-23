@@ -52,12 +52,6 @@
 					<input type="hidden" name="toggle" value="<? echo $t_m; ?>">
 					<input type="submit" value="Turn <? echo $t_str; ?>">
 				</form><?
-
-				?><form action="listDevices.php" method="post">
-					<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
-					<input type="hidden" name="add" value="3">
-					<input type="submit" value="Add">
-				</form><?
 			}
 			echo '</td>';
 			echo "</tr>\n";

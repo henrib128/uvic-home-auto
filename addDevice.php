@@ -9,7 +9,7 @@
 		<form action="listDevices.php" method="post">
 			Serial Number: <input type="text" name="dserial">
 			Name: <input type="text" name="dname">
-			Type: <input type="text" name="dtype">
+			<input type="hidden" name="add" value="3">
 			<input type="submit" value="Add">
 		</form>
 	</body>

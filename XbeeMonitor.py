@@ -49,7 +49,44 @@ class XbeeMonitor(object):
 	def sendCoorHexApply(self,_command,_parameter=''):
 		_parameterString = str(_parameter)
 		self.xbee.at(frame_id='A',command=_command,parameter=_parameterString.decode('hex'))
+
+	# Function to BLOCK and Wait for Xbee frame
+	def waitReadFrame(self,_command):
+		# BLOCK WAIT for valid Xbee frame
+		_frame = self.xbee.wait_read_frame()
+
+		# Try parsing the frame for crucial fields
+		if _frame.has_key['id']: _fid = _frame['id']
+		else:
+			print "No frame id field."
+			return False
+		if _frame.has_key['status']: _fstatus = _frame['status']
+		else:
+			print "No frame status field."
+			return False
+		if _frame.has_key['command']: _fcommand = _frame['command']
+		else:
+			print "No frame command field."
+			return False
 		
+		# Ignore frame with 'id' field is 'rx_long_addr' (garbage)
+		if _fid != 'rx_long_addr':
+			# Valid frame, check for frame status
+			if _fstatus.endcode['hex'] == '00' and _fcommand == _command:
+				# Success repsonse
+				if _command == 'NI':
+					# Return parameter field
+					if _frame.has_key('parameter'):
+						_parameter = _frame['parameter']
+						return _parameter
+					else:
+						return False
+				else:
+					return True
+			else:
+				# Failed response
+				return False
+				
 	# Function to process incoming frame
 	def processFrame(self,xbeeframe):
 		# Try to parse for 'source_addr_long'
