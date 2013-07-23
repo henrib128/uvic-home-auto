@@ -17,6 +17,19 @@ def getLocalIp():
 	s.close()
 	return ipaddr
 
+
+# Function to try checking frames
+def checkCommandResponse(_xbm,_command):
+	# Try receiving up to 5 frames for ok response
+	OK = False
+	for i in range(1,5):
+		response = _xbm.waitReadFrame(_command)
+		if response: 
+			OK = True
+			break
+	# If still havent got ok resposne, abort!
+	return OK
+
 # Function to add new xbee device to current Xbee network
 # Assumptions:
 #	- Xbee Coordinator is configured: SCAN = off, KY = <network key>
@@ -28,99 +41,48 @@ def addXbeeDevice(_xbm,_dserial):
 
 	# 1. Change Coordinator to default KY
 	_xbm.sendCoorHexApply('KY',default_key)
-	# Try receiving up to 5 frames for ok response
-	OK = False
-	for i in range(1,5):
-		response = _xbm.waitReadFrame('KY')
-		if response: 
-			OK = True
-			break
-	# If still havent got ok resposne, abort!
-	if !OK:
+	if not checkCommandResponse(_xbm,'KY'):
 		print "Failed to change coordinator to default KY"
 		return False
 	
 	# 1b. Confirm if Coordinator can talk to EndDevice now
 	_xbm.sendRemoteHexApply(_dserial,'SL')
-	# Try receiving up to 5 frames for ok response
-	OK = False
-	for i in range(1,5):
-		response = _xbm.waitReadFrame('SL')
-		if response: 
-			OK = True
-			break
-	# If still havent got ok resposne, abort!
-	if !OK:		
+	if not checkCommandResponse(_xbm,'SL'):		
 		print "Failed to talk to end device with default KY"
 		return False
 		
 	# 2. Change EndDevice to network KY
 	_xbm.sendRemoteHexApply(_dserial,'KY',network_key)
 	# Try receiving up to 5 frames for ok response
-	OK = False
-	for i in range(1,5):
-		response = _xbm.waitReadFrame('KY')
-		if response: 
-			OK = True
-			break
-	# If still havent got ok resposne, abort!
-	if !OK:		
+	if not checkCommandResponse(_xbm,'KY'):	
 		print "Failed to change end device to network KY"
 		return False
 	
 	# 3. Change Coordinator to network KY
 	_xbm.sendCoorHexApply('KY',network_key)
 	# Try receiving up to 5 frames for ok response
-	OK = False
-	for i in range(1,5):
-		response = _xbm.waitReadFrame('KY')
-		if response: 
-			OK = True
-			break
-	# If still havent got ok resposne, abort!
-	if !OK:		
+	if not checkCommandResponse(_xbm,'KY'):
 		print "Failed to change coordinator to network KY"
 		return False
 	
 	# 3.b Confirm if coordinator can talk to end device using network KY
 	_xbm.sendRemoteHexApply(_dserial,'SL')
 	# Try receiving up to 5 frames for ok response
-	OK = False
-	for i in range(1,5):
-		response = _xbm.waitReadFrame('SL')
-		if response: 
-			OK = True
-			break
-	# If still havent got ok resposne, abort!
-	if !OK:		
+	if not checkCommandResponse(_xbm,'SL'):	
 		print "Failed to talk to end device with network KY"
 		return False
 	
 	# 4. Lock EndDevice to Coordinator
 	_xbm.sendRemoteHexApply(_dserial,'A1','04')
 	# Try receiving up to 5 frames for ok response
-	OK = False
-	for i in range(1,5):
-		response = _xbm.waitReadFrame('A1')
-		if response: 
-			OK = True
-			break
-	# If still havent got ok resposne, abort!
-	if !OK:		
+	if not checkCommandResponse(_xbm,'A1'):	
 		print "Failed to lock end device with coordinator"
 		return False
 
 	# 5. Write changes to EndDevice
 	_xbm.sendRemoteHexApply(_dserial,'WR')
 	# Try receiving up to 5 frames for ok response
-	OK = False
-	for i in range(1,5):
-		response = _xbm.waitReadFrame('WR')
-		if response: 
-			OK = True
-			break
-	# If still havent got ok resposne, abort!
-	if !OK:		
+	if not checkCommandResponse(_xbm,'WR'):
 		print "Failed to write to end device"
 		return False
 		
@@ -152,42 +114,21 @@ def addXbeeDevice(_xbm,_dserial):
 		# 6. Set EndDevice SLEEP mode to 1 WITHOUT APPLYING CHANGE
 		_xbm.sendRemoteHexNotApply(_dserial,'SM','01')
 		# Try receiving up to 5 frames for ok response
-		OK = False
-		for i in range(1,5):
-			response = _xbm.waitReadFrame('SM')
-			if response: 
-				OK = True
-				break
-		# If still havent got ok resposne, abort!
-		if !OK:		
+		if not checkCommandResponse(_xbm,'SM'):
 			print "Failed to configure sleep mode for end device"
 			return False
 			
 		# 7. Write changes to EndDevice
 		_xbm.sendRemoteHexApply(_dserial,'WR')
 		# Try receiving up to 5 frames for ok response
-		OK = False
-		for i in range(1,5):
-			response = _xbm.waitReadFrame('WR')
-			if response: 
-				OK = True
-				break
-		# If still havent got ok resposne, abort!
-		if !OK:		
+		if not checkCommandResponse(_xbm,'WR'):	
 			print "Failed to write to end device"
 			return False
 	
 		# 8. Apply changes to enable SLEEP MODE
 		_xbm.sendRemoteHex(_dserial,'AC')
 		# Try receiving up to 5 frames for ok response
-		OK = False
-		for i in range(1,5):
-			response = _xbm.waitReadFrame('AC')
-			if response: 
-				OK = True
-				break
-		# If still havent got ok resposne, abort!
-		if !OK:		
+		if not checkCommandResponse(_xbm,'AC'):
 			print "Failed to apply changes to end device"
 			return False
 		
