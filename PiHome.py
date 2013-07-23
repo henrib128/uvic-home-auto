@@ -30,10 +30,13 @@ def checkCommandResponse(_xbm,_txtype,_dserial,_command,_param):
 			_xbm.sendRemoteHexNotApply(_dserial,_command,_param)
 
 		response = _xbm.waitReadFrame(_command)
-		print "Done waiting frame"
+		#print "Done waiting frame"
 		if response: 
 			OK = True
 			break
+
+		# Wait for 2 sec before retry
+		time.sleep(2)
 	# If still havent got ok resposne, abort!
 	return OK
 

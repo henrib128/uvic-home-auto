@@ -61,7 +61,7 @@ class XbeeMonitor(object):
 		else:
 			print "No frame id field."
 			return False
-		print "frame id %s" % _fid
+		#print "frame id %s" % _fid
 		if _frame.has_key('status'): _fstatus = _frame['status']
 		else:
 			print "No frame status field."
@@ -73,11 +73,11 @@ class XbeeMonitor(object):
 		
 		# Ignore frame with 'id' field is 'rx_long_addr' (garbage)
 		if _fid != 'rx_long_addr':
-			print "fid: %s" % _fid
+			#print "fid: %s" % _fid
 			# Valid frame, check for frame status
 			if _fstatus  == '\x00' and _fcommand == _command:
 				# Success repsonse
-				print "Status 00 and correct command %s" % _command
+				#print "Status 00 and correct command %s" % _command
 				if _command == 'NI':
 					# Return parameter field
 					if _frame.has_key('parameter'):
