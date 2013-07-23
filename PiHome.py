@@ -75,6 +75,7 @@ if __name__ == "__main__":
 	db.addEmail('trihuynh87@gmail.com')
 	db.addDevice(0x0013a20040a57ae9,0,'First Switch',0,1,'New')
 	db.addDevice(0x0013a20040a57b39,1,'Front Door',1,1,'New')
+	db.addDevice(0x0013a20040a184ce,1,'Back Door',1,0,'New')
 	
 	# Create a list of camera clients for each camera node
 	camnodes={}
@@ -90,7 +91,7 @@ if __name__ == "__main__":
 				
 	# Create XbeeMonitor instance
 	XbeeMonitor = xm.XbeeMonitor(camnodes,"/dev/ttyAMA0", 9600, None)				
-	XbeeMonitor.start()
+	XbeeMonitor.startAsync()
 	print "Start listnening to XBee frames in background..."
 	
 	# Create socket to listen to PHP Webserver request
@@ -137,12 +138,16 @@ if __name__ == "__main__":
 				# Stop XBeeMonitor
 				XbeeMonitor.stop()
 				
+				# Start XbeeMonitor with synchronous mode
+				XbeeMonitor.startSync()
+				
 				# Adding new device command
 				time.sleep(10)
 				#addXbeeDevice(dserial)
 				
 				# Restart XBeeMonitor and have it run in background again
-				XbeeMonitor.start()
+				XbeeMonitor.stop()
+				XbeeMonitor.startAsync()
 				
 			else:
 				print 'Invalid input'

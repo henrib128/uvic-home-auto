@@ -212,8 +212,8 @@ class XbeeMonitor(object):
 			# Frame does not have 'source_addr_long' field. Ignore frame
 			print "Frame error: no source_addr_long field. IGNORE."
 		
-	def start(self):
-		# Start xbee background single-threaded thread to listen for new frame at certain serial port
+	def startAsync(self):
+		# Start xbee asynchronous background single-threaded thread to listen for new frame at certain serial port
 		# If receiving new frame, it will pass the frame to the callback function
 		# Any new coming frame will be buffered if it is still processing previous frame
 		try: 
@@ -223,6 +223,17 @@ class XbeeMonitor(object):
 		except Exception, e:
 			print "error open serial port: " + str(e)
 			exit()
+
+        def startSync(self):
+                # Start xbee synchronous thread to listen for new frame at certain serial port
+                try:
+                        self.ser.open()
+                        self.xbee = XBee(self.ser)
+
+                except Exception, e:
+                        print "error open serial port: " + str(e)
+                        exit()
+
 
 # Door Thread class
 class DoorOpenThread(threading.Thread):
