@@ -224,9 +224,9 @@ if __name__ == "__main__":
 				# Adding new device command
 				result = addXbeeDevice(XbeeMonitor,dserial)
 				if result:
-					db.updateDeviceMessage(dserial,"Added")
+					db.updateDeviceMessage(int(dserial,16),"Added")
 				else:
-					db.updateDeviceMessage(dserial,"FailedToAdd")
+					db.updateDeviceMessage(int(dserial,16),"FailedToAdd")
 				
 				# Restart XBeeMonitor and have it run in background again
 				XbeeMonitor.stop()
