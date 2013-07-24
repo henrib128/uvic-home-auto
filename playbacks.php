@@ -67,12 +67,17 @@
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['playbackfolder'])) {
-			if($_REQUEST['command'] == "delplayback"){
+			if($_REQUEST['command'] == "playplayback"){
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
+			}			
+			else if($_REQUEST['command'] == "delplayback"){
 				removePlayback($_REQUEST['nodename'], $_REQUEST['playbackfolder']);
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
 			}
-			
-			# Send command to PiHome
-			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
+			else if($_REQUEST['command'] == "downloadplayback"){
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
+			}			
+
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		

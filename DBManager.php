@@ -77,9 +77,28 @@ function toggleDeviceActive($dserial, $dname, $dactive) {
 }
 
 function changeDeviceName($dserial, $dname) {
+	# Change device name in Devices table
 	$query = sprintf("UPDATE Devices SET name='%s' WHERE serial=%s",
 		mysql_real_escape_string($dname),
 		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+function changeNodeName($dname, $dnewname) {
+	# Change Node name in Nodes table
+	$query = sprintf("UPDATE Nodes SET nodename='%s' WHERE nodename='%s'",
+		mysql_real_escape_string($dnewname),
+		mysql_real_escape_string($dname)
+	);
+	
+	db_query($query);
+
+	# Change Node name in Playbacks table
+	$query = sprintf("UPDATE Playbacks SET nodename='%s' WHERE nodename='%s'",
+		mysql_real_escape_string($dnewname),
+		mysql_real_escape_string($dname)
 	);
 	
 	db_query($query);

@@ -16,9 +16,11 @@
 		if(isset($_REQUEST['command']) && isset($_REQUEST['dserial']) && isset($_REQUEST['dname'])) {
 			if($_REQUEST['command'] == "adddevice"){
 				addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "removedevice"){
 				removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "toggleactive"){
 				toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);
@@ -27,7 +29,6 @@
 				changeDeviceName('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
 			
-			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['dserial']) && isset($_REQUEST['toggle'])) {
@@ -37,12 +38,17 @@
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['nodeaddress'])) {
 			if($_REQUEST['command'] == "addnode"){
 				addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
 			}
 			else if($_REQUEST['command'] == "delnode"){
 				removeNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
+			}
+			else if($_REQUEST['command'] == "changenodename"){
+				changeNodeName($_REQUEST['nodename'], $_REQUEST['nodenewname']);
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
 			}
 			
-			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 ?>
@@ -57,18 +63,23 @@
 		<table border="1">		
 <?
 		$result = getNodes();
-
+		
+		# Header row
 		echo '<tr>';
+		# Extra collumn for Action
+		echo '<td>Action</td>';
+		# Populate all collumns
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
+			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
 			echo '<td>' . $meta->name . '</td>';
 		}
-		echo '<td>Action</td>';
 		echo "</tr>\n";
 		
+		# Start populating rows
 		while($row = mysql_fetch_row($result)) {
 			echo '<tr>';
-			for($i = 0; $i < mysql_num_fields($result); $i++) echo '<td>' . $row[$i] . '</td>';
+			# First collumn is Action button
 			echo '<td>';
 ?>
 			<form action="listDevices.php" method="post">
@@ -79,6 +90,25 @@
 			</form>
 <?
 			echo '</td>';
+			# Populate rest of collumns
+			for($i = 0; $i < mysql_num_fields($result); $i++){
+				# Get collumn header
+				$meta = mysql_fetch_field($result, $i);
+				
+				# Add change name button for Name collumn
+				if($meta->name == 'nodename') {
+				    echo '<td>';
+
+					?><form action="listDevices.php" method="post">
+						<input type="text" name="nodename" value="<? echo $row[0]; ?>">
+						<input type="hidden" name="nodeaddress" value="<? echo $row[1]; ?>">
+						<input type="hidden" name="command" value="changenodename">
+						<input type="submit" name ="nodenewname" value="Change name">
+					</form><?
+				    echo '</td>';
+				}
+				else echo '<td>' . $row[$i] . '</td>';
+			}
 			echo "</tr>\n";
 		}
 ?>
@@ -101,6 +131,7 @@
 		echo '<tr>';
 		echo '<td>Command</td>';
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
+			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
 			echo '<td>' . $meta->name . '</td>';
 		}
@@ -109,8 +140,7 @@
 		
 		while($row = mysql_fetch_row($result)) {
 			echo '<tr>';
-			
-			# Extra collume for removing device
+			# Extra collumn for removing device
 			echo '<td>';
 ?>
 			<form action="listDevices.php" method="post">
@@ -123,6 +153,7 @@
 			echo '</td>';
 			
 			for($i = 0; $i < mysql_num_fields($result); $i++){
+				# Get collumn header
 				$meta = mysql_fetch_field($result, $i);
 				
 				if($row[1] == DeviceType::PowerSwitch and $meta->name == 'Status') {
@@ -170,7 +201,7 @@
 						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
 						<input type="text" name="dname" value="<? echo $row[2]; ?>">
 						<input type="hidden" name="command" value="changedevicename">
-						<input type="submit" value="New name">
+						<input type="submit" value="Change name">
 					</form><?
 				    echo '</td>';
 				}
