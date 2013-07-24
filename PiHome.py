@@ -21,7 +21,7 @@ def getLocalIp():
 # Function to try checking frames
 def checkCommandResponse(_xbm,_txtype,_dserial,_command,_param):
 	OK = False
-	for i in range(1, 5):
+	for i in range(1, 10):
 		if _txtype == "coor":
 			_xbm.sendCoorHexApply(_command,_param)
 		elif _txtype == "dapply":
@@ -29,8 +29,9 @@ def checkCommandResponse(_xbm,_txtype,_dserial,_command,_param):
 		elif _txtype == "dnotapply":
 			_xbm.sendRemoteHexNotApply(_dserial,_command,_param)
 
+		# BLOCK WAIT for valid Xbee frame response
 		response = _xbm.waitReadFrame(_command)
-		#print "Done waiting frame"
+
 		if response: 
 			OK = True
 			break
@@ -50,93 +51,125 @@ def addXbeeDevice(_xbm,_dserial):
 	network_key='0ABCDE'
 	# Try receiving up to 5 frames for ok response
 	print "Entering addXbeeDevice"
+	
 	# 1. Change Coordinator to default KY
 	if not checkCommandResponse(_xbm,'coor','','KY',default_key):
-		print "Failed to change coordinator to default KY"
-		return False
+		_message = "Failed to change coordinator to default KY"
+		print _message
+		return _message
 	print "Done Coordinator KY default"
 
 	# 1b. Confirm if Coordinator can talk to EndDevice now
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):		
-		print "Failed to talk to end device with default KY"
-		return False
+		_message = "Failed to talk to end device with default KY"
+		print _message
+
+		# Revert Coordinator back to Network key
+		if not checkCommandResponse(_xbm,'coor','','KY',network_key):
+			_message = "Failed to revert coordinator to network KY. Please restart Pi!"
+			print _message
+			return _message
+		
+		return _message
 	print "Done checking talking in default KY"
 	
 	# 2. Change EndDevice to network KY
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'KY',network_key):	
-		print "Failed to change end device to network KY"
-		return False
+		_message = "Failed to change end device to network KY"
+		print _message
+		
+		# Revert Coordinator back to Network key
+		if not checkCommandResponse(_xbm,'coor','','KY',network_key):
+			_message = "Failed to revert coordinator to network KY. Please restart Pi!"
+			print _message
+			return _message
+			
+		return _message
 	print "Done changing Device KY network"
 	
 	# 3. Change Coordinator to network KY
 	if not checkCommandResponse(_xbm,'coor','','KY',network_key):
-		print "Failed to change coordinator to network KY"
-		return False
+		_message = "Failed to change coordinator to network KY. Please restart Pi!"
+		print _message
+		return _message
 	print "Done changing Coordinator KY network"	
 
 	# 3.b Confirm if coordinator can talk to end device using network KY
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
-		print "Failed to talk to end device with network KY"
-		return False
+		_message = "Failed to talk to end device with network KY"
+		print _message
+		return _message
 	print "Done talking to device in network KY"
 
 	# 4. Lock EndDevice to Coordinator
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'A1','04'):	
-		print "Failed to lock end device with coordinator"
-		return False
+		_message = "Failed to lock end device with coordinator"
+		print _message
+		return _message
 	print "Done locking device to network KY"
 
 	# 5. Write changes to EndDevice
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'WR',''):
-		print "Failed to write to end device"
-		return False
+		_message = "Failed to write to end device"
+		print _message
+		return _message
 	print "Done writing lock"
 
 	# Retrieving device type based on NI field
 	OK = False
-	for i in range(1,5):
+	for i in range(1,10):
 		_xbm.sendRemoteHexApply(_dserial,'NI')
 		dtype = _xbm.waitReadFrame('NI')
 		if dtype: 
 			OK = True
 			break
+		
+		# Wait for 2 sec before retry
+		time.sleep(2)
+
 	# If still havent got ok resposne, abort!
 	if not OK:		
-		print "Failed to write to end device"
-		return False
+		_message = "Failed to write to end device"
+		print _message
+		return _message
 	
 	if dtype == 'DS': dtype = 1
 	elif dtype == 'PS': dtype = 0
 	else:
-		print "Unknown device type %s" % dtype
-		return False
-	print "Done checking NI %s" % dtype
+		_message = "Unknown device type %s" % dtype
+		print _message
+		return _message
 
 	# Store device type to database ('0013A20040A57AE9') -> 0x0013A20040A57AE9
 	db.changeDeviceType(int(_dserial,16),dtype)
-	
+	print "Done checking NI %s and storing device type to database" % dtype
+		
 	# Set sleep mode if it's a DoorSensor
 	if dtype == 1:
 		# 6. Set EndDevice SLEEP mode to 1 WITHOUT APPLYING CHANGE
 		if not checkCommandResponse(_xbm,'dnotapply',_dserial,'SM','01'):
-			print "Failed to configure sleep mode for end device"
-			return False
+			_message = "Failed to configure sleep mode for end device"
+			print _message
+			return _message
 		print "Done sleep mode"
 
 		# 7. Write changes to EndDevice
 		if not checkCommandResponse(_xbm,'dapply',_dserial,'WR',''):	
-			print "Failed to write to end device"
-			return False
+			_message = "Failed to write to end device"
+			print _message
+			return _message
 		print "Done sleep write"
 
 		# 8. Apply changes to enable SLEEP MODE
 		if not checkCommandResponse(_xbm,'dapply',_dserial,'AC',''):
-			print "Failed to apply changes to end device"
-			return False
+			_message = "Failed to apply changes to end device"
+			print _message
+			return _message
 		print "Done apply changes"
 
 		# Everything went through! Return okay
-		return True
+		_message = "New device is added successfully"
+		return _message
 
 # Main body of script
 if __name__ == "__main__":
@@ -240,17 +273,19 @@ if __name__ == "__main__":
 				XbeeMonitor.startSync()
 				print "Started new Sychronous Xbee"
 
-				# Adding new device command
-				result = addXbeeDevice(XbeeMonitor,dserial)
-				if result:
-					db.updateDeviceMessage(int(dserial,16),"Added")
-				else:
-					db.updateDeviceMessage(int(dserial,16),"FailedToAdd")
+				# Adding new device command, update status for user
+				message = addXbeeDevice(XbeeMonitor,dserial)
+				db.updateDeviceMessage(int(dserial,16),message)
 				
 				# Restart XBeeMonitor and have it run in background again
 				XbeeMonitor.stop()
 				XbeeMonitor.startAsync()
 
+			elif webcommand == 'removedevice':
+				# Remove device command, need to trigger configuration mode
+				dserial=webparam
+				print "Remove device command from the web for %s." % dserial
+				
 			elif webcommand == 'addnode':
 				# Add new node command from web
 				node=webparam.split(',')
