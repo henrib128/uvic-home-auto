@@ -76,6 +76,15 @@ function toggleDeviceActive($dserial, $dname, $dactive) {
 	db_query($query);
 }
 
+function changeDeviceName($dserial, $dname) {
+	$query = sprintf("UPDATE Devices SET name='%s' WHERE serial=%s",
+		mysql_real_escape_string($dname),
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
 function removeNode($nodename, $nodeaddress) {
 	$query = sprintf("DELETE FROM Nodes WHERE nodename='%s' AND ipaddress='%s'",
 		mysql_real_escape_string($nodename),

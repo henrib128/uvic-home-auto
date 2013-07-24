@@ -53,7 +53,7 @@ def initDatabase():
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Playbacks")
 	dbcur.execute("CREATE TABLE Playbacks(nodename VARCHAR(10), recordfolder VARCHAR(24))")
-		
+	
 	# Commit querry and close db cursor, connection
 	dbcon.commit()
 	dbcur.close()
@@ -174,7 +174,7 @@ def updateDeviceMessage(_serial, _message):
 	dbcon.commit()
 	dbcur.close()
 	dbcon.close()
-	
+
 # Function to activate or deactivate device
 def updateDeviceActive(_serial, _active):
 	# Get database connection and cursor

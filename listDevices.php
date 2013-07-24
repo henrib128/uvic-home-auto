@@ -23,6 +23,9 @@
 			else if($_REQUEST['command'] == "toggleactive"){
 				toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);
 			}
+			else if($_REQUEST['command'] == "changedevicename"){
+				changeDeviceName('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+			}
 			
 			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
@@ -157,6 +160,17 @@
 						<input type="hidden" name="dactive" value="<? echo $t_m; ?>">
 						<input type="hidden" name="command" value="toggleactive">
 						<input type="submit" value="<? echo $t_str; ?>">
+					</form><?
+				    echo '</td>';
+				}
+				else if($meta->name == 'Name') {
+				    echo '<td>';
+
+					?><form action="listDevices.php" method="post">
+						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+						<input type="text" name="dname" value="<? echo $row[2]; ?>">
+						<input type="hidden" name="command" value="changedevicename">
+						<input type="submit" value="New name">
 					</form><?
 				    echo '</td>';
 				}
