@@ -328,7 +328,8 @@ if __name__ == "__main__":
 				print "changenodename command from Webserver %s %s %s." % (nodename,newnodename,nodeaddress)
 				
 				# First need to remove old node name
-				
+				if camnodes.has_key(nodename): del camnodes[nodename]
+
 				# Try adding camnodes{} dictionary with new nodename
 				if not camnodes.has_key(newnodename):
 					print "Nodename: %s Ipaddress: %s" % (newnodename,nodeaddress)
@@ -361,9 +362,16 @@ if __name__ == "__main__":
 				playbackfolder=playback[1]
 				print "delplayback command from Webserver %s %s." % (nodename,playbackfolder)
 
-				# Send delplayback command to remote pi
-				camclient=camnodes[nodename]
-				camclient.send("DELPLAYBACK,%s" % playbackfolder)
+				# Send playback command to remote pi
+				if camnodes.has_key(nodename):
+					camclient=camnodes[nodename]
+					camclient.send("DELPLAYBACK,%s" % playbackfolder)
+				else:
+					# Create new camclient for this node
+					nodeaddress=db.getNode(nodename)[1]
+					camclient = cl.CameraClient(nodeaddress,44444)
+					camnodes[nodename] = camclient					
+					camclient.send("DELPLAYBACK,%s" % playbackfolder)
 
 			elif webcommand == 'downloadplayback':
 				# Download playback command from web

@@ -15,6 +15,7 @@ from subprocess import Popen, PIPE
 
 # Required packages
 import DBManager as db
+import CameraClient as cl
 
 # Xbee Monitor class
 class XbeeMonitor(object):
@@ -289,6 +290,16 @@ class DoorOpenThread(threading.Thread):
 		# Perform camera actions
 		timestamp = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
 		mrecordfolder = 'record_' + timestamp
+		
+		# First get a list of all nodes in the system and add new socket if not existed
+		nodes = db.getNodes()
+		for node in nodes:
+			nodename = node[0]
+			nodeaddress = node[1]
+			if not self.camnodes.has_key(nodename):
+				camclient = cl.CameraClient(nodeaddress,44444)
+				self.camnodes[nodename] = camclient	
+				
 		
 		# For each of camera node, send recording request	
 		for (nodename,camclient) in self.camnodes.items():
