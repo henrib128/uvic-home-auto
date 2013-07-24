@@ -67,6 +67,11 @@
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['playbackfolder'])) {
+			if($_REQUEST['command'] == "delplayback"){
+				removePlayback($_REQUEST['nodename'], $_REQUEST['playbackfolder']);
+			}
+			
+			# Send command to PiHome
 			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
@@ -95,7 +100,7 @@
 			<form action="playbacks.php" method="post">
 				<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">
 				<input type="hidden" name="playbackfolder" value="<? echo $row[1]; ?>">
-				<input type="hidden" name="command" value="Play">
+				<input type="hidden" name="command" value="playplayback">
 				<input type="submit" value="Play">
 			</form>
 <?
@@ -107,7 +112,7 @@
 			<form action="playbacks.php" method="post">
 				<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">
 				<input type="hidden" name="playbackfolder" value="<? echo $row[1]; ?>">
-				<input type="hidden" name="command" value="Delete">
+				<input type="hidden" name="command" value="delplayback">
 				<input type="submit" value="Delete">
 			</form>
 <?
@@ -119,7 +124,7 @@
 			<form action="playbacks.php" method="post">
 				<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">
 				<input type="hidden" name="playbackfolder" value="<? echo $row[1]; ?>">
-				<input type="hidden" name="command" value="Download">
+				<input type="hidden" name="command" value="downloadplayback">
 				<input type="submit" value="Download">
 			</form>
 <?

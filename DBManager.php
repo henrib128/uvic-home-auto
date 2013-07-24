@@ -66,6 +66,15 @@ function removeNode($nodename, $nodeaddress) {
 	db_query($query);
 }
 
+function removePlayback($nodename, $playbackfolder) {
+	$query = sprintf("DELETE FROM Playbacks WHERE nodename='%s' AND recordfolder='%s'",
+		mysql_real_escape_string($nodename),
+		mysql_real_escape_string($playbackfolder)
+	);
+	
+	db_query($query);
+}
+
 function getCamPlaybacksResult() {
 	return db_query("SELECT nodename, recordfolder FROM Playbacks");
 }

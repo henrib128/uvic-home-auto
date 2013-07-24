@@ -14,7 +14,7 @@
 		
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command']) && isset($_REQUEST['dserial']) && isset($_REQUEST['dname'])) {
-			if($_REQUEST['command'] == "add"){
+			if($_REQUEST['command'] == "adddevice"){
 				addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
 			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
@@ -32,7 +32,7 @@
 				removeNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
 			}
 			
-			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodeaddress']);
+			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 ?>
@@ -78,7 +78,7 @@
 		<form action="listDevices.php" method="post">
 			Serial Number: <input type="text" name="dserial">
 			Name: <input type="text" name="dname">
-			<input type="hidden" name="command" value="add">
+			<input type="hidden" name="command" value="adddevice">
 			<input type="submit" value="Add">
 		</form>
 		<table border="1">		

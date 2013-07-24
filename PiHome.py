@@ -197,33 +197,49 @@ if __name__ == "__main__":
 			# Parse data for valid PHP requests
 			# Valid request should be in form of "webcommand dserial"
 			words = data.split()
-			if len(words) != 2 or len(words[1]) < 16:
-				print 'Invalid input'
+			if len(words) != 2:
+				print 'Invalid request. Valid request should be in form of "webcommand dserial"'
 				continue
 
 			# Assuming valid request in form of webcommand and device serial
 			webcommand = words[0]
-			dserial = words[1]
+			webparam = words[1]
 			
 			# Perform actions based on webcommand
 			if webcommand == 'off':
 				# Turn off power switch command
-				# Send request to remote Device							
+				dserial=webparam
+				if len(webparam) < 16:
+					# Dserial must be 16 or more letters
+					print "Dserial must be 16 or more letters"
+					continue
+				# Send request to remote Device
 				XbeeMonitor.sendRemoteHexApply(dserial,'D0','04')
 							
 			elif webcommand == 'on':
 				# Turn on power switch command
-				# Send request to remote Device							
+				dserial=webparam
+				if len(webparam) < 16:
+					# Dserial must be 16 or more letters
+					print "Dserial must be 16 or more letters"
+					continue
+
+				# Send request to remote Device						
 				XbeeMonitor.sendRemoteHexApply(dserial,'D0','05')
 				
-			elif webcommand == 'add':
-				print "This is add command from the web for %s\nShut XbeeMonitor down. Wait 10 sec. Then turn it back on." % dserial
+			elif webcommand == 'adddevice':
+				# Add new device, need to trigger configuration mode
+				dserial=webparam
+				print "Add device command from the web for %s. Entering configuration mode." % dserial
+
 				# Stop XBeeMonitor
 				XbeeMonitor.stop()
-				print "Stop current Xbee"
+				print "Stopped current Asynchronous Xbee"
+
 				# Start XbeeMonitor with synchronous mode
 				XbeeMonitor.startSync()
-				print "Start new Sycn Xbee"
+				print "Started new Sychronous Xbee"
+
 				# Adding new device command
 				result = addXbeeDevice(XbeeMonitor,dserial)
 				if result:
@@ -234,6 +250,41 @@ if __name__ == "__main__":
 				# Restart XBeeMonitor and have it run in background again
 				XbeeMonitor.stop()
 				XbeeMonitor.startAsync()
+
+			elif webcommand == 'addnode':
+				# Add new node command from web
+				node=webparam.split(',')
+				nodename=node[0]
+				nodeaddress=node[1]
+				print "addnode command from Webserver for %s %s." % (nodename,nodeaddress)
+
+			elif webcommand == 'delnode':
+				# Delete node command from web
+				node=webparam.split(',')
+				nodename=node[0]
+				nodeaddress=node[1]
+				print "delnode command from Webserver %s %s." % (nodename,nodeaddress)
+				
+			elif webcommand == 'playplayback':
+				# Play playback command from web
+				playback=webparam.split(',')
+				nodename=playback[0]
+				playbackfolder=playback[1]
+				print "playplayback command from Webserver %s %s." % (nodename,playbackfolder)
+
+			elif webcommand == 'delplayback':
+				# Delete playback command from web
+				playback=webparam.split(',')
+				nodename=playback[0]
+				playbackfolder=playback[1]
+				print "delplayback command from Webserver %s %s." % (nodename,playbackfolder)
+
+			elif webcommand == 'downloadplayback':
+				# Download playback command from web
+				playback=webparam.split(',')
+				nodename=playback[0]
+				playbackfolder=playback[1]
+				print "downloadplayback command from Webserver %s %s." % (nodename,playbackfolder)
 				
 			else:
 				print 'Invalid input'
