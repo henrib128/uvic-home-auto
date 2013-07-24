@@ -20,6 +20,9 @@
 			else if($_REQUEST['command'] == "removedevice"){
 				removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
+			else if($_REQUEST['command'] == "toggleactive"){
+				toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);
+			}
 			
 			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
@@ -98,7 +101,7 @@
 			$meta = mysql_fetch_field($result, $i);
 			echo '<td>' . $meta->name . '</td>';
 		}
-		echo '<td>Send</td>';
+
 		echo "</tr>\n";
 		
 		while($row = mysql_fetch_row($result)) {
@@ -116,24 +119,49 @@
 <?
 			echo '</td>';
 			
-			for($i = 0; $i < mysql_num_fields($result); $i++) echo '<td>' . $row[$i] . '</td>';
-			echo '<td>';
-			if($row[1] == DeviceType::PowerSwitch) {
-				$t_str = 'On';
-				$t_m = 1;
+			for($i = 0; $i < mysql_num_fields($result); $i++){
+				$meta = mysql_fetch_field($result, $i);
 				
-				if($row[3] == 1) {
-					$t_str = 'Off';
-					$t_m = 0;
+				if($row[1] == DeviceType::PowerSwitch and $meta->name == 'Status') {
+					$t_str = 'On';
+					$t_m = 1;
+				
+					if($row[3] == 1) {
+						$t_str = 'Off';
+						$t_m = 0;
+					}
+				    echo '<td>' . $row[$i];
+
+					?><form action="listDevices.php" method="post">
+						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+						<input type="hidden" name="toggle" value="<? echo $t_m; ?>">
+						<input type="submit" value="Turn <? echo $t_str; ?>">
+					</form><?
+				    echo '</td>';
 				}
-				
-				?><form action="listDevices.php" method="post">
-					<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
-					<input type="hidden" name="toggle" value="<? echo $t_m; ?>">
-					<input type="submit" value="Turn <? echo $t_str; ?>">
-				</form><?
+				else if($meta->name == 'Active') {
+				    echo '<td>' . $row[$i];
+
+					if($row[5] == 1) {
+						$t_str = 'Deactive';
+						$t_m = 0;
+					}
+					else if($row[5] == 0) {
+						$t_str = 'Activate';
+						$t_m = 1;
+					}
+					
+					?><form action="listDevices.php" method="post">
+						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+						<input type="hidden" name="dname" value="<? echo $row[2]; ?>">
+						<input type="hidden" name="dactive" value="<? echo $t_m; ?>">
+						<input type="hidden" name="command" value="toggleactive">
+						<input type="submit" value="<? echo $t_str; ?>">
+					</form><?
+				    echo '</td>';
+				}
+				else echo '<td>' . $row[$i] . '</td>';
 			}
-			echo '</td>';
 			echo "</tr>\n";
 		}
 ?>
