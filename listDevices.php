@@ -100,10 +100,11 @@
 				    echo '<td>';
 
 					?><form action="listDevices.php" method="post">
-						<input type="text" name="nodename" value="<? echo $row[0]; ?>">
+						<input type="text" name="nodenewname" value="<? echo $row[0]; ?>">
+						<input type="hiden" name="nodename" value="<? echo $row[0]; ?>">						
 						<input type="hidden" name="nodeaddress" value="<? echo $row[1]; ?>">
 						<input type="hidden" name="command" value="changenodename">
-						<input type="submit" name ="nodenewname" value="Change name">
+						<input type="submit" value="Change name">
 					</form><?
 				    echo '</td>';
 				}
