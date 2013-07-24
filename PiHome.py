@@ -325,7 +325,7 @@ if __name__ == "__main__":
 				nodename=node[0]
 				newnodename=node[1]
 				nodeaddress=node[2]
-				print "delnode command from Webserver %s %s." % (newnodename,nodeaddress)
+				print "changenodename command from Webserver %s %s %s." % (nodename,newnodename,nodeaddress)
 				
 				# First need to remove old node name
 				
