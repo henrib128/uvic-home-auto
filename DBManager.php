@@ -153,7 +153,7 @@ function sendCommandToPiHome($command, $param) {
 	if(strlen($command) == 0 or strlen($param) == 0) die('Command and Parameter are empty' . $command . $param);
 	
 	# Build command message consists of "command param"
-	$message = $command. ' ' . $param;
+	$message = $command. '/pi/' . $param;
 	
 	# Create one-time socket to local PiHome.py to send command to it
 	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -185,7 +185,7 @@ function setDeviceState($dserial, $state) {
 	else if($state == DeviceState::On) $msg = 'on';
 	else die('Invalid state' . $state);
 	
-	$msg .= ' ' . $dserial;
+	$msg .= '/pi/' . $dserial;
 	
 	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 	if(!$sock) die('1');

@@ -228,8 +228,8 @@ if __name__ == "__main__":
 			print data
 			
 			# Parse data for valid PHP requests
-			# Valid request should be in form of "webcommand dserial"
-			words = data.split()
+			# Valid request should be in form of "webcommand/pi/dserial"
+			words = data.split('/pi/')
 			if len(words) != 2:
 				print 'Invalid request. Valid request should be in form of "webcommand dserial"'
 				continue
@@ -290,7 +290,12 @@ if __name__ == "__main__":
 				# Remove device command, need to trigger configuration mode
 				dserial=webparam
 				print "Remove device command from the web for %s." % dserial
-				
+
+			elif webcommand == 'toggledevice':
+				# Toggle device command, need to trigger configuration mode
+				dserial=webparam
+				print "Toggle device command from the web for %s." % dserial
+								
 			elif webcommand == 'addnode':
 				# Add new node command from web
 				node=webparam.split(',')
@@ -311,6 +316,10 @@ if __name__ == "__main__":
 				nodename=playback[0]
 				playbackfolder=playback[1]
 				print "playplayback command from Webserver %s %s." % (nodename,playbackfolder)
+				
+				# Send playback command to remote pi
+				camclient=camnodes[nodename]
+				camclient.send("STARTPLAYBACK,%s" % playbackfolder)
 
 			elif webcommand == 'delplayback':
 				# Delete playback command from web
@@ -318,6 +327,10 @@ if __name__ == "__main__":
 				nodename=playback[0]
 				playbackfolder=playback[1]
 				print "delplayback command from Webserver %s %s." % (nodename,playbackfolder)
+
+				# Send delplayback command to remote pi
+				camclient=camnodes[nodename]
+				camclient.send("DELPLAYBACK,%s" % playbackfolder)
 
 			elif webcommand == 'downloadplayback':
 				# Download playback command from web
