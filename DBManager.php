@@ -76,6 +76,16 @@ function toggleDeviceActive($dserial, $dname, $dactive) {
 	db_query($query);
 }
 
+function changeEmail($newemail, $oldemail) {
+	# Change device name in Devices table
+	$query = sprintf("UPDATE Emails SET email='%s' WHERE email='%s'",
+		mysql_real_escape_string($newemail),
+		mysql_real_escape_string($oldemail)
+	);
+	
+	db_query($query);
+}
+
 function changeDeviceName($dserial, $dname) {
 	# Change device name in Devices table
 	$query = sprintf("UPDATE Devices SET name='%s' WHERE serial=%s",
@@ -120,6 +130,18 @@ function removePlayback($nodename, $playbackfolder) {
 	);
 	
 	db_query($query);
+}
+
+function removeEmail($email) {
+	$query = sprintf("DELETE FROM Emails WHERE email='%s'",
+		mysql_real_escape_string($email)
+	);
+	
+	db_query($query);
+}
+
+function getEmails() {
+	return db_query("SELECT email FROM Emails");
 }
 
 function getCamPlaybacksResult() {

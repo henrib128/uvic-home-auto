@@ -35,6 +35,15 @@
 			setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
+		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
+			if($_REQUEST['command'] == "removeemail"){
+				removeEmail($_REQUEST['email']);
+			}
+			else if($_REQUEST['command'] == "changeemail"){
+				changeEmail($_REQUEST['newemail'],$_REQUEST['email']);
+			}
+			header('Location: ' . $_SERVER['PHP_SELF']);
+		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['nodeaddress'])) {
 			if($_REQUEST['command'] == "addnode"){
 				addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
@@ -212,5 +221,61 @@
 		}
 ?>
 		</table>
+
+		<h2>Email Manager Table</h2>
+		
+		<table border="1">		
+<?
+		$result = getEmails();
+		
+		# Header row
+		echo '<tr>';
+		# Extra collumn for Action
+		echo '<td>Action</td>';
+		# Populate all collumns
+		for($i = 0; $i < mysql_num_fields($result); $i++) {
+			# Get collumn header
+			$meta = mysql_fetch_field($result, $i);
+			echo '<td>' . $meta->name . '</td>';
+		}
+		echo "</tr>\n";
+		
+		# Start populating rows
+		while($row = mysql_fetch_row($result)) {
+			echo '<tr>';
+			# First collumn is Action button
+			echo '<td>';
+?>
+			<form action="listDevices.php" method="post">
+					<input type="hidden" name="email" value="<? echo $row[0]; ?>">
+					<input type="hidden" name="command" value="removeemail">
+					<input type="submit" value="Remove">
+			</form>
+<?
+			echo '</td>';
+			# Populate rest of collumns
+			for($i = 0; $i < mysql_num_fields($result); $i++){
+				# Get collumn header
+				$meta = mysql_fetch_field($result, $i);
+				
+				# Add change name button for Name collumn
+				if($meta->name == 'email') {
+				    echo '<td>';
+
+					?><form action="listDevices.php" method="post">
+						<input type="text" name="newemail" value="<? echo $row[0]; ?>">
+						<input type="hidden" name="email" value="<? echo $row[0]; ?>">						
+						<input type="hidden" name="command" value="changeemail">
+						<input type="submit" value="Change name">
+					</form><?
+				    echo '</td>';
+				}
+				else echo '<td>' . $row[$i] . '</td>';
+			}
+			echo "</tr>\n";
+		}
+?>
+		</table>
+
 	</body>
 </html>
