@@ -53,12 +53,35 @@ function getCamNamesResult() {
 	return db_query("SELECT nodename FROM Nodes");
 }
 
+function getNodes() {
+	return db_query("SELECT nodename,ipaddress FROM Nodes");
+}
+
+function removeNode($nodename, $nodeaddress) {
+	$query = sprintf("DELETE FROM Nodes WHERE nodename='%s' AND ipaddress='%s'",
+		mysql_real_escape_string($nodename),
+		mysql_real_escape_string($nodeaddress)
+	);
+	
+	db_query($query);
+}
+
 function getCamPlaybacksResult() {
 	return db_query("SELECT nodename, recordfolder FROM Playbacks");
 }
 
 function getDevicesResult() {
 	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type as Type, name as Name, status as Status, message as Message, active as Active FROM Devices");
+}
+
+# Test function to add fake playbacks
+function addPlayback($nodename, $playbackfolder) {
+	$query = sprintf("INSERT INTO Playbacks VALUES('%s','%s')",
+		mysql_real_escape_string($nodename),
+		mysql_real_escape_string($playbackfolder)
+	);
+	
+	db_query($query);
 }
 
 function addDevice($dserial, $dname) {

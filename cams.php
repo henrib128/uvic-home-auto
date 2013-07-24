@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Cameras</title>
+		<title>Pimation Camera Manager</title>
 	</head>
 
 	<script type="text/javascript">
@@ -45,7 +45,9 @@
 	</script>
 
 	<body onload="createImageLayer();">
-		<h1>Cameras</h1>
+		<h1>Welcome to Pimation Camera Manager!</h1>
+		<ul><a href="/pimation.php">Back to Home page</a></ul>
+		
 		<select onchange="createImageLayer();" name="cam" id="cam_id" size=4>
 <?
 		require_once('DBManager.php');
