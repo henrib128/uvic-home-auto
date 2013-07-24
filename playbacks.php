@@ -49,114 +49,83 @@
 	<body onload="createImageLayer();">
 		<h1>Welcome to Pimation Playback Manager!</h1>
 		<ul><a href="/pimation.php">Back to Home page</a></ul>
-		
-		<h2>Playback Manager Table</h2>
-		<form action="playbacks.php" method="post">
-			Camera Name: <input type="text" name="nodename">
-			Folder Name: <input type="text" name="playbackfolder">
-			<input type="submit" value="Add">
-		</form>
-
-		<table border="1">
+		<h1>Playbacks</h1>
+		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+			<select name="cam" id="cam_id" size=4>
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
-		if(!isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['playbackfolder'])) {
-			addPlayback($_REQUEST['nodename'], $_REQUEST['playbackfolder']);
-			header('Location: ' . $_SERVER['PHP_SELF']);
-		}
-		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['playbackfolder'])) {
-			if($_REQUEST['command'] == "playplayback"){
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
-			}			
-			else if($_REQUEST['command'] == "delplayback"){
-				removePlayback($_REQUEST['nodename'], $_REQUEST['playbackfolder']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
-			}
-			else if($_REQUEST['command'] == "downloadplayback"){
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['playbackfolder']);
-			}			
-
-			header('Location: ' . $_SERVER['PHP_SELF']);
-		}
-		
-		# Populate playback list
-		$result = getCamPlaybacksResult();
-
-		echo '<tr>';
-		for($i = 0; $i < mysql_num_fields($result); $i++) {
-			$meta = mysql_fetch_field($result, $i);
-			echo '<td>' . $meta->name . '</td>';
-		}
-		# Extra collums for Playback, Remove, and Download action
-		echo '<td>Play</td>';
-		echo '<td>Delete</td>';
-		echo '<td>Download</td>';
-		echo "</tr>\n";
-		
-		while($row = mysql_fetch_row($result)) {
-			echo '<tr>';
-			for($i = 0; $i < mysql_num_fields($result); $i++) echo '<td>' . $row[$i] . '</td>';
-
-			# Extra Play collumn
-			echo '<td>';
-?>			
-			<form action="playbacks.php" method="post">
-				<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">
-				<input type="hidden" name="playbackfolder" value="<? echo $row[1]; ?>">
-				<input type="hidden" name="command" value="playplayback">
-				<input type="submit" value="Play">
-			</form>
-<?
-			echo '</td>';
-
-			# Extra Delete collumn
-			echo '<td>';
-?>			
-			<form action="playbacks.php" method="post">
-				<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">
-				<input type="hidden" name="playbackfolder" value="<? echo $row[1]; ?>">
-				<input type="hidden" name="command" value="delplayback">
-				<input type="submit" value="Delete">
-			</form>
-<?
-			echo '</td>';
+			require_once('DBManager.php');
+			db_connect();
 			
-			# Extra Download collumn
-			echo '<td>';
-?>			
-			<form action="playbacks.php" method="post">
-				<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">
-				<input type="hidden" name="playbackfolder" value="<? echo $row[1]; ?>">
-				<input type="hidden" name="command" value="downloadplayback">
-				<input type="submit" value="Download">
-			</form>
-<?
-			echo '</td>';
+			$cam_sel = '';
+			$cam_rec = '';
+			$loc = 'Location: ' . $_SERVER['PHP_SELF'];
 			
-			echo "</tr>\n";
-		}
-?>
-		</table>
-
-		<br><br>
-
-		<h2>Select Camera to play playback from</h2>
-		<select onchange="createImageLayer();" name="cam" id="cam_id" size=4>
-<?
-		require_once('DBManager.php');
-		db_connect();
+			if(isset($_REQUEST['cam'])) {
+				$cam_sel = $_REQUEST['cam'];
 				
-		$result = getCamPlaybacksResult();
-		
-		while($cam = mysql_fetch_array($result)) {
-			echo "\t\t\t<option value='$cam[0]:$cam[1]'>$cam[0]</option>\n";
-		}
+				if(isset($_REQUEST['action'])) {
+					$a = explode(':', $cam_sel, 2);
+					
+					if(count($a) != 2) die('wrong count');
+					
+					if($_REQUEST['action'] == 'Play') {
+						startPlayback($a[0], $a[1]);
+						header($loc . '?cam=' . urlencode($cam_sel));
+					}
+					else if($_REQUEST['action'] == 'Delete') {
+						camReset($a[0]);
+						deletePlayback($a[0], $a[1]);
+						header($loc);
+					}
+					else die('invalid action');
+				}
+			}
+			else if(isset($_REQUEST['cam_rec']) && $_REQUEST['action']) {
+				$cam_rec = $_REQUEST['cam_rec'];
+				$act = $_REQUEST['action'];
+				
+				if(isset($_REQUEST['path']) && $act == 'Record') {
+					startRecord($cam_rec, $_REQUEST['path']);
+					header($loc . '?cam_rec=' . urlencode($cam_rec));
+				}
+				else if($_REQUEST['action'] == 'Stop') {
+					camReset($cam_rec);
+					header($loc);
+				}
+				else die('invalid action 2');
+			}
+			
+			$result = getCamPlaybacksResult();
+			
+			while($cam = mysql_fetch_array($result)) {
+				$op = $cam[0] . ':' . $cam[1];
+				echo "\t\t\t\t<option value='$op'";
+				if($op == $cam_sel) echo " selected";
+				echo ">$op</option>\n";
+				
+			}
 ?>
-		</select>
-		<!-- Playback window 
-		-->
+			</select>
+			<input type="submit" name="action" value="Play" />
+			<input type="submit" name="action" value="Delete" />
+		</form><br>
+		<h1>Cameras</h1>
+		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+			<select name="cam_rec" >
+<?
+			$result = getCamNamesResult();
+			
+			while($cam = mysql_fetch_array($result)) {
+				$cam = $cam[0];
+				echo "\t\t\t<option value='$cam'>$cam</option>\n";
+			}
+?>
+			</select><br>
+			Path: <input type="text" name="path"><br>
+			<input type="submit" name="action" value="Record" />
+			<input type="submit" name="action" value="Stop" />
+		</form>
+		<br><br>
 		<div id="webcam"></div>
 	</body>
 </html>

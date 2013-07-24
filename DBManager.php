@@ -43,10 +43,11 @@ function db_query($query) {
 }
 
 function getCamIP($name) {
-	$name = mysql_real_escape_string($name);
-	$result = db_query("SELECT ipaddress FROM Nodes WHERE nodename = " . "'$name'");
+	$query = sprintf("SELECT ipaddress FROM Nodes WHERE nodename ='%s'",
+		mysql_real_escape_string($name));
+	$result = db_query($query);
 	$row = mysql_fetch_row($result);
-	return $row;
+	return $row[0];
 }
 
 function getCamNamesResult() {
@@ -248,5 +249,52 @@ function setDeviceState($dserial, $state) {
 	socket_send($sock, $msg, strlen($msg), 0);
 	
 	socket_close($sock);
+}
+
+function sendPiCam($cam, $msg) {
+	$ip = getCamIP($cam);
+	if($ip == '') die("cam not found: " . $cam);
+	
+	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+	if(!$sock) die('socket_create');
+	
+	if(!socket_connect($sock, $ip, 44444)) {
+		socket_close($sock);
+		die('socket_connect: ' . $ip . ', ' . $msg);
+	}
+	
+	socket_send($sock, $msg, strlen($msg), 0);
+	
+	socket_close($sock);
+}
+
+function startPlayback($cam, $path) {
+	sendPiCam($cam, 'STARTPLAYBACK,' . $path);
+}
+
+function camReset($cam) {
+	sendPiCam($cam, 'INIT');
+}
+
+function deletePlayback($cam, $path) {
+	sendPiCam($cam, 'DELPLAYBACK,' . $path);
+	
+	$query = sprintf("DELETE FROM Playbacks WHERE nodename='%s' AND recordfolder='%s'",
+		mysql_real_escape_string($cam),
+		mysql_real_escape_string($path)
+	);
+	
+	db_query($query);
+}
+
+function startRecord($cam, $path) {
+	sendPiCam($cam, 'STARTRECORD,' . $path);
+	
+	$query = sprintf("INSERT INTO Playbacks VALUES('%s', '%s')",
+		mysql_real_escape_string($cam),
+		mysql_real_escape_string($path)
+	);
+	
+	db_query($query);
 }
 ?>

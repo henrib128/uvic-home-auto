@@ -7,8 +7,7 @@ db_connect();
 $cam_sel = $_REQUEST['cam'];
 $action = $_REQUEST['action'];
 $n = $_REQUEST['n'];
-$row = getCamIP($cam_sel);
-$ip = $row[0];
+$ip = getCamIP($cam_sel);
 $port = $_REQUEST['port'];
 
 set_time_limit(0);
