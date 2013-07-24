@@ -297,17 +297,20 @@ if __name__ == "__main__":
 				dserial=webparam
 				print "Remove device command from the web for %s." % dserial
 
-			elif webcommand == 'toggledevice':
-				# Toggle device command, need to trigger configuration mode
-				dserial=webparam
-				print "Toggle device command from the web for %s." % dserial
-								
+							
 			elif webcommand == 'addnode':
 				# Add new node command from web
 				node=webparam.split(',')
 				nodename=node[0]
 				nodeaddress=node[1]
 				print "addnode command from Webserver for %s %s." % (nodename,nodeaddress)
+				
+				# Try adding camnodes{} dictionary with new nodename
+				if not camnodes.has_key(nodename):
+					print "Nodename: %s Ipaddress: %s" % (nodename,nodeaddress)
+					# This must be a camera node, create camera client
+					camclient = cl.CameraClient(nodeaddress,44444)
+					camnodes[nodename] = camclient
 
 			elif webcommand == 'delnode':
 				# Delete node command from web
@@ -315,6 +318,23 @@ if __name__ == "__main__":
 				nodename=node[0]
 				nodeaddress=node[1]
 				print "delnode command from Webserver %s %s." % (nodename,nodeaddress)
+				
+			elif webcommand == 'changenodename':
+				# Delete node command from web
+				node=webparam.split(',')
+				nodename=node[0]
+				newnodename=node[1]
+				nodeaddress=node[2]
+				print "delnode command from Webserver %s %s." % (newnodename,nodeaddress)
+				
+				# First need to remove old node name
+				
+				# Try adding camnodes{} dictionary with new nodename
+				if not camnodes.has_key(newnodename):
+					print "Nodename: %s Ipaddress: %s" % (newnodename,nodeaddress)
+					# This must be a camera node, create camera client
+					camclient = cl.CameraClient(nodeaddress,44444)
+					camnodes[newnodename] = camclient
 				
 			elif webcommand == 'playplayback':
 				# Play playback command from web
@@ -324,9 +344,16 @@ if __name__ == "__main__":
 				print "playplayback command from Webserver %s %s." % (nodename,playbackfolder)
 				
 				# Send playback command to remote pi
-				camclient=camnodes[nodename]
-				camclient.send("STARTPLAYBACK,%s" % playbackfolder)
-
+				if camnodes.has_key(nodename):
+					camclient=camnodes[nodename]
+					camclient.send("STARTPLAYBACK,%s" % playbackfolder)
+				else:
+					# Create new camclient for this node
+					nodeaddress=db.getNode(nodename)[1]
+					camclient = cl.CameraClient(nodeaddress,44444)
+					camnodes[nodename] = camclient					
+					camclient.send("STARTPLAYBACK,%s" % playbackfolder)
+					
 			elif webcommand == 'delplayback':
 				# Delete playback command from web
 				playback=webparam.split(',')

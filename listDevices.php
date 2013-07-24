@@ -46,7 +46,7 @@
 			}
 			else if($_REQUEST['command'] == "changenodename"){
 				changeNodeName($_REQUEST['nodename'], $_REQUEST['nodenewname']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
+				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodenewname'] . ',' . $_REQUEST['nodeaddress']);
 			}
 			
 			header('Location: ' . $_SERVER['PHP_SELF']);
