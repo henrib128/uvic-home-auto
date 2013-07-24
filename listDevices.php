@@ -17,6 +17,10 @@
 			if($_REQUEST['command'] == "adddevice"){
 				addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
+			else if($_REQUEST['command'] == "removedevice"){
+				removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+			}
+			
 			sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
@@ -89,6 +93,7 @@
 		$result = getDevicesResult();
 
 		echo '<tr>';
+		echo '<td>Command</td>';
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			$meta = mysql_fetch_field($result, $i);
 			echo '<td>' . $meta->name . '</td>';
@@ -98,6 +103,19 @@
 		
 		while($row = mysql_fetch_row($result)) {
 			echo '<tr>';
+			
+			# Extra collume for removing device
+			echo '<td>';
+?>
+			<form action="listDevices.php" method="post">
+				<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+				<input type="hidden" name="dname" value="<? echo $row[2]; ?>">
+				<input type="hidden" name="command" value="removedevice">
+				<input type="submit" value="Remove">
+			</form>
+<?
+			echo '</td>';
+			
 			for($i = 0; $i < mysql_num_fields($result); $i++) echo '<td>' . $row[$i] . '</td>';
 			echo '<td>';
 			if($row[1] == DeviceType::PowerSwitch) {

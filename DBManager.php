@@ -57,6 +57,15 @@ function getNodes() {
 	return db_query("SELECT nodename,ipaddress FROM Nodes");
 }
 
+function removeDevice($dserial, $dname) {
+	$query = sprintf("DELETE FROM Devices WHERE serial=%s AND name='%s'",
+		mysql_real_escape_string($dserial),
+		mysql_real_escape_string($dname)
+	);
+	
+	db_query($query);
+}
+
 function removeNode($nodename, $nodeaddress) {
 	$query = sprintf("DELETE FROM Nodes WHERE nodename='%s' AND ipaddress='%s'",
 		mysql_real_escape_string($nodename),

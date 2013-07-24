@@ -263,6 +263,11 @@ if __name__ == "__main__":
 			elif webcommand == 'adddevice':
 				# Add new device, need to trigger configuration mode
 				dserial=webparam
+				if len(webparam) < 16:
+					# Dserial must be 16 or more letters
+					print "Dserial must be 16 or more letters"
+					continue
+					
 				print "Add device command from the web for %s. Entering configuration mode." % dserial
 
 				# Stop XBeeMonitor
