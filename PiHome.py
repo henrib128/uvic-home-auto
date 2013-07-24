@@ -285,7 +285,8 @@ if __name__ == "__main__":
 					db.updateDeviceMessage(int(dserial,16),"Successfully configured")
 				else:
 					# Fail to add new device, remove it from database
-					db.removeDevice(int(dserial,16))
+					#db.removeDevice(int(dserial,16))
+                                        db.updateDeviceMessage(int(dserial,16),message)
 				
 				# Restart XBeeMonitor and have it run in background again
 				XbeeMonitor.stop()

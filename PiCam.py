@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	mbasedir = '/home/pi/mjpg-streamer/mjpg-streamer' 
 
 	# Default recording base directory (where playbacks are stored)
-	mrecorddir='/tmp/mjpg-streamer'
+	mrecorddir='/home/pi/tmp/mjpg-streamer'
 
 	# Create camera monitor object
 	CameraMonitor = cm.CameraMonitor(hostname,hostport,mbasedir,mrecorddir)
