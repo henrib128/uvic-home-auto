@@ -47,15 +47,12 @@
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['nodeaddress'])) {
 			if($_REQUEST['command'] == "addnode"){
 				addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
 			}
 			else if($_REQUEST['command'] == "delnode"){
 				removeNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodeaddress']);
 			}
 			else if($_REQUEST['command'] == "changenodename"){
 				changeNodeName($_REQUEST['nodename'], $_REQUEST['nodenewname']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['nodename'] . ',' . $_REQUEST['nodenewname'] . ',' . $_REQUEST['nodeaddress']);
 			}
 			
 			header('Location: ' . $_SERVER['PHP_SELF']);
