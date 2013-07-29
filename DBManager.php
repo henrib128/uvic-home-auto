@@ -42,6 +42,19 @@ function db_query($query) {
 	return $result;
 }
 
+
+###################################### Camera node related functions
+# Function to get a list of all nodes
+function getNodes() {
+	return db_query("SELECT nodename,ipaddress FROM Nodes");
+}
+
+# Function to get all node names from Nodes
+function getCamNamesResult() {
+	return db_query("SELECT nodename FROM Nodes");
+}
+
+# Function to get ipaddress of a node
 function getCamIP($name) {
 	$query = sprintf("SELECT ipaddress FROM Nodes WHERE nodename ='%s'",
 		mysql_real_escape_string($name));
@@ -50,53 +63,17 @@ function getCamIP($name) {
 	return $row[0];
 }
 
-function getCamNamesResult() {
-	return db_query("SELECT nodename FROM Nodes");
-}
-
-function getNodes() {
-	return db_query("SELECT nodename,ipaddress FROM Nodes");
-}
-
-function removeDevice($dserial, $dname) {
-	$query = sprintf("DELETE FROM Devices WHERE serial=%s AND name='%s'",
-		mysql_real_escape_string($dserial),
-		mysql_real_escape_string($dname)
+# Function to add new node to database
+function addNode($nodename, $nodeaddress) {
+	$query = sprintf("INSERT INTO Nodes VALUES('%s','%s')",
+		mysql_real_escape_string($nodename),
+		mysql_real_escape_string($nodeaddress)
 	);
 	
 	db_query($query);
 }
 
-function toggleDeviceActive($dserial, $dname, $dactive) {
-	$query = sprintf("UPDATE Devices SET active=%s WHERE serial=%s AND name='%s'",
-		mysql_real_escape_string($dactive),
-		mysql_real_escape_string($dserial),
-		mysql_real_escape_string($dname)
-	);
-	
-	db_query($query);
-}
-
-function changeEmail($newemail, $oldemail) {
-	# Change device name in Devices table
-	$query = sprintf("UPDATE Emails SET email='%s' WHERE email='%s'",
-		mysql_real_escape_string($newemail),
-		mysql_real_escape_string($oldemail)
-	);
-	
-	db_query($query);
-}
-
-function changeDeviceName($dserial, $dname) {
-	# Change device name in Devices table
-	$query = sprintf("UPDATE Devices SET name='%s' WHERE serial=%s",
-		mysql_real_escape_string($dname),
-		mysql_real_escape_string($dserial)
-	);
-	
-	db_query($query);
-}
-
+# Function to change camera node name
 function changeNodeName($dname, $dnewname) {
 	# Change Node name in Nodes table
 	$query = sprintf("UPDATE Nodes SET nodename='%s' WHERE nodename='%s'",
@@ -115,6 +92,7 @@ function changeNodeName($dname, $dnewname) {
 	db_query($query);
 }
 
+# Function to remove node
 function removeNode($nodename, $nodeaddress) {
 	# Remove Node from Nodes table
 	$query = sprintf("DELETE FROM Nodes WHERE nodename='%s' AND ipaddress='%s'",
@@ -125,53 +103,13 @@ function removeNode($nodename, $nodeaddress) {
 	db_query($query);
 }
 
-function removePlayback($nodename, $playbackfolder) {
-	$query = sprintf("DELETE FROM Playbacks WHERE nodename='%s' AND recordfolder='%s'",
-		mysql_real_escape_string($nodename),
-		mysql_real_escape_string($playbackfolder)
-	);
-	
-	db_query($query);
-}
-
-function addEmail($email) {
-	$query = sprintf("INSERT INTO Emails VALUES('%s')",
-		mysql_real_escape_string($email)
-	);
-	
-	db_query($query);
-}
-
-function removeEmail($email) {
-	$query = sprintf("DELETE FROM Emails WHERE email='%s'",
-		mysql_real_escape_string($email)
-	);
-	
-	db_query($query);
-}
-
-function getEmails() {
-	return db_query("SELECT email FROM Emails");
-}
-
-function getCamPlaybacksResult() {
-	return db_query("SELECT nodename, recordfolder FROM Playbacks");
-}
-
+################################### Device related functions
+# Function to get list of devices
 function getDevicesResult() {
 	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type as Type, name as Name, status as Status, message as Message, active as Active FROM Devices");
 }
 
-# Test function to add fake playbacks
-function addPlayback($nodename, $playbackfolder) {
-	$query = sprintf("INSERT INTO Playbacks VALUES('%s','%s')",
-		mysql_real_escape_string($nodename),
-		mysql_real_escape_string($playbackfolder)
-	);
-	
-	db_query($query);
-}
-
+# Function to add new device to database
 function addDevice($dserial, $dname) {
 	$query = sprintf("INSERT INTO Devices VALUES(%s, 5, '%s', 0, 0,'New')",
 		mysql_real_escape_string($dserial),
@@ -181,33 +119,133 @@ function addDevice($dserial, $dname) {
 	db_query($query);
 }
 
-function addNode($nodename, $nodeaddress) {
-	$query = sprintf("INSERT INTO Nodes VALUES('%s','%s')",
-		mysql_real_escape_string($nodename),
-		mysql_real_escape_string($nodeaddress)
+# Function to change device name
+function changeDeviceName($dserial, $dname) {
+	# Change device name in Devices table
+	$query = sprintf("UPDATE Devices SET name='%s' WHERE serial=%s",
+		mysql_real_escape_string($dname),
+		mysql_real_escape_string($dserial)
 	);
 	
 	db_query($query);
 }
 
-# temporary
-/*function setDeviceState($dserial, $state) {
-	$query = sprintf("UPDATE Devices SET status=%s WHERE serial=%s",
-		mysql_real_escape_string($state),
-		mysql_real_escape_string($dserial)
+# Function to remove device
+function removeDevice($dserial, $dname) {
+	$query = sprintf("DELETE FROM Devices WHERE serial=%s AND name='%s'",
+		mysql_real_escape_string($dserial),
+		mysql_real_escape_string($dname)
 	);
 	
 	db_query($query);
-}*/
+}
 
-/*function setDeviceState($dserial, $state) {
-	$non_num_pattern = "/[^0-9]/";
-	if(preg_match($non_num_pattern, $dserial) || preg_match($non_num_pattern, $state)) {
-		die('Invalid input');
+# Function to update device active state
+function toggleDeviceActive($dserial, $dname, $dactive) {
+	$query = sprintf("UPDATE Devices SET active=%s WHERE serial=%s AND name='%s'",
+		mysql_real_escape_string($dactive),
+		mysql_real_escape_string($dserial),
+		mysql_real_escape_string($dname)
+	);
+	
+	db_query($query);
+}
+
+############################ Email related functions
+# Function to get all emails
+function getEmails() {
+	return db_query("SELECT email FROM Emails");
+}
+
+# Function to add new email
+function addEmail($email) {
+	$query = sprintf("INSERT INTO Emails VALUES('%s')",
+		mysql_real_escape_string($email)
+	);
+	
+	db_query($query);
+}
+
+# Function to remove email
+function removeEmail($email) {
+	$query = sprintf("DELETE FROM Emails WHERE email='%s'",
+		mysql_real_escape_string($email)
+	);
+	
+	db_query($query);
+}
+
+# Function to change email
+function changeEmail($newemail, $oldemail) {
+	# Change device name in Devices table
+	$query = sprintf("UPDATE Emails SET email='%s' WHERE email='%s'",
+		mysql_real_escape_string($newemail),
+		mysql_real_escape_string($oldemail)
+	);
+	
+	db_query($query);
+}
+
+
+############################################## Playback related functions
+# Function to return list of nodename and playback folders
+function getCamPlaybacksResult() {
+	return db_query("SELECT nodename, recordfolder FROM Playbacks");
+}
+
+############### Function to send command to remore Pi via socket
+function sendPiCam($cam, $msg) {
+	$ip = getCamIP($cam);
+	if($ip == '') die("cam not found: " . $cam);
+	
+	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+	if(!$sock) die('socket_create');
+	
+	if(!socket_connect($sock, $ip, 44444)) {
+		socket_close($sock);
+		die('socket_connect: ' . $ip . ', ' . $msg);
 	}
-	exec(SENDER_PATH . ' ' . $dserial . ' ' . $state);
-}*/
+	
+	socket_send($sock, $msg, strlen($msg), 0);
+	
+	socket_close($sock);
+}
 
+# Function to send STARTPLAYBACK command
+function startPlayback($cam, $path) {
+	sendPiCam($cam, 'STARTPLAYBACK,' . $path);
+}
+
+# Function to send INIT command
+function camReset($cam) {
+	sendPiCam($cam, 'INIT');
+}
+
+# Function to send DELPLAYBACK
+function deletePlayback($cam, $path) {
+	$query = sprintf("DELETE FROM Playbacks WHERE nodename='%s' AND recordfolder='%s'",
+		mysql_real_escape_string($cam),
+		mysql_real_escape_string($path)
+	);
+	db_query($query);
+	
+	sendPiCam($cam, 'DELPLAYBACK,' . $path);	
+}
+
+# Function to send STARTRECORD command
+function startRecord($cam, $path) {
+	sendPiCam($cam, 'STARTRECORD,' . $path);
+	
+	$query = sprintf("INSERT INTO Playbacks VALUES('%s', '%s')",
+		mysql_real_escape_string($cam),
+		mysql_real_escape_string($path)
+	);
+	
+	db_query($query);
+}
+
+
+################################################# Function to send command to central PiHome
 function sendCommandToPiHome($command, $param) {
 	# Check for non-empty command and parameter
 	if(strlen($command) == 0 or strlen($param) == 0) die('Command and Parameter are empty' . $command . $param);
@@ -232,6 +270,7 @@ function sendCommandToPiHome($command, $param) {
 	socket_close($sock);
 }
 
+# Function to set switch state through PiHome, should use sendCommandToPiHome function
 function setDeviceState($dserial, $state) {
 	#$non_num_pattern = "/[^0-9A-Z]/";
 	
@@ -260,49 +299,4 @@ function setDeviceState($dserial, $state) {
 	socket_close($sock);
 }
 
-function sendPiCam($cam, $msg) {
-	$ip = getCamIP($cam);
-	if($ip == '') die("cam not found: " . $cam);
-	
-	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-	if(!$sock) die('socket_create');
-	
-	if(!socket_connect($sock, $ip, 44444)) {
-		socket_close($sock);
-		die('socket_connect: ' . $ip . ', ' . $msg);
-	}
-	
-	socket_send($sock, $msg, strlen($msg), 0);
-	
-	socket_close($sock);
-}
-
-function startPlayback($cam, $path) {
-	sendPiCam($cam, 'STARTPLAYBACK,' . $path);
-}
-
-function camReset($cam) {
-	sendPiCam($cam, 'INIT');
-}
-
-function deletePlayback($cam, $path) {
-	$query = sprintf("DELETE FROM Playbacks WHERE nodename='%s' AND recordfolder='%s'",
-		mysql_real_escape_string($cam),
-		mysql_real_escape_string($path)
-	);
-	db_query($query);
-	
-	sendPiCam($cam, 'DELPLAYBACK,' . $path);	
-}
-
-function startRecord($cam, $path) {
-	sendPiCam($cam, 'STARTRECORD,' . $path);
-	
-	$query = sprintf("INSERT INTO Playbacks VALUES('%s', '%s')",
-		mysql_real_escape_string($cam),
-		mysql_real_escape_string($path)
-	);
-	
-	db_query($query);
-}
 ?>
