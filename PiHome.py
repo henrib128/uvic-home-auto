@@ -184,29 +184,14 @@ if __name__ == "__main__":
 	mainnodeaddr = getLocalIp()
 	db.addNode(mainnodename,mainnodeaddr)
 	#db.addNode('Rear Cam','142.104.167.186')
-	db.addEmail('trihuynh87@gmail.com')
-	testswitch = '0013a20040a57ae9'
-	testdoor = '0013a20040a184ce'
-	db.addDevice(int(testswitch,16),0,'First Switch',0,1,'New')
-	db.addDevice(int(testdoor,16),1,'Back Door',1,0,'New')
+	#db.addEmail('trihuynh87@gmail.com')
+	#testswitch = '0013a20040a57ae9'
+	#testdoor = '0013a20040a184ce'
+	#db.addDevice(int(testswitch,16),0,'First Switch',0,1,'New')
+	#db.addDevice(int(testdoor,16),1,'Back Door',1,0,'New')
 	
-	# Create a list of camera clients for each camera node
-	# TODOO: This should be removed and should NOT be passed to XBeeMonitor.
-	# All camera node socket clients should be stored in database, and XBeeMonitor should retrieved a list of clients from DB
-	# So if new camera is added, all it's needed to do is create new socket client for that camera, add to datbase, and thats it
-	camnodes={}
-	nodes = db.getNodes()
-	for node in nodes:
-		nodename = node[0]
-		nodeaddress = node[1]
-		if nodename != 'router':
-			print "Nodename: %s Ipaddress: %s" % (nodename,nodeaddress)
-			# This must be a camera node, create camera client
-			camclient = cl.CameraClient(nodeaddress,44444)
-			camnodes[nodename] = camclient
-				
 	# Create XbeeMonitor instance
-	XbeeMonitor = xm.XbeeMonitor(camnodes,"/dev/ttyAMA0", 9600, None)				
+	XbeeMonitor = xm.XbeeMonitor("/dev/ttyAMA0", 9600, None)				
 	XbeeMonitor.startAsync()
 	print "Start listnening to XBee frames in background..."
 	
@@ -293,7 +278,7 @@ if __name__ == "__main__":
 				XbeeMonitor.startAsync()
 
 			elif webcommand == 'removedevice':
-				# Remove device command, need to trigger configuration mode
+				# Remove device command, need to dissociate device from the xbee network
 				dserial=webparam
 				print "Remove device command from the web for %s." % dserial
 

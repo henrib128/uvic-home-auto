@@ -21,13 +21,12 @@ import CameraClient as cl
 class XbeeMonitor(object):
 
 	# Class constructor __init__ function (default defined by python), ran upon instantiation
-	def __init__(self, camnodes, sport="/dev/ttyAMA0", sbaud=9600, stimeout="None"):
+	def __init__(self, sport="/dev/ttyAMA0", sbaud=9600, stimeout="None"):
 		# Data attributes (specific for each instance, accessed by self.var)
 		self.ser = serial.Serial()
 		self.ser.port = sport
 		self.ser.baudrate = sbaud
 		self.ser.timeout = stimeout  #None is block read. 1 is non-block read, 2 is timeout block read
-		self.camnodes = camnodes
 	
 	# Function to stop xbee background listening thread and close serial port	
 	def stop(self):
@@ -158,7 +157,7 @@ class XbeeMonitor(object):
 											db.updateDeviceMessage(dserial,"DoorOpenedAndActive")
 											
 											# Spawn new thread to perform door open actions
-											DoorOpenThread(dserial,self.camnodes).start()
+											DoorOpenThread(dserial).start()
 											
 										elif dactive == 0:
 											# Door is unactive, do nothing
@@ -279,9 +278,9 @@ class XbeeMonitor(object):
 
 # Door Thread class
 class DoorOpenThread(threading.Thread):
-	def __init__(self, dserial, camnodes):
+	def __init__(self, dserial):
 		self.dserial = dserial
-		self.camnodes = camnodes
+		self.camnodes = {}
 		self.recordtime = 10
 		super(DoorOpenThread, self).__init__()
 		print "Total active Door threads: %d, Door: %s" % (threading.active_count(), self.dserial)
@@ -297,6 +296,7 @@ class DoorOpenThread(threading.Thread):
 			nodename = node[0]
 			nodeaddress = node[1]
 			if not self.camnodes.has_key(nodename):
+				# Try create a socket to the camera node
 				camclient = cl.CameraClient(nodeaddress,44444)
 				self.camnodes[nodename] = camclient	
 				
@@ -307,6 +307,8 @@ class DoorOpenThread(threading.Thread):
 			camclient.send_wait("STARTRECORD,%s" % mrecordfolder)
 
 		# Wait for recording time
+		# Here should retrieve record time from database
+		#self.recordtime = db.getRecordTime()
 		time.sleep(self.recordtime)
 		
 		# For each of camera node, send resume request	
@@ -333,7 +335,11 @@ class DoorOpenThread(threading.Thread):
 			print email[0]
 			#self.sendEmail(email[0],dname,localtime,link)
 			#self.sendEmail(email[0],dname)
-
+		
+		# Close all socket connections to remote cameras
+		for (nodename,camclient) in self.camnodes.items():
+			camclient.close()
+		
 	# Function to send email
 	def sendEmail(self,_email,_dname):
 		msg = MIMEText("Hello, we have detected your %s was opened Please click below for live stream update" % (_dname))
