@@ -73,8 +73,12 @@
 						header($loc . '?cam=' . urlencode($cam_sel));
 					}
 					else if($_REQUEST['action'] == 'Delete') {
-						camReset($a[0]);
+						# First delete playback from the database
+						# Then sending delete command to the remote Pi
 						deletePlayback($a[0], $a[1]);
+						
+						# Then sending INIT command to refresh the camera Pi
+						camReset($a[0]);
 						header($loc);
 					}
 					else die('invalid action');

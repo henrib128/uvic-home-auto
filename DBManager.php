@@ -277,14 +277,13 @@ function camReset($cam) {
 }
 
 function deletePlayback($cam, $path) {
-	sendPiCam($cam, 'DELPLAYBACK,' . $path);
-	
 	$query = sprintf("DELETE FROM Playbacks WHERE nodename='%s' AND recordfolder='%s'",
 		mysql_real_escape_string($cam),
 		mysql_real_escape_string($path)
 	);
-	
 	db_query($query);
+	
+	sendPiCam($cam, 'DELPLAYBACK,' . $path);	
 }
 
 function startRecord($cam, $path) {
