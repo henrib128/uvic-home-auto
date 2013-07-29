@@ -199,12 +199,15 @@ if __name__ == "__main__":
 	host = getLocalIp()
 	port = 50000
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # set socket property
+	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	sock.bind((host, port))
-	sock.listen(100)
+	#sock.listen(100)
 	
 	# Always listening to new socket connection request from Webserver PHP script
 	while True:
 		try:
+			sock.listen(100)
 			# Receiving new socket connection request
 			conn, addr = sock.accept()
 			# Receive new data
@@ -271,7 +274,7 @@ if __name__ == "__main__":
 				else:
 					# Fail to add new device, remove it from database
 					#db.removeDevice(int(dserial,16))
-                                        db.updateDeviceMessage(int(dserial,16),message)
+					db.updateDeviceMessage(int(dserial,16),message)
 				
 				# Restart XBeeMonitor and have it run in background again
 				XbeeMonitor.stop()
@@ -294,14 +297,17 @@ if __name__ == "__main__":
 				print 'Invalid input'
 				continue
 	
-		except KeyboardInterrupt:
-			conn.close()
-			sock.close()
-			exit()
 		except Exception as e:
-			conn.close()
+			print "Exception: %s" % e
 			sock.close()
-			print str(e)
+			XbeeMonitor.stop()
 			exit()
-			
+		except KeyboardInterrupt:
+			sock.close()
+			XbeeMonitor.stop()
+			exit()
 
+	# close socket connection
+	print "Stop listening to Web server, close socket, stop XbeeMonitor"
+	sock.close()
+	XbeeMonitor.stop()
