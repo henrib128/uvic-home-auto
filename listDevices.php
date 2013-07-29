@@ -36,7 +36,10 @@
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
-			if($_REQUEST['command'] == "removeemail"){
+			if($_REQUEST['command'] == "addemail"){
+				addEmail($_REQUEST['email']);
+			}
+			else if($_REQUEST['command'] == "removeemail"){
 				removeEmail($_REQUEST['email']);
 			}
 			else if($_REQUEST['command'] == "changeemail"){
@@ -220,7 +223,12 @@
 		</table>
 
 		<h2>Email Manager Table</h2>
-		
+		<form action="listDevices.php" method="post">
+			Email: <input type="text" name="email">
+			<input type="hidden" name="command" value="addemail">
+			<input type="submit" value="Add">
+		</form>
+
 		<table border="1">		
 <?
 		$result = getEmails();

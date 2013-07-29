@@ -116,6 +116,7 @@ function changeNodeName($dname, $dnewname) {
 }
 
 function removeNode($nodename, $nodeaddress) {
+	# Remove Node from Nodes table
 	$query = sprintf("DELETE FROM Nodes WHERE nodename='%s' AND ipaddress='%s'",
 		mysql_real_escape_string($nodename),
 		mysql_real_escape_string($nodeaddress)
@@ -128,6 +129,14 @@ function removePlayback($nodename, $playbackfolder) {
 	$query = sprintf("DELETE FROM Playbacks WHERE nodename='%s' AND recordfolder='%s'",
 		mysql_real_escape_string($nodename),
 		mysql_real_escape_string($playbackfolder)
+	);
+	
+	db_query($query);
+}
+
+function addEmail($email) {
+	$query = sprintf("INSERT INTO Emails VALUES('%s')",
+		mysql_real_escape_string($email)
 	);
 	
 	db_query($query);
