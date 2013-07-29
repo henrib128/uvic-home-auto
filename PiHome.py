@@ -51,7 +51,14 @@ def addXbeeDevice(_xbm,_dserial):
 	network_key='0ABCDE'
 	# Try receiving up to 5 frames for ok response
 	print "Entering addXbeeDevice"
-	
+
+	# 0. First try if Coor can already talk to remote device on Network KY (existing device)
+	if checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
+		_message = "Succeeded talking to end device on network KY"
+		print _message
+		return _message
+	print "Done checking if device is already on network KY"	
+		
 	# 1. Change Coordinator to default KY
 	if not checkCommandResponse(_xbm,'coor','','KY',default_key):
 		_message = "Failed to change coordinator to default KY"
@@ -276,13 +283,12 @@ if __name__ == "__main__":
 
 				# Adding new device command, update status for user
 				message = addXbeeDevice(XbeeMonitor,dserial)
-				if message == 'New device is added successfully':
-					# Successfully added new device
-					db.updateDeviceMessage(int(dserial,16),"Successfully configured")
-				else:
+				db.updateDeviceMessage(int(dserial,16),message)
+				
+				# Remove garbage device from database if it is not added
+				#if message != 'New device is added successfully':
 					# Fail to add new device, remove it from database
 					#db.removeDevice(int(dserial,16))
-					db.updateDeviceMessage(int(dserial,16),message)
 				
 				# Restart XBeeMonitor and have it run in background again
 				XbeeMonitor.stop()
