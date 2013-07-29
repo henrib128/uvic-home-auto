@@ -256,8 +256,16 @@ if __name__ == "__main__":
 					print "Dserial must be 16 or more letters"
 					continue
 					
-				print "Add device command from the web for %s. Entering configuration mode." % dserial
-
+				print "Add device command from the web for %s." % dserial
+				
+				# First check if this device is already added
+				existingDevice = db.getDevice(int(dserial,16))
+				if existingDevice:
+					# Existing device, do nothing
+					print "Device is already configured"
+					db.updateDeviceMessage(int(dserial,16),"Already configured")
+					continue
+				
 				# Stop XBeeMonitor
 				XbeeMonitor.stop()
 				print "Stopped current Asynchronous Xbee"
