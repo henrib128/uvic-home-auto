@@ -15,9 +15,11 @@ class NodeType {
 	const Slave = 2;
 }
 
-define('SCRIPT_IP', '142.104.165.35');
+# Retrieving local ipaddress of PiHome, assuming the same as the webserver ipaddress
+define('SCRIPT_IP', $_SERVER['SERVER_ADDR']);
 define('SCRIPT_PORT', 50000);
 
+# Function to connect to MySQL database on localhost with predefined credentials
 function db_connect() {
 	$link = mysql_connect('localhost', 'ceng499', 'ceng499');
 	if(!$link) {
@@ -30,6 +32,7 @@ function db_connect() {
 	}
 }
 
+# Function to execute MySQL query
 function db_query($query) {
 	$result = mysql_query($query);
 	
