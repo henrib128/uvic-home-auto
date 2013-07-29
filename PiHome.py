@@ -53,61 +53,62 @@ def addXbeeDevice(_xbm,_dserial):
 	print "Entering addXbeeDevice"
 
 	# 0. First try if Coor can already talk to remote device on Network KY (existing device)
-	if checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
-		_message = "Succeeded talking to end device on network KY"
-		print _message
-		return _message
-	print "Done checking if device is already on network KY"	
-		
-	# 1. Change Coordinator to default KY
-	if not checkCommandResponse(_xbm,'coor','','KY',default_key):
-		_message = "Failed to change coordinator to default KY"
-		print _message
-		return _message
-	print "Done Coordinator KY default"
-
-	# 1b. Confirm if Coordinator can talk to EndDevice now
-	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):		
-		_message = "Failed to talk to end device with default KY"
-		print _message
-
-		# Revert Coordinator back to Network key
-		if not checkCommandResponse(_xbm,'coor','','KY',network_key):
-			_message = "Failed to revert coordinator to network KY. Please restart Pi!"
-			print _message
-			return _message
-		
-		return _message
-	print "Done checking talking in default KY"
-	
-	# 2. Change EndDevice to network KY
-	if not checkCommandResponse(_xbm,'dapply',_dserial,'KY',network_key):	
-		_message = "Failed to change end device to network KY"
-		print _message
-		
-		# Revert Coordinator back to Network key
-		if not checkCommandResponse(_xbm,'coor','','KY',network_key):
-			_message = "Failed to revert coordinator to network KY. Please restart Pi!"
-			print _message
-			return _message
-			
-		return _message
-	print "Done changing Device KY network"
-	
-	# 3. Change Coordinator to network KY
-	if not checkCommandResponse(_xbm,'coor','','KY',network_key):
-		_message = "Failed to change coordinator to network KY. Please restart Pi!"
-		print _message
-		return _message
-	print "Done changing Coordinator KY network"	
-
-	# 3.b Confirm if coordinator can talk to end device using network KY
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
-		_message = "Failed to talk to end device with network KY"
-		print _message
-		return _message
-	print "Done talking to device in network KY"
+		# Cant talk to device the way it is, need to start normal setup
+	
+		# 1. Change Coordinator to default KY
+		if not checkCommandResponse(_xbm,'coor','','KY',default_key):
+			_message = "Failed to change coordinator to default KY"
+			print _message
+			return _message
+		print "Done Coordinator KY default"
 
+		# 1b. Confirm if Coordinator can talk to EndDevice now
+		if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):		
+			_message = "Failed to talk to end device with default KY"
+			print _message
+
+			# Revert Coordinator back to Network key
+			if not checkCommandResponse(_xbm,'coor','','KY',network_key):
+				_message = "Failed to revert coordinator to network KY. Please restart Pi!"
+				print _message
+				return _message
+		
+			return _message
+		print "Done checking talking in default KY"
+	
+		# 2. Change EndDevice to network KY
+		if not checkCommandResponse(_xbm,'dapply',_dserial,'KY',network_key):	
+			_message = "Failed to change end device to network KY"
+			print _message
+		
+			# Revert Coordinator back to Network key
+			if not checkCommandResponse(_xbm,'coor','','KY',network_key):
+				_message = "Failed to revert coordinator to network KY. Please restart Pi!"
+				print _message
+				return _message
+			
+			return _message
+		print "Done changing Device KY network"
+	
+		# 3. Change Coordinator to network KY
+		if not checkCommandResponse(_xbm,'coor','','KY',network_key):
+			_message = "Failed to change coordinator to network KY. Please restart Pi!"
+			print _message
+			return _message
+		print "Done changing Coordinator KY network"	
+
+		# 3.b Confirm if coordinator can talk to end device using network KY
+		if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
+			_message = "Failed to talk to end device with network KY"
+			print _message
+			return _message
+		print "Done talking to device in network KY"
+
+	else:
+		# Device is already on Network KY! Proceed with step 4
+		print "Device is already on network KY"
+	
 	# 4. Lock EndDevice to Coordinator
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'A1','04'):	
 		_message = "Failed to lock end device with coordinator"
@@ -258,21 +259,12 @@ if __name__ == "__main__":
 			elif webcommand == 'adddevice':
 				# Add new device, need to trigger configuration mode
 				dserial=webparam
-				if len(webparam) < 16:
+				print "Add device command from the web for %s." % dserial
+				if len(dserial) < 16:
 					# Dserial must be 16 or more letters
 					print "Dserial must be 16 or more letters"
 					continue
-					
-				print "Add device command from the web for %s." % dserial
-				
-				# First check if this device is already added
-				existingDevice = db.getDevice(int(dserial,16))
-				if existingDevice:
-					# Existing device, do nothing
-					print "Device is already configured"
-					db.updateDeviceMessage(int(dserial,16),"Already configured")
-					continue
-				
+			
 				# Stop XBeeMonitor
 				XbeeMonitor.stop()
 				print "Stopped current Asynchronous Xbee"
