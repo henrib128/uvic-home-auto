@@ -33,7 +33,7 @@
 		while($cam = mysql_fetch_array($result)) {
 			$cam = $cam[0];
 			echo "<h1>" . $cam . "</h1><br>\n";
-			echo "<img id='" . $cam . "' src='/blank.jpg' onload=\"refresh(" . $cam . ", " . $i . ");\"/>";
+			echo "<img id='" . $cam . "' src='/blank.jpg' onload=\"refresh('" . $cam . "', " . $i . ");\"/>";
 			$i++;
 		}
 ?>
