@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<title>Pimation Playback Manager</title>
+		<? include("meta.php"); ?>
 	</head>
 
 	<script type="text/javascript">
@@ -47,8 +48,9 @@
 	</script>
 
 	<body onload="createImageLayer();">
+		<? include("header.php"); ?>
+	
 		<h1>Welcome to Pimation Playback Manager!</h1>
-		<ul><a href="/pimation.php">Back to Home page</a></ul>
 		<h1>Playbacks</h1>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			<select name="cam" id="cam_id" size=4>
@@ -131,5 +133,7 @@
 		</form>
 		<br><br>
 		<div id="webcam"></div>
+		
+		<?php include("footer.php"); ?>
 	</body>
 </html>

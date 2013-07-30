@@ -2,6 +2,8 @@
 <html>
 	<head>
 		<title>Pimation Camera Manager</title>
+		<? include("meta.php"); ?>
+		
 		<script type="text/javascript">
 		var frameNr = 0;
 		var loadCnt = 0;
@@ -21,8 +23,9 @@
 		</script>
 	</head>
 	<body>
+		<? include("header.php"); ?>
+		
 		<h1>Welcome to Pimation Camera Manager!</h1>
-		<ul><a href="/pimation.php">Back to Home page</a></ul>
 <?
 		require_once('DBManager.php');
 		db_connect();
@@ -38,5 +41,6 @@
 		}
 ?>
 
+		<?php include("/footer.php"); ?>
 	</body>
 </html>

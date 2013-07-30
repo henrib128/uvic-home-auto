@@ -2,12 +2,13 @@
 <html>
 	<head>
 		<title>Pimation Device Manager</title>
+		<? include("meta.php"); ?>
 	</head>
 
 	<body>
+		<? include("header.php"); ?>
+		
 		<h1>Welcome to Pimation Device Manager!</h1>
-		<ul><a href="/pimation.php">Back to Home page</a></ul>
-
 <?
 		require_once('DBManager.php');
 		db_connect();
@@ -62,7 +63,7 @@
 		}
 ?>
 		<h2>Camera Manager</h2>
-		<form action="listDevices.php" method="post">
+		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			Camera Name: <input type="text" name="nodename">
 			Pi address: <input type="text" name="nodeaddress">
 			<input type="hidden" name="command" value="addnode">
@@ -91,7 +92,7 @@
 			# First collumn is Action button
 			echo '<td>';
 ?>
-			<form action="listDevices.php" method="post">
+			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 					<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">
 					<input type="hidden" name="nodeaddress" value="<? echo $row[1]; ?>">
 					<input type="hidden" name="command" value="delnode">
@@ -108,7 +109,7 @@
 				if($meta->name == 'nodename') {
 				    echo '<td>';
 
-					?><form action="listDevices.php" method="post">
+					?><form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 						<input type="text" name="nodenewname" value="<? echo $row[0]; ?>">
 						<input type="hidden" name="nodename" value="<? echo $row[0]; ?>">						
 						<input type="hidden" name="nodeaddress" value="<? echo $row[1]; ?>">
@@ -125,7 +126,7 @@
 		</table>
 		
 		<h2>Device Manager</h2>
-		<form action="listDevices.php" method="post">
+		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			Serial Number: <input type="text" name="dserial">
 			Name: <input type="text" name="dname">
 			<input type="hidden" name="command" value="adddevice">
@@ -156,7 +157,7 @@
 			# Extra collumn for removing device
 			echo '<td>';
 ?>
-			<form action="listDevices.php" method="post">
+			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 				<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
 				<input type="hidden" name="dname" value="<? echo $row[2]; ?>">
 				<input type="hidden" name="command" value="removedevice">
@@ -179,7 +180,7 @@
 					}
 				    echo '<td>' . $row[$i];
 
-					?><form action="listDevices.php" method="post">
+					?><form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
 						<input type="hidden" name="toggle" value="<? echo $t_m; ?>">
 						<input type="submit" value="Turn <? echo $t_str; ?>">
@@ -198,7 +199,7 @@
 						$t_m = 1;
 					}
 					
-					?><form action="listDevices.php" method="post">
+					?><form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
 						<input type="hidden" name="dname" value="<? echo $row[2]; ?>">
 						<input type="hidden" name="dactive" value="<? echo $t_m; ?>">
@@ -210,7 +211,7 @@
 				else if($meta->name == 'Name') {
 				    echo '<td>';
 
-					?><form action="listDevices.php" method="post">
+					?><form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
 						<input type="text" name="dname" value="<? echo $row[2]; ?>">
 						<input type="hidden" name="command" value="changedevicename">
@@ -239,7 +240,7 @@
 		</table>
 
 		<h2>Email Manager</h2>
-		<form action="listDevices.php" method="post">
+		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			Email: <input type="text" name="email">
 			<input type="hidden" name="command" value="addemail">
 			<input type="submit" value="Add">
@@ -267,7 +268,7 @@
 			# First collumn is Action button
 			echo '<td>';
 ?>
-			<form action="listDevices.php" method="post">
+			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 					<input type="hidden" name="email" value="<? echo $row[0]; ?>">
 					<input type="hidden" name="command" value="removeemail">
 					<input type="submit" value="Remove">
@@ -283,7 +284,7 @@
 				if($meta->name == 'email') {
 				    echo '<td>';
 
-					?><form action="listDevices.php" method="post">
+					?><form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 						<input type="text" name="newemail" value="<? echo $row[0]; ?>">
 						<input type="hidden" name="email" value="<? echo $row[0]; ?>">						
 						<input type="hidden" name="command" value="changeemail">
@@ -297,6 +298,7 @@
 		}
 ?>
 		</table>
-
+		
+		<?php include("footer.php"); ?>
 	</body>
 </html>
