@@ -12,6 +12,9 @@ import os, subprocess
 
 from subprocess import Popen, PIPE
 
+#Email/Twitter Packages
+import smtplib
+
 # Required packages
 import DBManager as db
 import CameraClient as cl
