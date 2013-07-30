@@ -10,12 +10,13 @@ import socket
 import sys, time, datetime, string
 import os, subprocess
 
-from email.mime.text import MIMEText
 from subprocess import Popen, PIPE
 
 # Required packages
 import DBManager as db
 import CameraClient as cl
+
+
 
 # Xbee Monitor class
 class XbeeMonitor(object):
@@ -366,29 +367,36 @@ class DoorOpenThread(threading.Thread):
 			print "Nodename: %s recordfolder: %s" % (playback[0],playback[1])
 		
 		# Send email notifications
-		localtime = time.asctime(time.localtime(time.time()))
-		print localtime
-		#router_ip=db.getNode('router')[1]
- 		#link = "http://%s/camera" % router_ip
- 		#print link
 		emails = db.getEmails()
 		for email in emails:
 			print email[0]
-			#self.sendEmail(email[0],dname,localtime,link)
-			#self.sendEmail(email[0],dname)
+			#sendEmail(email[0],dname,localtime,link)
+			sendEmail(email[0],dname)
 		
 		# Close all socket connections to remote cameras
 		for (nodename,camclient) in self.camnodes.items():
 			camclient.close()
 		
-	# Function to send email
-	def sendEmail(self,_email,_dname):
-		msg = MIMEText("Hello, we have detected your %s was opened Please click below for live stream update" % (_dname))
-		msg["From"] = "minhtri@uvic.ca"
-		msg["To"] = _email
-		msg["Subject"] = "Notification from UVicPiHome"
-		p = Popen(["/usr/sbin/sendmail", "-toi"], stdin=PIPE)
-		p.communicate(msg.as_string())
+	def sendEmail(_email,_dname):
+	
+		fromaddr = 'pimation.uvic@gmail.com'
+		msg = "\r\n".join([
+			"From: pimation.uvic@gmail.com",
+			"Subject: PiMation Sensor Alert",
+			"",
+			"Sensor" + _dname + "has been triggered."
+		])
+		username = 'pimation.uvic@gmail.com'
+	
+		password = 'raspberrypimation'
+		print 'start'
+		server = smtplib.SMTP('smtp.gmail.com:587')
+		server.ehlo()
+		server.starttls()
+		server.login(username,password)
+		server.sendmail(fromaddr, _email, msg)
+		server.quit()
+		print 'end'
 
 
 			
