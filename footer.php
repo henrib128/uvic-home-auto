@@ -1,2 +1,2 @@
-<p>&copy; <?php echo date("Y"); ?> PiMation. All rights reserved (not really).</p>
+<p>&copy; <?php echo date("Y"); ?> PiMation. All rights reserved.</p>
 </div>
