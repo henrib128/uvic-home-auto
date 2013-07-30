@@ -369,6 +369,8 @@ class DoorOpenThread(threading.Thread):
 		for playback in playbacks:
 			print "Nodename: %s recordfolder: %s" % (playback[0],playback[1])
 		
+		# Getting device name
+		dname = db.getDevice(self.dserial)[2]
 		# Send email notifications
 		emails = db.getEmails()
 		for email in emails:
