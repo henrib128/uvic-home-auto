@@ -107,9 +107,18 @@ function removeNode($nodename, $nodeaddress) {
 }
 
 ################################### Trigger related functions
-# Function to add new trigger to database
+# Function to add new door trigger to database
 function addDoorTrigger($dserial) {
 	$query = sprintf("INSERT INTO DoorTriggers VALUES(%s, 0, 0)",
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+# Function to add new switch trigger to database
+function addSwitchTrigger($dserial) {
+	$query = sprintf("INSERT INTO SwitchTriggers VALUES(%s, 0, 0)",
 		mysql_real_escape_string($dserial)
 	);
 	
@@ -121,9 +130,23 @@ function getDoorTriggers() {
 	return db_query("SELECT lpad(hex(doorserial),16,'0') as doorserial, lpad(hex(switchserial),16,'0') as switchserial, openon FROM DoorTriggers");
 }
 
+# Function to return list of switch triggers
+function getSwitchTriggers() {
+	return db_query("SELECT lpad(hex(switchserial),16,'0') as switchserial, ondailytime, offdailytime FROM SwitchTriggers");
+}
+
 # Function to remove door trigger
 function removeDoorTrigger($dserial) {
 	$query = sprintf("DELETE FROM DoorTriggers WHERE doorserial=%s",
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+# Function to remove switch trigger
+function removeSwitchTrigger($dserial) {
+	$query = sprintf("DELETE FROM SwitchTriggers WHERE switchserial=%s",
 		mysql_real_escape_string($dserial)
 	);
 	
@@ -144,6 +167,26 @@ function updateDoorSwitch($dserial, $sserial) {
 function updateOpenOn($dserial, $openon) {
 	$query = sprintf("UPDATE DoorTriggers SET openon=%s WHERE doorserial=%s",
 		mysql_real_escape_string($openon),
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+# Function to update switch on time daily
+function updateOnTime($dserial, $ondailytime) {
+	$query = sprintf("UPDATE SwitchTriggers SET ondailytime=%s WHERE switchserial=%s",
+		mysql_real_escape_string($ondailytime),
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+# Function to update switch off time daily
+function updateOffTime($dserial, $offdailytime) {
+	$query = sprintf("UPDATE SwitchTriggers SET offdailytime=%s WHERE switchserial=%s",
+		mysql_real_escape_string($offdailytime),
 		mysql_real_escape_string($dserial)
 	);
 	

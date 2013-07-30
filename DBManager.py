@@ -60,7 +60,14 @@ def initDatabase():
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE DoorTriggers")
 	dbcur.execute("CREATE TABLE DoorTriggers(doorserial BIGINT UNSIGNED PRIMARY KEY, switchserial BIGINT UNSIGNED, openon TINYINT)")
-	
+
+	# Create SwitchTriggers table, drop previous table if existed
+	dbcur.execute("SHOW TABLES LIKE SwitchTriggers")
+	result=dbcur.fetchone()
+	if not (result is None or result[0] is None):
+		dbcur.execute("DROP TABLE SwitchTriggers")
+	dbcur.execute("CREATE TABLE SwitchTriggers(switchserial BIGINT UNSIGNED PRIMARY KEY, ondailytime TINYINT, offdailytime TINYINT)")
+		
 	# Commit querry and close db cursor, connection
 	dbcon.commit()
 	dbcur.close()
