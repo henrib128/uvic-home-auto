@@ -39,13 +39,13 @@
 ?>
 		<p>Click below to restart your central Pi</p>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-			<input type="hidden" name="command" value="startcentral">
+			<input type="hidden" name="command" value="NOstartcentral">
 			<input type="submit" value="Restart Central Pi">
 		</form>
 
 		<p>Click below to restart your remote Pi</p>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-			<input type="hidden" name="command" value="startremote">
+			<input type="hidden" name="command" value="NOstartremote">
 			<input type="submit" value="Restart Remote Pi">
 		</form>
 		
