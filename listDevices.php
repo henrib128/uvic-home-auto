@@ -61,7 +61,7 @@
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 ?>
-		<h2>Add new camera node</h2>
+		<h2>Camera Manager</h2>
 		<form action="listDevices.php" method="post">
 			Camera Name: <input type="text" name="nodename">
 			Pi address: <input type="text" name="nodeaddress">
@@ -124,7 +124,7 @@
 ?>
 		</table>
 		
-		<h2>Device Manager Table</h2>
+		<h2>Device Manager</h2>
 		<form action="listDevices.php" method="post">
 			Serial Number: <input type="text" name="dserial">
 			Name: <input type="text" name="dname">
@@ -139,12 +139,15 @@
 		$result = getDevicesResult();
 
 		echo '<tr>';
+		# Extra command collumn at the front
 		echo '<td>Command</td>';
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
 			echo '<td>' . $meta->name . '</td>';
 		}
+		# Extra trigger collumn at the end
+		echo '<td>Trigger</td>';
 
 		echo "</tr>\n";
 		
@@ -217,12 +220,25 @@
 				}
 				else echo '<td>' . $row[$i] . '</td>';
 			}
+			
+			# Extra collumn at the end for adding trigger
+			echo '<td>';
+?>
+			<form action="triggers.php" method="post">
+				<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+				<input type="hidden" name="dtype" value="<? echo $row[1]; ?>">
+				<input type="hidden" name="dname" value="<? echo $row[2]; ?>">
+				<input type="hidden" name="command" value="addtrigger">
+				<input type="submit" value="Add trigger">
+			</form>
+<?
+			echo '</td>';
 			echo "</tr>\n";
 		}
 ?>
 		</table>
 
-		<h2>Email Manager Table</h2>
+		<h2>Email Manager</h2>
 		<form action="listDevices.php" method="post">
 			Email: <input type="text" name="email">
 			<input type="hidden" name="command" value="addemail">

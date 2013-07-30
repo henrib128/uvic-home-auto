@@ -138,10 +138,26 @@ class XbeeMonitor(object):
 									if pstatus:
 										# Door Close
 										print "Door is closed!"
-										
+
 										# Update door status and message
 										db.updateDeviceStatus(dserial,0)
 										db.updateDeviceMessage(dserial,"DoorClosed")
+										
+										# Check if door is active
+										if dactive == 1:
+											# First check if this door is associated with a switch
+											doortrigger = db.getDoorTrigger(dserial)
+											if doortrigger is not None:
+												# There is active doortriger, try sending command to associated switch
+												switchserial = doortrigger[1]
+												openon = doortrigger[2]
+												# Check if there is switchserial set
+												if switchserial is not None:
+													switchserialHex='00%x' % int(switchserial)
+													# Send Xbee command to the switch depending on the openon flag
+													if openon == 1 and len(switchserialHex) > 15::
+														# Turn off switch when door closes
+														self.sendRemoteHexApply(switchserialHex,'D0','04')
 									
 									else:
 										# Door Open
@@ -156,6 +172,20 @@ class XbeeMonitor(object):
 											print "Door is active, send email notifcation and start camera recording"
 											db.updateDeviceMessage(dserial,"DoorOpenedAndActive")
 											
+											# First check if this door is associated with a switch
+											doortrigger = db.getDoorTrigger(dserial)
+											if doortrigger is not None:
+												# There is active doortriger, try sending command to associated switch
+												switchserial = doortrigger[1]
+												openon = doortrigger[2]
+												# Check if there is switchserial set
+												if switchserial is not None:
+													switchserialHex='00%x' % int(switchserial)
+													# Send Xbee command to the switch depending on the openon flag
+													if openon == 1 and len(switchserialHex) > 15::
+														# Turn off switch when door closes
+														self.sendRemoteHexApply(switchserialHex,'D0','05')
+					
 											# Spawn new thread to perform door open actions
 											DoorOpenThread(dserial).start()
 											

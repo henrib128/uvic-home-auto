@@ -11,6 +11,7 @@
 		<li><a href="/cams.php">I want to view my live cameras</a></li>
 		<li><a href="/listDevices.php">I want to manage my devices and cameras</a></li>
 		<li><a href="/playbacks.php">I want to view my playbacks</a></li>
+		<li><a href="/triggers.php">I want to manager my triggers</a></li>
 		</ul>
 	</body>
 </html>

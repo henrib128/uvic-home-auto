@@ -26,8 +26,8 @@ INSERT INTO Nodes VALUES('Public IP','24.68.152.172');
 INSERT INTO Nodes VALUES('Front Door','192.168.0.190');
 INSERT INTO Nodes VALUES('Back Door','192.168.0.191');
 
-
-
+DROP TABLE DoorTriggers;
+CREATE TABLE DoorTriggers(doorserial BIGINT UNSIGNED PRIMARY KEY, switchserial BIGINT UNSIGNED, openon TINYINT);
 
 
 

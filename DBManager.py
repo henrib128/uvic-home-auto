@@ -53,6 +53,13 @@ def initDatabase():
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Playbacks")
 	dbcur.execute("CREATE TABLE Playbacks(nodename VARCHAR(10), recordfolder VARCHAR(24))")
+
+	# Create DoorTriggers table, drop previous table if existed
+	dbcur.execute("SHOW TABLES LIKE DoorTriggers")
+	result=dbcur.fetchone()
+	if not (result is None or result[0] is None):
+		dbcur.execute("DROP TABLE DoorTriggers")
+	dbcur.execute("CREATE TABLE DoorTriggers(doorserial BIGINT UNSIGNED PRIMARY KEY, switchserial BIGINT UNSIGNED, openon TINYINT)")
 	
 	# Commit querry and close db cursor, connection
 	dbcon.commit()
@@ -451,4 +458,25 @@ def removePlayback(_nodename,_recordfolder):
 	dbcur.close()
 	dbcon.close()
 	
+# Function to get door trigger information
+def getDoorTrigger(_serial):
+	# Get database connection and cursor
+	dbcon = getDBCon()
+	dbcur = dbcon.cursor()
 	
+	# Get device
+	dbcur.execute("SELECT doorserial,switchserial,openon FROM DoorTriggers WHERE doorserial=%s", _serial)
+	result=dbcur.fetchone()
+
+	# Close db cursor, connection
+	dbcur.close()
+	dbcon.close()
+
+	# Return result	
+	if result is None or result[0] is None:
+		print("DoorTrigger %s does not exist" % _serial)
+		return None
+	else:		
+		# Return device info
+		return result
+		

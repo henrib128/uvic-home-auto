@@ -106,6 +106,41 @@ function removeNode($nodename, $nodeaddress) {
 	db_query($query);
 }
 
+################################### Trigger related functions
+# Function to add new trigger to database
+function addDoorTrigger($dserial) {
+	$query = sprintf("INSERT INTO DoorTriggers VALUES(%s, 0, 0)",
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+# Function to return list of door triggers
+function getDoorTriggers() {
+	return db_query("SELECT lpad(hex(doorserial),16,'0') as doorserial, lpad(hex(switchserial),16,'0') as switchserial, openon FROM DoorTriggers");
+}
+
+# Function to remove door trigger
+function removeDoorTrigger($dserial) {
+	$query = sprintf("DELETE FROM DoorTriggers WHERE doorserial=%s",
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+# Function to update door trigger
+function updateDoorTrigger($dserial, $sserial, $openon) {
+	$query = sprintf("UPDATE DoorTriggers SET switchserial=%s AND openon=%s WHERE doorserial=%s",
+		mysql_real_escape_string($sserial),
+		mysql_real_escape_string($openon),
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
 ################################### Device related functions
 # Function to get list of devices
 function getDevicesResult() {
