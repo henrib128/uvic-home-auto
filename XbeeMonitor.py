@@ -348,8 +348,9 @@ class DoorOpenThread(threading.Thread):
 			
 		#Send Twitter direct message
 		api = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='1632009878-fz4krrdmMSm6Fs1tLpfbzQlwS0UuUpC1ft5nkdJ',access_token_secret='bwn78QdcmhrRmW2QwnbjRWtj5f1OgAVms6AEimTwQg')
-		directMessage = api.PostDirectMessage('@PiMationUVic', 'Sensor ' + dname + ' has been triggered on ' + timestamp)
-		print directmessage
+		tstatus = api.PostUpdate('Sensor ' + dname + ' has been triggered on ' + timestamp)
+		#directMessage = api.PostDirectMessage('@PiMationUVic', 'Sensor ' + dname + ' has been triggered on ' + timestamp)
+		print tstatus
 		
 		# First get a list of all nodes in the system and add new socket if not existed
 		nodes = db.getNodes()
@@ -397,7 +398,7 @@ class DoorOpenThread(threading.Thread):
 			"From: pimation.uvic@gmail.com",
 			"Subject: PiMation Sensor Alert",
 			"",
-			"Sensor" + _dname + "has been triggered."
+			"Sensor " + _dname + " has been triggered. Please check PiMation website!"
 		])
 		username = 'pimation.uvic@gmail.com'
 	
