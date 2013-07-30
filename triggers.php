@@ -18,9 +18,15 @@
 				# First add new entry to Door Trigger table
 				addDoorTrigger('0x'.$_REQUEST['dserial']);
 			}
-			else if($_REQUEST['command'] == "updatetrigger"){
+			else if($_REQUEST['command'] == "updateswitch"){
 				# Upadate trigger table
-				updateDoorTrigger('0x'.$_REQUEST['dserial'],'0x'.$_REQUEST['sserial'],$_REQUEST['openon']);
+				updateDoorSwitch('0x'.$_REQUEST['dserial'],'0x'.$_REQUEST['sserial']);
+			}
+			else if($_REQUEST['command'] == "updateopenon"){
+				if(isset($_REQUEST['openon'])) $openon = 1;
+				else $openon = 0; 
+				# Upadate trigger table
+				updateOpenOn('0x'.$_REQUEST['dserial'],$openon);
 			}
 			else if($_REQUEST['command'] == "removetrigger"){
 				# Upadate trigger table
@@ -66,8 +72,31 @@
 			for($i = 0; $i < mysql_num_fields($result); $i++){
 				# Get collumn header
 				$meta = mysql_fetch_field($result, $i);
-			
-				echo '<td>' . $row[$i] . '</td>';
+				
+				# Allow changing SwitchSerial field
+				if($meta->name == 'switchserial') {
+				    echo '<td>';
+
+					?><form action="triggers.php" method="post">
+						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+						<input type="text" name="sserial" value="<? echo $row[1]; ?>">
+						<input type="hidden" name="command" value="updateswitch">
+						<input type="submit" value="Change switch">
+					</form><?
+				    echo '</td>';
+				}
+				else if($meta->name == 'openon') {
+				    echo '<td>';
+
+					?><form action="triggers.php" method="post">
+						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
+						<input type="checkbox" name="openon" value=1 <? if($row[2]==1) echo 'checked="True"'?>>
+						<input type="hidden" name="command" value="updateopenon">
+						<input type="submit" value="Save">
+					</form><?
+				    echo '</td>';
+				}							
+				else echo '<td>' . $row[$i] . '</td>';
 			}
 			
 			echo "</tr>\n";

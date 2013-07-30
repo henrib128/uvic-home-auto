@@ -130,10 +130,19 @@ function removeDoorTrigger($dserial) {
 	db_query($query);
 }
 
-# Function to update door trigger
-function updateDoorTrigger($dserial, $sserial, $openon) {
-	$query = sprintf("UPDATE DoorTriggers SET switchserial=%s AND openon=%s WHERE doorserial=%s",
+# Function to update door switch
+function updateDoorSwitch($dserial, $sserial) {
+	$query = sprintf("UPDATE DoorTriggers SET switchserial=%s WHERE doorserial=%s",
 		mysql_real_escape_string($sserial),
+		mysql_real_escape_string($dserial)
+	);
+	
+	db_query($query);
+}
+
+# Function to update door openon
+function updateOpenOn($dserial, $openon) {
+	$query = sprintf("UPDATE DoorTriggers SET openon=%s WHERE doorserial=%s",
 		mysql_real_escape_string($openon),
 		mysql_real_escape_string($dserial)
 	);
