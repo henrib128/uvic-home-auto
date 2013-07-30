@@ -374,13 +374,13 @@ class DoorOpenThread(threading.Thread):
 		for email in emails:
 			print email[0]
 			#sendEmail(email[0],dname,localtime,link)
-			sendEmail(email[0],dname)
+			self.sendEmail(email[0],dname)
 		
 		# Close all socket connections to remote cameras
 		for (nodename,camclient) in self.camnodes.items():
 			camclient.close()
 		
-	def sendEmail(_email,_dname):
+	def sendEmail(self,_email,_dname):
 	
 		fromaddr = 'pimation.uvic@gmail.com'
 		msg = "\r\n".join([

@@ -12,10 +12,6 @@
 <?
 		# Path to local PiMation working directory
 		$pimation_dir = '/home/pi/uvic-home-auto/';
-		#$pimation_dir="/home/tri/ceng499/uvic-home-auto/";
-
-		# mjpg-streamer base dir
-		$mjpg_streamer_dir="/home/pi/mjpg-streamer/mjpg-streamer/";
 
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command'])) {
@@ -35,7 +31,6 @@
 	
 				# Then start PiCam in the background
 				exec($pimation_dir . "PiCam.py &");
-				exec($mjpg_streamer_dir . 'mjpg_streamer -i "' . $mjpg_streamer_dir . 'input_uvc.so" -o "' . $mjpg_streamer_dir . 'output_http.so -w ' . $mjpg_streamer_dir . 'www" ' . '&');
 			}
 
 			# Return to self rendering
