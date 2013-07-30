@@ -30,9 +30,11 @@ import time, datetime
 import serial, threading
 import socket
 
-from email.mime.text import MIMEText
 from subprocess import Popen, PIPE
 from struct import *
+
+#Email/Twitter Packages
+import smtplib
 
 # Required packages
 import DBManager as db
@@ -184,12 +186,25 @@ class SerialMonitor(object):
            
 # Function to send email
 def sendEmail(_email,_dname):
-	msg = MIMEText("Hello, we have detected your %s was opened Please click below for live stream update" % (_dname))
-	msg["From"] = "minhtri@uvic.ca"
-	msg["To"] = _email
-	msg["Subject"] = "Notification from UVicPiHome"
-	p = Popen(["/usr/sbin/sendmail", "-toi"], stdin=PIPE)
-	p.communicate(msg.as_string())
+
+	fromaddr = 'pimation.uvic@gmail.com'
+	msg = "\r\n".join([
+		"From: pimation.uvic@gmail.com",
+		"Subject: PiMation Sensor Alert",
+		"",
+		"Sensor" + _dname + "has been triggered."
+	])
+	username = 'pimation.uvic@gmail.com'
+
+	password = 'raspberrypimation'
+	print 'start'
+	server = smtplib.SMTP('smtp.gmail.com:587')
+	server.ehlo()
+	server.starttls()
+	server.login(username,password)
+	server.sendmail(fromaddr, _email, msg)
+	server.quit()
+	print 'end'
 
 
 # Function to determine Event, assuming input parameters are in correct format
@@ -291,16 +306,16 @@ def processEvent(_serial, _status):
 			print "Nodename: %s recordfolder: %s" % (playback[0],playback[1])
 		
 		# Send email notifications
-		localtime = time.asctime(time.localtime(time.time()))
-		print localtime
-		router_ip=db.getNode('router')[1]
- 		link = "http://%s/camera" % router_ip
- 		print link
+		#localtime = time.asctime(time.localtime(time.time()))
+		#print localtime
+		#router_ip=db.getNode('router')[1]
+ 		#link = "http://%s/camera" % router_ip
+ 		#print link
 		emails = db.getEmails()
 		for email in emails:
 			print email[0]
 			#sendEmail(email[0],dname,localtime,link)
-			#sendEmail(email[0],dname)
+			sendEmail(email[0],dname)
 
 	# All other event are unknown
 	else:
