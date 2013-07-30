@@ -2,11 +2,13 @@
 <html>
 	<head>
 		<title>Pimation Trigger Manager</title>
+		<? include("meta.php"); ?>
 	</head>
 
 	<body>
+		<? include("header.php"); ?>
+		
 		<h1>Welcome to Pimation Trigger Manager!</h1>
-		<ul><a href="/pimation.php">Back to Home page</a></ul>
 
 <?
 		require_once('DBManager.php');
@@ -187,5 +189,6 @@
 ?>
 		</table>
 		
+		<?php include("footer.php"); ?>
 	</body>
 </html>
