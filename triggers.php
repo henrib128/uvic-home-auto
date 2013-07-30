@@ -26,11 +26,9 @@
 				# Upadate trigger table
 				updateDoorSwitch('0x'.$_REQUEST['dserial'],'0x'.$_REQUEST['sserial']);
 			}
-			else if($_REQUEST['command'] == "updateopenon"){
-				if(isset($_REQUEST['openon'])) $openon = 1;
-				else $openon = 0; 
+			else if($_REQUEST['command'] == "updatedooraction" && isset($_REQUEST['dooraction'])){
 				# Upadate trigger table
-				updateOpenOn('0x'.$_REQUEST['dserial'],$openon);
+				updateDoorAction('0x'.$_REQUEST['dserial'],$_REQUEST['dooraction']);
 			}
 			else if($_REQUEST['command'] == "updateontime"){
 				# Upadate trigger table
@@ -101,13 +99,15 @@
 					</form><?
 				    echo '</td>';
 				}
-				else if($meta->name == 'openon') {
+				else if($meta->name == 'action') {
 				    echo '<td>';
 
 					?><form action="triggers.php" method="post">
 						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
-						<input type="checkbox" name="openon" value=1 <? if($row[2]==1) echo 'checked="True"'?>>
-						<input type="hidden" name="command" value="updateopenon">
+						<input type="radio" name="dooraction" value=0 <? if($row[2]==0) echo 'checked="True"'?>>None
+						<input type="radio" name="dooraction" value=1 <? if($row[2]==1) echo 'checked="True"'?>>OpenOn
+						<input type="radio" name="dooraction" value=2 <? if($row[2]==2) echo 'checked="True"'?>>OpenOff
+						<input type="hidden" name="command" value="updatedooraction">
 						<input type="submit" value="Save">
 					</form><?
 				    echo '</td>';

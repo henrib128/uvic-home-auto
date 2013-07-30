@@ -127,7 +127,7 @@ function addSwitchTrigger($dserial) {
 
 # Function to return list of door triggers
 function getDoorTriggers() {
-	return db_query("SELECT lpad(hex(doorserial),16,'0') as doorserial, lpad(hex(switchserial),16,'0') as switchserial, openon FROM DoorTriggers");
+	return db_query("SELECT lpad(hex(doorserial),16,'0') as doorserial, lpad(hex(switchserial),16,'0') as switchserial, action FROM DoorTriggers");
 }
 
 # Function to return list of switch triggers
@@ -163,10 +163,10 @@ function updateDoorSwitch($dserial, $sserial) {
 	db_query($query);
 }
 
-# Function to update door openon
-function updateOpenOn($dserial, $openon) {
-	$query = sprintf("UPDATE DoorTriggers SET openon=%s WHERE doorserial=%s",
-		mysql_real_escape_string($openon),
+# Function to update door action
+function updateDoorAction($dserial, $action) {
+	$query = sprintf("UPDATE DoorTriggers SET action=%s WHERE doorserial=%s",
+		mysql_real_escape_string($action),
 		mysql_real_escape_string($dserial)
 	);
 	

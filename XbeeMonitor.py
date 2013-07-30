@@ -150,17 +150,20 @@ class XbeeMonitor(object):
 											if doortrigger is not None:
 												# There is active doortriger, try sending command to associated switch
 												switchserial = doortrigger[1]
-												openon = doortrigger[2]
+												dooraction = doortrigger[2]
 												# Check if there is switchserial set
 												if switchserial is not None:
 													switchserialHex='00%x' % int(switchserial)
-													print "Door Trigger: %s %s" % (switchserialHex,openon)
-													# Send Xbee command to the switch depending on the openon flag
-													if openon == 1 and len(switchserialHex) > 15:
+													print "Door Trigger: %s %s" % (switchserialHex,dooraction)
+													# Send Xbee command to the switch depending on the dooraction flag
+													if dooraction == 1 and len(switchserialHex) > 15:
 														# Turn off switch when door closes
 														print "Turn switch %s off!" % switchserialHex
 														self.sendRemoteHexApply(switchserialHex,'D0','04')
-									
+													elif dooraction == 2 and len(switchserialHex) > 15:
+														# Turn on switch when door closes
+														print "Turn switch %s on!" % switchserialHex
+														self.sendRemoteHexApply(switchserialHex,'D0','05')
 									else:
 										# Door Open
 										print "Door is opened!"
@@ -179,17 +182,21 @@ class XbeeMonitor(object):
 											if doortrigger is not None:
 												# There is active doortriger, try sending command to associated switch
 												switchserial = doortrigger[1]
-												openon = doortrigger[2]
+												dooraction = doortrigger[2]
 												# Check if there is switchserial set
 												if switchserial is not None:
 													switchserialHex='00%x' % int(switchserial)
-													print "Door Trigger: %s %s" % (switchserialHex,openon)
-													# Send Xbee command to the switch depending on the openon flag
-													if openon == 1 and len(switchserialHex) > 15:
+													print "Door Trigger: %s %s" % (switchserialHex,dooraction)
+													# Send Xbee command to the switch depending on the dooraction flag
+													if dooraction == 1 and len(switchserialHex) > 15:
 														# Turn on switch when door opens
 														print "Turn switch %s on!" % switchserialHex
 														self.sendRemoteHexApply(switchserialHex,'D0','05')
-					
+													elif dooraction == 2 and len(switchserialHex) > 15:
+														# Turn off switch when door opens
+														print "Turn switch %s off!" % switchserialHex
+														self.sendRemoteHexApply(switchserialHex,'D0','04')
+																			
 											# Spawn new thread to perform door open actions
 											DoorOpenThread(dserial).start()
 											

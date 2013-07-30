@@ -27,7 +27,7 @@ INSERT INTO Nodes VALUES('Front Door','192.168.0.190');
 INSERT INTO Nodes VALUES('Back Door','192.168.0.191');
 
 DROP TABLE DoorTriggers;
-CREATE TABLE DoorTriggers(doorserial BIGINT UNSIGNED PRIMARY KEY, switchserial BIGINT UNSIGNED, openon TINYINT);
+CREATE TABLE DoorTriggers(doorserial BIGINT UNSIGNED PRIMARY KEY, switchserial BIGINT UNSIGNED, action TINYINT);
 
 DROP TABLE SwitchTriggers;
 CREATE TABLE SwitchTriggers(switchserial BIGINT UNSIGNED PRIMARY KEY, ondailytime TINYINT, offdailytime TINYINT);
