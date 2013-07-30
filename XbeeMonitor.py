@@ -14,6 +14,7 @@ from subprocess import Popen, PIPE
 
 #Email/Twitter Packages
 import smtplib
+import twitter
 
 # Required packages
 import DBManager as db
@@ -335,6 +336,21 @@ class DoorOpenThread(threading.Thread):
 		timestamp = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
 		mrecordfolder = 'record_' + timestamp
 		
+		# Getting device name
+		dname = db.getDevice(self.dserial)[2]
+		
+		# Send email notifications
+		emails = db.getEmails()
+		for email in emails:
+			print email[0]
+			#sendEmail(email[0],dname,localtime,link)
+			self.sendEmail(email[0],dname)
+			
+		#Send Twitter direct message
+		api = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='1632009878-fz4krrdmMSm6Fs1tLpfbzQlwS0UuUpC1ft5nkdJ',access_token_secret='bwn78QdcmhrRmW2QwnbjRWtj5f1OgAVms6AEimTwQg')
+		directMessage = api.PostDirectMessage('@PiMationUVic', 'Sensor ' + dname + ' has been triggered on ' + timestamp)
+		print directmessage
+		
 		# First get a list of all nodes in the system and add new socket if not existed
 		nodes = db.getNodes()
 		for node in nodes:
@@ -369,15 +385,7 @@ class DoorOpenThread(threading.Thread):
 		for playback in playbacks:
 			print "Nodename: %s recordfolder: %s" % (playback[0],playback[1])
 		
-		# Getting device name
-		dname = db.getDevice(self.dserial)[2]
-		# Send email notifications
-		emails = db.getEmails()
-		for email in emails:
-			print email[0]
-			#sendEmail(email[0],dname,localtime,link)
-			self.sendEmail(email[0],dname)
-		
+	
 		# Close all socket connections to remote cameras
 		for (nodename,camclient) in self.camnodes.items():
 			camclient.close()
