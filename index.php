@@ -11,8 +11,8 @@
 		<h1>Welcome to Pimation Home Page!</h1>
 <?
 		# Path to local PiMation working directory
-		#$pimation_dir = '/home/pi/uvic-home-auto/';
-		$pimation_dir="/home/tri/ceng499/uvic-home-auto/";
+		$pimation_dir = '/home/pi/uvic-home-auto/';
+		#$pimation_dir="/home/tri/ceng499/uvic-home-auto/";
 
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command'])) {
