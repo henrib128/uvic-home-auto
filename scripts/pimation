@@ -1,0 +1,34 @@
+#! /bin/sh
+# /etc/init.d/pimation
+
+### BEGIN INIT INFO
+# Provides:          pimation
+# Required-Start:    $all
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Pimation
+# Description:       Start Pimation after everything else
+### END INIT INFO
+
+case "$1" in
+	start)
+		echo "Starting PiHome.py"
+		/opt/pimation/scripts/PiHome.py &>/dev/null &
+		sleep 2
+		echo "Starting PiCam.py"
+		/opt/pimation/scripts/PiCam.py &>/dev/null &
+		;;
+	stop)
+		echo "Stopping PiHome.py"
+		killall PiHome.py
+		echo "Stopping PiCam.py"
+		killall PiCam.py
+		;;
+	*)
+		echo "Usage: /etc/init.d/pimation {start|stop}"
+		exit 1
+		;;
+esac
+
+exit 0
