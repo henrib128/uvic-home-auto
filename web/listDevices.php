@@ -34,6 +34,7 @@
 		}
 		else if(isset($_REQUEST['dserial']) && isset($_REQUEST['toggle'])) {
 			setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
+			sleep(1);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
