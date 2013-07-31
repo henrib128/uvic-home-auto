@@ -41,7 +41,7 @@
 ?>
 			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 					<input type="hidden" name="username" value="<? echo $row[0]; ?>">
-					<td><input type="text" name="pass"></td>
+					<td><input type="password" name="pass"></td>
 					<td><input type="submit" value="Change"></td>
 			</form>
 <?

@@ -59,6 +59,8 @@ function changePass($username, $pass) {
 }
 
 function isAdmin() {
+	if(!isset($_SERVER['PHP_AUTH_USER'])) return 0;
+	
 	$query = sprintf("SELECT is_admin FROM Users WHERE username ='%s'",
 		mysql_real_escape_string($_SERVER['PHP_AUTH_USER'])
 	);

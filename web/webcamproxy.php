@@ -2,7 +2,6 @@
 if(!isset($_REQUEST['cam']) || !isset($_REQUEST['port']) || !isset($_REQUEST['n'])) exit();
 
 require_once('DBManager.php');
-db_connect();
 
 $n = $_REQUEST['n'];
 $cam_sel = $_REQUEST['cam'];
