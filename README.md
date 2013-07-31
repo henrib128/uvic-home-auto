@@ -6,6 +6,8 @@ sudo mkdir pimation playbacks mjpg-streamer
 sudo chown pi pimation playbacks mjpg-streamer
 sudo chgrp pi pimation playbacks mjpg-streamer
 
+sudo apt-get install libjpeg8-dev
+sudo apt-get install imagemagick
 svn co https://mjpg-streamer.svn.sourceforge.net/svnroot/mjpg-streamer/mjpg-streamer mjpg-streamer
 cd mjpg-streamer
 make
@@ -15,7 +17,7 @@ cd ..
 git clone git@github.com:henrib128/uvic-home-auto.git pimation
 
 cd pimation
-./scripts/deploy_web.sh
+./deploy_web.sh
 
 sudo cp scripts/pimation /etc/init.d/
 sudo chmod 755 /etc/init.d/pimation
