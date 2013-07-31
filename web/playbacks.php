@@ -132,7 +132,7 @@
 			<input type="submit" name="action" value="Stop" />
 		</form>
 		<br><br>
-		<div id="webcam"></div>
+		<div id="webcam"><img src='/blank.jpg' /></div>
 		
 		<?php include("footer.php"); ?>
 	</body>
