@@ -48,11 +48,67 @@
 				# Upadate trigger table
 				removeSwitchTrigger('0x'.$_REQUEST['dserial']);
 			}
-									
+
+			# Return to self rendering
+			header('Location: ' . $_SERVER['PHP_SELF']);
+		}
+		else if(isset($_REQUEST['command']) && isset($_REQUEST['oldrecordtime']) && isset($_REQUEST['newrecordtime'])) {									
+			$command = $_REQUEST['command'];
+			$oldrecordtime = $_REQUEST['oldrecordtime'];
+			$newrecordtime = $_REQUEST['newrecordtime'];
+						
+			if($command == "updaterecordtime"){
+				# Update record time table
+				updateRecordTime($newrecordtime, $oldrecordtime);
+			}		
 			# Return to self rendering
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 ?>
+		<h2>Camera Trigger Manager</h2>
+		<table border="1">
+<?
+		require_once('DBManager.php');
+		db_connect();
+		
+		# Getting list of record time
+		$result = getRecordTime();
+		
+		# Header row
+		echo '<tr>';
+		# Populate all collumns
+		for($i = 0; $i < mysql_num_fields($result); $i++) {
+			# Get collumn header
+			$meta = mysql_fetch_field($result, $i);
+			echo '<td>' . $meta->name . '</td>';
+		}
+		echo "</tr>\n";
+		
+		# Start populating rows
+		while($row = mysql_fetch_row($result)) {
+			echo '<tr>';
+			# Populate rest of collumns
+			for($i = 0; $i < mysql_num_fields($result); $i++){
+				# Get collumn header
+				$meta = mysql_fetch_field($result, $i);
+				
+				# Add change name button for Name collumn
+				if($meta->name == 'recordtime') {
+				    echo '<td>';
+					?><form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+						<input type="text" name="newrecordtime" value="<? echo $row[0]; ?>"> seconds
+						<input type="hidden" name="oldrecordtime" value="<? echo $row[0]; ?>">						
+						<input type="hidden" name="command" value="updaterecordtime">
+						<input type="submit" value="Update">
+					</form><?
+				    echo '</td>';
+				}
+				else echo '<td>' . $row[$i] . '</td>';
+			}
+			echo "</tr>\n";
+		}		
+?>		
+		</table>
 		
 		<h2>Door Trigger Manager</h2>
 		<table border="1">		

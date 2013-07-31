@@ -16,7 +16,7 @@ INSERT INTO Credential VALUES('rpi','rpipass');
 DROP TABLE Emails;
 CREATE TABLE Emails(email VARCHAR(20) PRIMARY KEY);
 INSERT INTO Emails VALUES('trihuynh87@gmail.com');
-INSERT INTO Emails VALUES('henrib128@gmail.com');
+
 
 --type: 0 public, 1 master, 2 slave
 -- TODO: one public ip
@@ -32,4 +32,6 @@ CREATE TABLE DoorTriggers(doorserial BIGINT UNSIGNED PRIMARY KEY, switchserial B
 DROP TABLE SwitchTriggers;
 CREATE TABLE SwitchTriggers(switchserial BIGINT UNSIGNED PRIMARY KEY, ondailytime TINYINT, offdailytime TINYINT);
 
-
+DROP TABLE RecordTime;
+CREATE TABLE RecordTime(recordtime TINYINT PRIMARY KEY);
+INSERT INTO RecordTime VALUES(0);

@@ -39,7 +39,16 @@ def initDatabase():
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Emails")
 	dbcur.execute("CREATE TABLE Emails(email VARCHAR(20) PRIMARY KEY)")
+	dbcur.execute("INSERT INTO Emails VALUES('pimation@email.com')")
 
+	# Create RecordTime table, drop previous table if existed
+	dbcur.execute("SHOW TABLES LIKE 'RecordTime'")
+	result=dbcur.fetchone()
+	if not (result is None or result[0] is None):
+		dbcur.execute("DROP TABLE RecordTime")
+	dbcur.execute("CREATE TABLE RecordTime(recordtime TINYINT PRIMARY KEY)")
+	dbcur.execute("INSERT INTO RecordTime VALUES(10)")
+	
 	# Create Nodes table, drop previous table if existed
 	dbcur.execute("SHOW TABLES LIKE 'Nodes'")
 	result=dbcur.fetchone()
@@ -285,7 +294,22 @@ def getEmails():
 	
 	return results
 
+# Function to get record time
+def getRecordTime():
+	# Get database connection and cursor
+	dbcon = getDBCon()
+	dbcur = dbcon.cursor()
+	
+	# Find all emails
+	dbcur.execute("SELECT recordtime FROM RecordTime")
+	results=dbcur.fetchall()
 
+	# Close db cursor, connection
+	dbcur.close()
+	dbcon.close()
+	
+	return results
+	
 # Function to add email
 def addEmail(_email):
 	# Get database connection and cursor

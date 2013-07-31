@@ -327,7 +327,6 @@ class DoorOpenThread(threading.Thread):
 	def __init__(self, dserial):
 		self.dserial = dserial
 		self.camnodes = {}
-		self.recordtime = 10
 		super(DoorOpenThread, self).__init__()
 		print "Total active Door threads: %d, Door: %s" % (threading.active_count(), self.dserial)
 
@@ -370,8 +369,12 @@ class DoorOpenThread(threading.Thread):
 
 		# Wait for recording time
 		# Here should retrieve record time from database
-		#self.recordtime = db.getRecordTime()
-		time.sleep(self.recordtime)
+		recordtimes = db.getRecordTime()
+		for recordtime in recordtimes:
+			recordtimesecond = recordtime[0]
+			break
+			
+		time.sleep(recordtimesecond)
 		
 		# For each of camera node, send resume request	
 		for (nodename,camclient) in self.camnodes.items():

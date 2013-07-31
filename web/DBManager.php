@@ -241,6 +241,22 @@ function toggleDeviceActive($dserial, $dname, $dactive) {
 	db_query($query);
 }
 
+############################ Record time related functions
+# Function to get record time
+function getRecordTime() {
+	return db_query("SELECT recordtime FROM RecordTime");
+}
+
+# Function to change record time
+function updateRecordTime($newtime, $oldtime) {
+	$query = sprintf("UPDATE RecordTime SET recordtime=%s WHERE recordtime=%s",
+		mysql_real_escape_string($newtime),
+		mysql_real_escape_string($oldtime)
+	);
+	
+	db_query($query);
+}
+
 ############################ Email related functions
 # Function to get all emails
 function getEmails() {
@@ -267,7 +283,6 @@ function removeEmail($email) {
 
 # Function to change email
 function changeEmail($newemail, $oldemail) {
-	# Change device name in Devices table
 	$query = sprintf("UPDATE Emails SET email='%s' WHERE email='%s'",
 		mysql_real_escape_string($newemail),
 		mysql_real_escape_string($oldemail)
