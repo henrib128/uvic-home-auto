@@ -27,9 +27,6 @@
 		
 		<h1>Welcome to Pimation Camera Manager!</h1>
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		if(isset($_REQUEST['action']) && isset($_REQUEST['cam']) && isset($_REQUEST['path'])) {
 			$act = $_REQUEST['action'];
 			$cam_rec = $_REQUEST['cam'];

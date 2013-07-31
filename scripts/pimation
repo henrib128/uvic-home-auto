@@ -24,6 +24,8 @@ case "$1" in
 		killall PiHome.py
 		echo "Stopping PiCam.py"
 		killall PiCam.py
+		echo "Stopping mjpg-streamer"
+		killall mjpg-streamer
 		;;
 	*)
 		echo "Usage: /etc/init.d/pimation {start|stop}"

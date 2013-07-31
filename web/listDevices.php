@@ -10,9 +10,6 @@
 		
 		<h1>Welcome to Pimation Device Manager!</h1>
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command']) && isset($_REQUEST['dserial']) && isset($_REQUEST['dname'])) {
 			if($_REQUEST['command'] == "adddevice"){

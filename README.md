@@ -1,5 +1,5 @@
 uvic-home-auto
-==============
+====================================================================================
 
 cd /opt
 sudo mkdir pimation playbacks mjpg-streamer
@@ -23,7 +23,7 @@ sudo cp scripts/pimation /etc/init.d/
 sudo chmod 755 /etc/init.d/pimation
 sudo update-rc.d pimation defaults
 
-============================
+====================================================================================
 
 sudo mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
@@ -48,6 +48,53 @@ SSLCertificateKeyFile /etc/apache2/ssl/apache.key
 
 sudo service apache2 restart
 
-============================
+====================================================================================
+
+apt-get install libapache2-mod-auth-mysql
+
+mysql -u root -p
+USE pihome;
+
+CREATE TABLE Users (
+	username varchar(40) NOT NULL default '',
+	pass varchar(60) NOT NULL default '',
+	is_admin BOOLEAN,
+	PRIMARY KEY (username)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO Users VALUES('guest', SHA1('guest'), false);
+INSERT INTO Users VALUES('admin', SHA1('pimation'), true);
+
+exit
+
+sudo nano /etc/apache2/apache2.conf
+# add the following:
+<Directory /var/www>
+	## mod auth_mysql
+	AuthBasicAuthoritative Off
+	AuthMYSQL on
+	AuthMySQL_Authoritative on
+	AuthMySQL_DB pihome
+	Auth_MySQL_Host localhost
+	Auth_MySQL_User ceng499
+	Auth_MySQL_Password ceng499
+	AuthMySQL_Password_Table Users
+	AuthMySQL_Username_Field username
+	AuthMySQL_Password_Field pass
+	AuthMySQL_Empty_Passwords off
+	AuthMySQL_Encryption_Types SHA1Sum
+	# Standard auth stuff
+	AuthType Basic
+	AuthName "Pimation"
+	Require valid-user
+</Directory>
+
+cd /etc/apache2/mods-enabled/
+sudo ln -s /etc/apache2/mods-available/auth_mysql.load .
+sudo service apache2 restart
+
+====================================================================================
+
+
 
 

@@ -49,15 +49,12 @@
 
 	<body onload="createImageLayer();">
 		<? include("header.php"); ?>
-	
+		
 		<h1>Welcome to Pimation Playback Manager!</h1>
 		<h1>Playbacks</h1>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			<select name="cam" id="cam_id" size=4>
 <?
-			require_once('DBManager.php');
-			db_connect();
-			
 			$cam_sel = '';
 			$cam_rec = '';
 			$loc = 'Location: ' . $_SERVER['PHP_SELF'];

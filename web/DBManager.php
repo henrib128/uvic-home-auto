@@ -45,6 +45,28 @@ function db_query($query) {
 	return $result;
 }
 
+function getUsers() {
+	return db_query("SELECT username as Username, is_admin as 'Administrator' FROM Users");
+}
+
+function changePass($username, $pass) {
+	$query = sprintf("UPDATE Users SET pass = SHA1('%s') WHERE username ='%s'",
+		mysql_real_escape_string($pass),
+		mysql_real_escape_string($username)
+	);
+	
+	db_query($query);
+}
+
+function isAdmin() {
+	$query = sprintf("SELECT is_admin FROM Users WHERE username ='%s'",
+		mysql_real_escape_string($_SERVER['PHP_AUTH_USER'])
+	);
+	
+	$result = db_query($query);
+	$row = mysql_fetch_row($result);
+	return $row[0];
+}
 
 ###################################### Camera node related functions
 # Function to get a list of all nodes
@@ -403,5 +425,7 @@ function setDeviceState($dserial, $state) {
 	
 	socket_close($sock);
 }
+
+db_connect();
 
 ?>
