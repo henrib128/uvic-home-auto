@@ -50,7 +50,7 @@ sudo service apache2 restart
 
 ====================================================================================
 
-apt-get install libapache2-mod-auth-mysql
+sudo apt-get install libapache2-mod-auth-mysql
 
 mysql -u root -p
 USE pihome;
