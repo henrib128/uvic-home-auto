@@ -86,23 +86,8 @@
 					else die('invalid action');
 				}
 			}
-			else if(isset($_REQUEST['cam_rec']) && $_REQUEST['action']) {
-				$cam_rec = $_REQUEST['cam_rec'];
-				$act = $_REQUEST['action'];
-				
-				if(isset($_REQUEST['path']) && $act == 'Record') {
-					startRecord($cam_rec, $_REQUEST['path']);
-					header($loc . '?cam_rec=' . urlencode($cam_rec));
-				}
-				else if($_REQUEST['action'] == 'Stop') {
-					camReset($cam_rec);
-					header($loc);
-				}
-				else die('invalid action 2');
-			}
 			
 			$result = getCamPlaybacksResult();
-			
 			while($cam = mysql_fetch_array($result)) {
 				$op = $cam[0] . ':' . $cam[1];
 				echo "\t\t\t\t<option value='$op'";
@@ -114,23 +99,8 @@
 			</select>
 			<input type="submit" name="action" value="Play" />
 			<input type="submit" name="action" value="Delete" />
-		</form><br>
-		<h1>Cameras</h1>
-		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-			<select name="cam_rec" >
-<?
-			$result = getCamNamesResult();
-			
-			while($cam = mysql_fetch_array($result)) {
-				$cam = $cam[0];
-				echo "\t\t\t<option value='$cam'>$cam</option>\n";
-			}
-?>
-			</select><br>
-			Path: <input type="text" name="path"><br>
-			<input type="submit" name="action" value="Record" />
-			<input type="submit" name="action" value="Stop" />
 		</form>
+		
 		<br><br>
 		<div id="webcam"><img src='/blank.jpg' /></div>
 		
