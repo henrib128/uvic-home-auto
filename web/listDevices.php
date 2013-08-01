@@ -172,7 +172,7 @@
 						$t_str = 'Off';
 						$t_m = 0;
 					}
-				    echo '<td>' . $row[$i];
+				    echo '<td>';
 
 					?><form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
@@ -182,7 +182,7 @@
 				    echo '</td>';
 				}
 				else if($meta->name == 'Active') {
-				    echo '<td>' . $row[$i];
+				    echo '<td>';
 
 					if($row[5] == 1) {
 						$t_str = 'Deactive';
