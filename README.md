@@ -87,6 +87,7 @@ sudo nano /etc/apache2/apache2.conf
 	AuthType Basic
 	AuthName "Pimation"
 	Require valid-user
+	AuthUserFile /dev/null
 </Directory>
 
 cd /etc/apache2/mods-enabled/

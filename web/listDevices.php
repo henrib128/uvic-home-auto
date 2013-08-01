@@ -184,11 +184,11 @@
 				else if($meta->name == 'Active') {
 				    echo '<td>';
 
-					if($row[5] == 1) {
+					if($row[3] == 1) {
 						$t_str = 'Deactive';
 						$t_m = 0;
 					}
-					else if($row[5] == 0) {
+					else if($row[3] == 0) {
 						$t_str = 'Activate';
 						$t_m = 1;
 					}
@@ -235,7 +235,7 @@
 		
 		<h2>Device States</h2>
 		
-		<iframe src="/states.php" style="border:0;"></iframe> 
+		<iframe src="/states.php" style="border:0;width:100%;height:100%"></iframe> 
 
 		<h2>Email Manager</h2>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">

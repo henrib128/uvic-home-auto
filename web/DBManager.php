@@ -220,11 +220,16 @@ function updateOffTime($dserial, $offdailytime) {
 ################################### Device related functions
 # Function to get list of devices
 function getDevicesResult() {
-	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type as Type, name as Name, status as Status, message as Message, active as Active FROM Devices");
+	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type as Type, name as Name, active as Active FROM Devices");
 }
 
 function getStatesResult() {
-	return db_query("SELECT type as Type, name as Name, status as Status, message as Message FROM Devices");
+	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, name as Name, type as Type, status as Status, message as Message FROM Devices");
+}
+
+function stateToStr($state) {
+	if($state) return 'On';
+	return 'Off';
 }
 
 # Function to add new device to database
@@ -407,7 +412,7 @@ function sendCommandToPiHome($command, $param) {
 	socket_send($sock, $message, strlen($message), 0);
 	
 	# Do not wait for socket response, close right away.
-	# This may need to change if we want to wait for confirmation from PiHome.py
+	# This may need to change if we want to wait for confirmation from PistartRecordHome.py
 	socket_close($sock);
 }
 
