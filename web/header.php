@@ -11,7 +11,6 @@ require_once('DBManager.php');
 	<table>
 		<tr>
 			<th align="center"><img id="logo" src="/logo.png" alt="PiMation Logo" width="100" height="100"/></th>
-			<th align="left"><font size="7"><span style="color:white;font-weight:bold">Pi</span><span style="color:white;font-weight:bold">Mation</span></font></th>
 		</tr>
 		<tr>
 			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post" id="logout_form">
