@@ -233,6 +233,8 @@
 ?>
 		</table>
 		
+		<h2>Device States</h2>
+		
 		<iframe src="/states.php" style="border:0;"></iframe> 
 
 		<h2>Email Manager</h2>

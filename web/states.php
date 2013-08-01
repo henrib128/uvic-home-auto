@@ -2,9 +2,10 @@
 <html>
 	<head>
 		<meta http-equiv="refresh" content="1">
+		<? include("meta.php"); ?>
 	</head>
 	
-	<body>
+	<body style="background:none;margin:0;">
 		<table border="1">
 <?
 			require_once('DBManager.php');
