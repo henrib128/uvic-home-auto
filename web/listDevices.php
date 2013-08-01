@@ -18,7 +18,6 @@
 			}
 			else if($_REQUEST['command'] == "removedevice"){
 				removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "toggleactive"){
 				toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);

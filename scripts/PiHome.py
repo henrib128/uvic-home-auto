@@ -286,19 +286,6 @@ if __name__ == "__main__":
 				XbeeMonitor.stop()
 				XbeeMonitor.startAsync()
 
-			elif webcommand == 'removedevice':
-				# Remove device command, need to dissociate device from the xbee network
-				dserial=webparam
-				print "Remove device command from the web for %s." % dserial
-
-			
-			elif webcommand == 'downloadplayback':
-				# Download playback command from web
-				playback=webparam.split(',')
-				nodename=playback[0]
-				playbackfolder=playback[1]
-				print "downloadplayback command from Webserver %s %s." % (nodename,playbackfolder)
-				
 			else:
 				print 'Invalid input'
 				continue

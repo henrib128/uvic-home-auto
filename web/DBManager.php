@@ -325,14 +325,15 @@ function getCamPlaybacksResult() {
 ############### Function to send command to remore Pi via socket
 function sendPiCam($cam, $msg) {
 	$ip = getCamIP($cam);
-	if($ip == '') die("cam not found: " . $cam);
+	if($ip == '') die("The camera does not have a valid IP address or not found: " . $cam);
 	
 	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-	if(!$sock) die('socket_create');
+	if(!$sock) die('PHP failed to create socket.');
 	
 	if(!socket_connect($sock, $ip, 44444)) {
 		socket_close($sock);
-		die('socket_connect: ' . $ip . ', ' . $msg);
+		die('Failed to connect to ' . $cam . ' at ' . $ip . ', ' . $msg . 
+		'. Please make sure the Camera Ipaddress is correct and	restart the Camera Pi.');
 	}
 	
 	socket_send($sock, $msg, strlen($msg), 0);
@@ -384,11 +385,11 @@ function sendCommandToPiHome($command, $param) {
 	
 	# Create one-time socket to local PiHome.py to send command to it
 	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-	if(!$sock) die('Cannot create socket');
+	if(!$sock) die('PHP cannot create socket');
 	
 	if(!socket_connect($sock, SCRIPT_IP, SCRIPT_PORT)) {
 		socket_close($sock);
-		die('Cannot connect to PiHome.py ip and port');
+		die('Cannot connect to PiHome.py ip and port at ' . SCRIPT_IP . ', ' . SCRIPT_PORT);
 	}
 	
 	# Send command through socket
@@ -416,11 +417,11 @@ function setDeviceState($dserial, $state) {
 	$msg .= '/pi/' . $dserial;
 	
 	$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-	if(!$sock) die('1');
+	if(!$sock) die('PHP cannot create socket');
 	
 	if(!socket_connect($sock, SCRIPT_IP, SCRIPT_PORT)) {
 		socket_close($sock);
-		die('2');
+		die('Cannot connect to PiHome.py ip and port at ' . SCRIPT_IP . ', ' . SCRIPT_PORT);
 	}
 	
 	socket_send($sock, $msg, strlen($msg), 0);
