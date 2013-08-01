@@ -1,0 +1,32 @@
+#! /bin/sh
+
+case "$1" in
+	start)
+		echo "Creating playback folder"
+		mkdir -p /opt/playbacks
+		chown pi /opt/playbacks
+		chgrp pi /opt/playbacks
+		chmod 775 /opt/playbacks
+		
+		echo "Starting PiHome.py"
+		/opt/pimation/scripts/PiHome.py &
+		sleep 2
+		
+		echo "Starting PiCam.py"
+		/opt/pimation/scripts/PiCam.py &
+		;;
+	stop)
+		echo "Stopping PiHome.py"
+		killall PiHome.py
+		echo "Stopping PiCam.py"
+		killall PiCam.py
+		echo "Stopping mjpg-streamer"
+		killall mjpg_streamer
+		;;
+	*)
+		echo "Usage: pimation_d {start|stop}"
+		exit 1
+		;;
+esac
+
+exit 0
