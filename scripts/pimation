@@ -13,9 +13,16 @@
 
 case "$1" in
 	start)
+		echo "Creating playback folder"
+		mkdir /opt/playbacks
+		chown pi /opt/playbacks
+		chgrp pi /opt/playbacks
+		chmod 775 /opt/playbacks
+		
 		echo "Starting PiHome.py"
 		/opt/pimation/scripts/PiHome.py &>/dev/null &
 		sleep 2
+		
 		echo "Starting PiCam.py"
 		/opt/pimation/scripts/PiCam.py &>/dev/null &
 		;;
