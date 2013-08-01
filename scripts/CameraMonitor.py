@@ -55,13 +55,15 @@ class CameraThread(threading.Thread):
 		   self.command == 'DELPLAYBACK':
 			try:
 				self.recordfolder = params[1]
+
 			except Exception:
+				# Assign record folder to empty to be ruled out
 				self.recordfolder = ""
 			
 	def processRequest(self, data):
 		# First parse the request
 		self.parseRequest(data)
-
+		
 		# Perform action based on request
 		try:
 			if self.command == "INIT":
@@ -93,7 +95,12 @@ class CameraThread(threading.Thread):
 
 			elif self.command == "STARTRECORD":
 				print "Received command: %s,%s" % (self.command, self.recordfolder)
-				response = "Received %s command" % self.command
+				response = "Received command: %s,%s" % (self.command, self.recordfolder)
+				
+				# Check if record folder is empty
+				if self.recordfolder == "":
+					# Do nothing
+					return
 				
 				# First stop all stream
 				self.main.stopAllStream()
@@ -107,15 +114,25 @@ class CameraThread(threading.Thread):
 				
 			elif self.command == "STARTPLAYBACK":
 				print "Received command: %s,%s" % (self.command, self.recordfolder)
-				response = "Received %s command" % self.command
-					
+				response = "Received command: %s,%s" % (self.command, self.recordfolder)
+
+				# Check if record folder is empty
+				if self.recordfolder == "":
+					# Do nothing
+					return
+										
 				# Start playback from certain folder to port 8081
 				self.main.playFolder(self.recordfolder)
 
 			elif self.command == "DELPLAYBACK":
 				print "Received command: %s,%s" % (self.command, self.recordfolder)
-				response = "Received %s command" % self.command
-				
+				response = "Received command: %s,%s" % (self.command, self.recordfolder)
+
+				# Check if record folder is empty
+				if self.recordfolder == "":
+					# Do nothing
+					return
+									
 				# Delete specified folder
 				self.main.delPlayback(self.recordfolder)
 												
@@ -141,7 +158,7 @@ class CameraMonitor(object):
 	#server="CameraMonitor"
 
 	# Class constructor __init__ function (default defined by python), ran upon instantiation
-	def __init__(self,hostname=socket.gethostname(),port=44444,mbasedir='/home/pi/mjpg-streamer/mjpg-streamer',mrecordir='/tmp/mjpg-streamer'):
+	def __init__(self,hostname=socket.gethostname(),port=44444,mbasedir='/opt/mjpg-streamer',mrecordir='/opt/playbacks'):
 		# Data attributes (specific for each instance, accessed by self.var)
 		self.hostname = hostname
 		self.port = port
