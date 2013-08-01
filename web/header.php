@@ -10,7 +10,7 @@ require_once('DBManager.php');
 <ul id="menu">
 	<table>
 		<tr>
-			<th align="center"><img id="logo" src="/logo.png" alt="PiMation Logo" width="100" height="100"/></th>
+			<th align="left"><img id="logo" src="/logo.png" alt="PiMation Logo"/></th>
 		</tr>
 		<tr>
 			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post" id="logout_form">
