@@ -34,4 +34,4 @@ CREATE TABLE SwitchTriggers(switchserial BIGINT UNSIGNED PRIMARY KEY, ondailytim
 
 DROP TABLE RecordTime;
 CREATE TABLE RecordTime(recordtime TINYINT PRIMARY KEY);
-INSERT INTO RecordTime VALUES(0);
+INSERT INTO RecordTime VALUES(10);

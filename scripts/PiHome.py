@@ -53,61 +53,61 @@ def addXbeeDevice(_xbm,_dserial):
 	print "Entering addXbeeDevice"
 
 	# 0. First try if Coor can already talk to remote device on Network KY (existing device)
-	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
+	#if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
 		# Cant talk to device the way it is, need to start normal setup
 	
-		# 1. Change Coordinator to default KY
-		if not checkCommandResponse(_xbm,'coor','','KY',default_key):
-			_message = "Failed to change coordinator to default KY"
-			print _message
-			return _message
-		print "Done Coordinator KY default"
+	# 1. Change Coordinator to default KY
+	if not checkCommandResponse(_xbm,'coor','','KY',default_key):
+		_message = "Failed to change coordinator to default KY"
+		print _message
+		return _message
+	print "Done Coordinator KY default"
 
-		# 1b. Confirm if Coordinator can talk to EndDevice now
-		if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):		
-			_message = "Failed to talk to end device with default KY"
-			print _message
+	# 1b. Confirm if Coordinator can talk to EndDevice now
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):		
+		_message = "Failed to talk to end device with default KY"
+		print _message
 
-			# Revert Coordinator back to Network key
-			if not checkCommandResponse(_xbm,'coor','','KY',network_key):
-				_message = "Failed to revert coordinator to network KY. Please restart Pi!"
-				print _message
-				return _message
-		
-			return _message
-		print "Done checking talking in default KY"
-	
-		# 2. Change EndDevice to network KY
-		if not checkCommandResponse(_xbm,'dapply',_dserial,'KY',network_key):	
-			_message = "Failed to change end device to network KY"
-			print _message
-		
-			# Revert Coordinator back to Network key
-			if not checkCommandResponse(_xbm,'coor','','KY',network_key):
-				_message = "Failed to revert coordinator to network KY. Please restart Pi!"
-				print _message
-				return _message
-			
-			return _message
-		print "Done changing Device KY network"
-	
-		# 3. Change Coordinator to network KY
+		# Revert Coordinator back to Network key
 		if not checkCommandResponse(_xbm,'coor','','KY',network_key):
-			_message = "Failed to change coordinator to network KY. Please restart Pi!"
+			_message = "Failed to revert coordinator to network KY. Please restart Pi!"
 			print _message
 			return _message
-		print "Done changing Coordinator KY network"	
+	
+		return _message
+	print "Done checking talking in default KY"
 
-		# 3.b Confirm if coordinator can talk to end device using network KY
-		if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
-			_message = "Failed to talk to end device with network KY"
+	# 2. Change EndDevice to network KY
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'KY',network_key):	
+		_message = "Failed to change end device to network KY"
+		print _message
+	
+		# Revert Coordinator back to Network key
+		if not checkCommandResponse(_xbm,'coor','','KY',network_key):
+			_message = "Failed to revert coordinator to network KY. Please restart Pi!"
 			print _message
 			return _message
-		print "Done talking to device in network KY"
+		
+		return _message
+	print "Done changing Device KY network"
 
-	else:
+	# 3. Change Coordinator to network KY
+	if not checkCommandResponse(_xbm,'coor','','KY',network_key):
+		_message = "Failed to change coordinator to network KY. Please restart Pi!"
+		print _message
+		return _message
+	print "Done changing Coordinator KY network"	
+
+	# 3.b Confirm if coordinator can talk to end device using network KY
+	if not checkCommandResponse(_xbm,'dapply',_dserial,'SL',''):	
+		_message = "Failed to talk to end device with network KY"
+		print _message
+		return _message
+	print "Done talking to device in network KY"
+
+	#else:
 		# Device is already on Network KY! Proceed with step 4
-		print "Device is already on network KY"
+	#	print "Device is already on network KY"
 	
 	# 4. Lock EndDevice to Coordinator
 	if not checkCommandResponse(_xbm,'dapply',_dserial,'A1','04'):	
