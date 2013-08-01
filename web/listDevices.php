@@ -131,9 +131,6 @@
 		</form>
 		<table border="1">		
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		$result = getDevicesResult();
 
 		echo '<tr>';
@@ -235,6 +232,8 @@
 		}
 ?>
 		</table>
+		
+		<iframe src="/states.php" style="border:0;"></iframe> 
 
 		<h2>Email Manager</h2>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">

@@ -223,6 +223,10 @@ function getDevicesResult() {
 	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type as Type, name as Name, status as Status, message as Message, active as Active FROM Devices");
 }
 
+function getStatesResult() {
+	return db_query("SELECT type as Type, name as Name, status as Status, message as Message FROM Devices");
+}
+
 # Function to add new device to database
 function addDevice($dserial, $dname) {
 	$query = sprintf("INSERT INTO Devices VALUES(%s, 5, '%s', 0, 0,'New')",
