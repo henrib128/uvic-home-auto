@@ -14,7 +14,7 @@
 case "$1" in
 	start)
 		echo "Creating playback folder"
-		mkdir /opt/playbacks
+		mkdir -p /opt/playbacks
 		chown pi /opt/playbacks
 		chgrp pi /opt/playbacks
 		chmod 775 /opt/playbacks
@@ -32,7 +32,7 @@ case "$1" in
 		echo "Stopping PiCam.py"
 		killall PiCam.py
 		echo "Stopping mjpg-streamer"
-		killall mjpg-streamer
+		killall mjpg_streamer
 		;;
 	*)
 		echo "Usage: /etc/init.d/pimation {start|stop}"
