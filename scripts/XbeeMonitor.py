@@ -333,7 +333,7 @@ class DoorOpenThread(threading.Thread):
 	def run(self):
 		# Perform camera actions
 		timestamp = datetime.datetime.now().strftime("%y_%m_%d.%H_%M_%S")
-		mrecordfolder = 'record_' + timestamp
+		mrecordfolder = 'dooropen_' + timestamp
 		
 		# Getting device name
 		dname = db.getDevice(self.dserial)[2]

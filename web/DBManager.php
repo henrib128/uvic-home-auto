@@ -371,7 +371,7 @@ function startRecord($cam, $path) {
 	# Check if the path is empty
 	if($path == ""){
 		# Empty record folder, assign it to default value using timestamp
-		$path = date('y_m_d.H_i_s');
+		$path = 'record_' . date('y_m_d.H_i_s');
 	}
 
 	# Send command to camera Pi
