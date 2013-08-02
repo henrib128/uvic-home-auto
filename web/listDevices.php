@@ -60,6 +60,7 @@
 		}
 ?>
 		<h2>Camera Manager</h2>
+		<p>Add new camera by giving it a unique name and ipaddress (check your network). You can also change name or remove it later.</p>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			Camera Name: <input type="text" name="nodename">
 			Pi address: <input type="text" name="nodeaddress">
@@ -123,6 +124,8 @@
 		</table>
 		
 		<h2>Device Manager</h2>
+		<p>Add new power switch and door sensor to your network by giving it a name and serial number (the 16 digit code on your device). You can activate door sensor to enable email notification and camera recording when door opens. You can also add custome trigger to it (see Triggers tab).</p>
+		<p></p>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			Serial Number: <input type="text" name="dserial">
 			Name: <input type="text" name="dname">
@@ -233,11 +236,12 @@
 ?>
 		</table>
 		
-		<h2>Device States</h2>
-		
+		<h2>Device Live Status</h2>
+		<p>This table is automatically refreshed every second for latest updates on your devices.</p>
 		<iframe src="/states.php" style="border:0;width:100%;height:100%"></iframe> 
 
-		<h2>Email Manager</h2>
+		<h2>Notification Manager</h2>
+		<p>Provide your emails to get notification when door opens (door must be activated).</p>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			Email: <input type="text" name="email">
 			<input type="hidden" name="command" value="addemail">
