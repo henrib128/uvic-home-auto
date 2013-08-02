@@ -23,22 +23,14 @@ def initDatabase():
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Devices")
-	dbcur.execute("CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(20), status TINYINT, active TINYINT, message VARCHAR(50))")
-
-	# Create Credential table, drop previous table if existed
-	dbcur.execute("SHOW TABLES LIKE 'Credential'")
-	result=dbcur.fetchone()
-	if not (result is None or result[0] is None):
-		dbcur.execute("DROP TABLE Credential")
-	dbcur.execute("CREATE TABLE Credential(username VARCHAR(20) PRIMARY KEY, password VARCHAR(20))")
-	dbcur.execute("INSERT INTO Credential VALUES('pihome','pihomepass')")
+	dbcur.execute("CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(50), status TINYINT, active TINYINT, message VARCHAR(100))")
 
 	# Create Emails table, drop previous table if existed
 	dbcur.execute("SHOW TABLES LIKE 'Emails'")
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Emails")
-	dbcur.execute("CREATE TABLE Emails(email VARCHAR(20) PRIMARY KEY)")
+	dbcur.execute("CREATE TABLE Emails(email VARCHAR(50) PRIMARY KEY)")
 	dbcur.execute("INSERT INTO Emails VALUES('pimation@email.com')")
 
 	# Create RecordTime table, drop previous table if existed
@@ -54,14 +46,14 @@ def initDatabase():
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Nodes")
-	dbcur.execute("CREATE TABLE Nodes(nodename VARCHAR(10) PRIMARY KEY, ipaddress VARCHAR(15))")
+	dbcur.execute("CREATE TABLE Nodes(nodename VARCHAR(50) PRIMARY KEY, ipaddress VARCHAR(15))")
 
 	# Create Playbacks table, drop previous table if existed
 	dbcur.execute("SHOW TABLES LIKE 'Playbacks'")
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE Playbacks")
-	dbcur.execute("CREATE TABLE Playbacks(nodename VARCHAR(10), recordfolder VARCHAR(24))")
+	dbcur.execute("CREATE TABLE Playbacks(nodename VARCHAR(50), recordfolder VARCHAR(100))")
 
 	# Create DoorTriggers table, drop previous table if existed
 	dbcur.execute("SHOW TABLES LIKE DoorTriggers")

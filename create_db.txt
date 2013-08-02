@@ -5,23 +5,19 @@ USE pihome
 
 -- Type 0 switch (on/off), 1 door sensor (open/close) for TRUE/FALSE
 DROP TABLE Devices;
-CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(20), status TINYINT, active TINYINT, message VARCHAR(50));
+CREATE TABLE Devices(serial BIGINT UNSIGNED PRIMARY KEY, type TINYINT, name VARCHAR(50), status TINYINT, active TINYINT, message VARCHAR(100));
 INSERT INTO Devices VALUES(10000000000,0,'bedroom lamp',0, 1, 'NEW');
 INSERT INTO Devices VALUES(10000000001,1,'front door',0, 0, 'NEW');
 
-DROP TABLE Credential;
-CREATE TABLE Credential(username VARCHAR(20) PRIMARY KEY, password VARCHAR(20));
-INSERT INTO Credential VALUES('rpi','rpipass');
-
 DROP TABLE Emails;
-CREATE TABLE Emails(email VARCHAR(20) PRIMARY KEY);
+CREATE TABLE Emails(email VARCHAR(50) PRIMARY KEY);
 INSERT INTO Emails VALUES('trihuynh87@gmail.com');
 
 
 --type: 0 public, 1 master, 2 slave
 -- TODO: one public ip
 DROP TABLE Nodes;
-CREATE TABLE Nodes(nodename VARCHAR(20) PRIMARY KEY, ipaddress VARCHAR(15));
+CREATE TABLE Nodes(nodename VARCHAR(50) PRIMARY KEY, ipaddress VARCHAR(15));
 INSERT INTO Nodes VALUES('Public IP','24.68.152.172');
 INSERT INTO Nodes VALUES('Front Door','192.168.0.190');
 INSERT INTO Nodes VALUES('Back Door','192.168.0.191');
@@ -35,3 +31,7 @@ CREATE TABLE SwitchTriggers(switchserial BIGINT UNSIGNED PRIMARY KEY, ondailytim
 DROP TABLE RecordTime;
 CREATE TABLE RecordTime(recordtime TINYINT PRIMARY KEY);
 INSERT INTO RecordTime VALUES(10);
+
+CREATE TABLE Playbacks(nodename VARCHAR(50), recordfolder VARCHAR(100));
+
+
