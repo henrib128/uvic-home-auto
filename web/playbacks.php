@@ -49,9 +49,8 @@
 
 	<body onload="createImageLayer();">
 		<? include("header.php"); ?>
-		
 		<h1>Welcome to Pimation Playback Manager!</h1>
-		<h1>Playbacks</h1>
+		<p>Here you can view and manage all your recordings. Pick a recording and hit play to start viewing. Delete with remove the recording permanently. Right now you can only view one recording at a time.</p>
 		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
 			<select name="cam" id="cam_id" size=4>
 <?
