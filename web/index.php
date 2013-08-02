@@ -15,6 +15,7 @@
 		<h2>Users</h2>
 		
 		<table border="1">
+			<tr><th>Username</th><th>Administrator</th><th>New Password</th><th>Submit</th></tr>
 <?
 		if(isset($_REQUEST['username']) && isset($_REQUEST['pass'])) {
 			changePass($_REQUEST['username'], $_REQUEST['pass']);
@@ -23,29 +24,16 @@
 		
 		$result = getUsers();
 		
-		echo '<tr>';
-		
-		for($i = 0; $i < mysql_num_fields($result); $i++) {
-			$meta = mysql_fetch_field($result, $i);
-			echo '<th>' . $meta->name . '</th>';
-		}
-		
-		echo "<th>New Password</th><th>Submit</th></tr>\n";
-		
-		while($row = mysql_fetch_row($result)) {
-			echo '<tr>';
-			
-			for($i = 0; $i < mysql_num_fields($result); $i++) {
-				echo '<td>' . $row[$i] . '</td>';
-			}
+		while($row = mysql_fetch_object($result)) {
+			echo '<tr><td>' . $row->username . '</td><td>' . yesNo($row->is_admin) . '</td>';
 ?>
-			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-					<input type="hidden" name="username" value="<? echo $row[0]; ?>">
+				<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+					<input type="hidden" name="username" value="<? echo $row->username; ?>">
 					<td><input type="password" name="pass"></td>
 					<td><input type="submit" value="Change"></td>
-			</form>
+				</form>
+			</tr>
 <?
-			echo "</tr>\n";
 		}
 ?>
 		</table>
