@@ -67,16 +67,16 @@
 					if(count($a) != 2) die('wrong count');
 					
 					if($_REQUEST['action'] == 'Play') {
-						startPlayback($a[0], $a[1]);
+						if($isAdmin) startPlayback($a[0], $a[1]);
 						header($loc . '?cam=' . urlencode($cam_sel));
 					}
 					else if($_REQUEST['action'] == 'Delete') {
 						# First delete playback from the database
 						# Then sending delete command to the remote Pi
-						deletePlayback($a[0], $a[1]);
+						if($isAdmin) deletePlayback($a[0], $a[1]);
 						
 						# Then sending INIT command to refresh the camera Pi
-						camReset($a[0]);
+						if($isAdmin) camReset($a[0]);
 						header($loc);
 					}
 					else die('invalid action');

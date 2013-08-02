@@ -11,42 +11,39 @@
 		<h1>Welcome to Pimation Trigger Manager!</h1>
 
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command']) && isset($_REQUEST['dserial'])) {
 			if($_REQUEST['command'] == "addtrigger" && $_REQUEST['dtype'] == 1){
 				# First add new entry to Door Trigger table
-				addDoorTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) addDoorTrigger('0x'.$_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "addtrigger" && $_REQUEST['dtype'] == 0){
 				# First add new entry to Door Trigger table
-				addSwitchTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) addSwitchTrigger('0x'.$_REQUEST['dserial']);
 			}			
 			else if($_REQUEST['command'] == "updateswitch"){
 				# Upadate trigger table
-				updateDoorSwitch('0x'.$_REQUEST['dserial'],'0x'.$_REQUEST['sserial']);
+				if($isAdmin) updateDoorSwitch('0x'.$_REQUEST['dserial'],'0x'.$_REQUEST['sserial']);
 			}
 			else if($_REQUEST['command'] == "updatedooraction" && isset($_REQUEST['dooraction'])){
 				# Upadate trigger table
-				updateDoorAction('0x'.$_REQUEST['dserial'],$_REQUEST['dooraction']);
+				if($isAdmin) updateDoorAction('0x'.$_REQUEST['dserial'],$_REQUEST['dooraction']);
 			}
 			else if($_REQUEST['command'] == "updateontime"){
 				# Upadate trigger table
-				updateOnTime('0x'.$_REQUEST['dserial'],$_REQUEST['ondailytime']);
+				if($isAdmin) updateOnTime('0x'.$_REQUEST['dserial'],$_REQUEST['ondailytime']);
 			}	
 			else if($_REQUEST['command'] == "updateofftime"){
 				# Upadate trigger table
-				updateOffTime('0x'.$_REQUEST['dserial'],$_REQUEST['offdailytime']);
+				if($isAdmin) updateOffTime('0x'.$_REQUEST['dserial'],$_REQUEST['offdailytime']);
 			}						
 			else if($_REQUEST['command'] == "removedoortrigger"){
 				# Upadate trigger table
-				removeDoorTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) removeDoorTrigger('0x'.$_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "removeswitchtrigger"){
 				# Upadate trigger table
-				removeSwitchTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) removeSwitchTrigger('0x'.$_REQUEST['dserial']);
 			}
 
 			# Return to self rendering
@@ -59,20 +56,66 @@
 						
 			if($command == "updaterecordtime"){
 				# Update record time table
-				updateRecordTime($newrecordtime, $oldrecordtime);
+				if($isAdmin) updateRecordTime($newrecordtime, $oldrecordtime);
 			}		
 			# Return to self rendering
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
+		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
+			if($_REQUEST['command'] == "addemail"){
+				if($isAdmin) addEmail($_REQUEST['email']);
+			}
+			else if($_REQUEST['command'] == "removeemail"){
+				if($isAdmin) removeEmail($_REQUEST['email']);
+			}
+			else if($_REQUEST['command'] == "changeemail"){
+				if($isAdmin) changeEmail($_REQUEST['newemail'],$_REQUEST['email']);
+			}
+			header('Location: ' . $_SERVER['PHP_SELF']);
+		}
 ?>
-		<h2>Cameras Recording Time</h2>
-		<p>Specify how long you want to record on all cameras when a door is opened (door must be activated).</p>
+
+		<h2>Notification Manager</h2>
+		<p>Provide your emails to get notification when door is opened (door must be activated).</p>
 		
+		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+			Email: <input type="text" name="email">
+			<input type="hidden" name="command" value="addemail">
+			<input type="submit" value="Add">
+		</form>
+
+		<table border="1">
+			<tr><th>Action</th><th>Email</th></tr>
+<?
+		$result = getEmails();
+		
+		while($row = mysql_fetch_object($result)) {
+?>
+			<tr>
+				<td>
+					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+							<input type="hidden" name="email" value="<? echo $row->email; ?>">
+							<input type="hidden" name="command" value="removeemail">
+							<input type="submit" value="Remove">
+					</form>
+				</td>
+				<td>
+					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+						<input type="text" name="newemail" value="<? echo $row->email; ?>">
+						<input type="hidden" name="email" value="<? echo $row->email; ?>">
+						<input type="hidden" name="command" value="changeemail">
+						<input type="submit" value="Change name">
+					</form>
+				</td>
+			</tr>
+<?
+		}
+?>
+		</table>
+		
+		<p>Specify how long you want to record for all your cameras when door is opened (door must be activated).</p>
 		<table border="1">
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		# Getting list of record time
 		$result = getRecordTime();
 		
@@ -82,7 +125,7 @@
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
-			echo '<td>' . $meta->name . '</td>';
+			echo '<th>' . $meta->name . '</th>';
 		}
 		echo "</tr>\n";
 		
@@ -117,18 +160,15 @@
 		
 		<table border="1">		
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		$result = getDoorTriggers();
 
 		echo '<tr>';
 		# Extra command collumn at the front
-		echo '<td>Command</td>';
+		echo '<th>Command</th>';
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
-			echo '<td>' . $meta->name . '</td>';
+			echo '<th>' . $meta->name . '</th>';
 		}
 		echo "</tr>\n";
 		
@@ -187,18 +227,15 @@
 		
 		<table border="1">		
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		$result = getSwitchTriggers();
 
 		echo '<tr>';
 		# Extra command collumn at the front
-		echo '<td>Command</td>';
+		echo '<th>Command</th>';
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
-			echo '<td>' . $meta->name . '</td>';
+			echo '<th>' . $meta->name . '</th>';
 		}
 		echo "</tr>\n";
 		

@@ -13,47 +13,35 @@
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command']) && isset($_REQUEST['dserial']) && isset($_REQUEST['dname'])) {
 			if($_REQUEST['command'] == "adddevice"){
-				addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
+				if($isAdmin) addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				if($isAdmin) sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "removedevice"){
-				removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				if($isAdmin) removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
 			else if($_REQUEST['command'] == "toggleactive"){
-				toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);
+				if($isAdmin) toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);
 			}
 			else if($_REQUEST['command'] == "changedevicename"){
-				changeDeviceName('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				if($isAdmin) changeDeviceName('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
 			
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['dserial']) && isset($_REQUEST['toggle'])) {
-			setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
-			sleep(1);
-			header('Location: ' . $_SERVER['PHP_SELF']);
-		}
-		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
-			if($_REQUEST['command'] == "addemail"){
-				addEmail($_REQUEST['email']);
-			}
-			else if($_REQUEST['command'] == "removeemail"){
-				removeEmail($_REQUEST['email']);
-			}
-			else if($_REQUEST['command'] == "changeemail"){
-				changeEmail($_REQUEST['newemail'],$_REQUEST['email']);
-			}
+			if($isAdmin) setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
+			if($isAdmin) sleep(1);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['nodeaddress'])) {
 			if($_REQUEST['command'] == "addnode"){
-				addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
+				if($isAdmin) addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
 			}
 			else if($_REQUEST['command'] == "delnode"){
-				removeNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
+				if($isAdmin) removeNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
 			}
 			else if($_REQUEST['command'] == "changenodename"){
-				changeNodeName($_REQUEST['nodename'], $_REQUEST['nodenewname']);
+				if($isAdmin) changeNodeName($_REQUEST['nodename'], $_REQUEST['nodenewname']);
 			}
 			
 			header('Location: ' . $_SERVER['PHP_SELF']);
@@ -174,44 +162,6 @@
 		<p>This table is automatically refreshed every second for latest updates on your devices.</p>
 		
 		<iframe src="/states.php" style="border:0;width:100%;height:100%;scrolling:no"></iframe> 
-
-		<h2>Notification Manager</h2>
-		<p>Provide your emails to get notification when door opens (door must be activated).</p>
-		
-		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-			Email: <input type="text" name="email">
-			<input type="hidden" name="command" value="addemail">
-			<input type="submit" value="Add">
-		</form>
-
-		<table border="1">
-			<tr><th>Action</th><th>Email</th></tr>
-<?
-		$result = getEmails();
-		
-		while($row = mysql_fetch_object($result)) {
-?>
-			<tr>
-				<td>
-					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-							<input type="hidden" name="email" value="<? echo $row->email; ?>">
-							<input type="hidden" name="command" value="removeemail">
-							<input type="submit" value="Remove">
-					</form>
-				</td>
-				<td>
-					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-						<input type="text" name="newemail" value="<? echo $row->email; ?>">
-						<input type="hidden" name="email" value="<? echo $row->email; ?>">
-						<input type="hidden" name="command" value="changeemail">
-						<input type="submit" value="Change name">
-					</form>
-				</td>
-			</tr>
-<?
-		}
-?>
-		</table>
 
 		<?php include("footer.php"); ?>
 	</body>

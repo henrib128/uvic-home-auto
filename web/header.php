@@ -21,10 +21,13 @@ require_once('DBManager.php');
 				<li><a href="/triggers.php">Triggers</a></li>
 				<li><a href="/cams.php">Live Cams</a></li>
 				<li><a href="/playbacks.php">Playbacks</a></li>
-				<li><a href="/logout" onclick="document.getElementById('logout_form').submit(); return false;">Logout</a></li>
+				<!--<li><a href="/logout" onclick="document.getElementById('logout_form').submit(); return false;">Logout</a></li>!-->
 			</td>
 			</form>
 		</tr>
 	</table>
 </ul>
 <div id="main">
+<? if(!$isAdmin) { ?>
+<p style="color:red;font-size:150%;font-weight:bold;">Welcome guest.<br>Note: All buttons have been disabled except for switch control in Devices</p>
+<? } ?>
