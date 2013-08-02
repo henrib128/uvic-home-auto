@@ -10,45 +10,31 @@
 <?
 			require_once('DBManager.php');
 			
-			if(isset($_REQUEST['dserial']) && isset($_REQUEST['toggle'])) {
-				setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
+			if(isset($_REQUEST['dserial']) && isset($_REQUEST['status'])) {
+				setDeviceState($_REQUEST['dserial'], !$_REQUEST['status']);
 				header('Location: ' . $_SERVER['PHP_SELF']);
 			}
 			
 			$result = getStatesResult();
 			
-			echo '<tr>';
+			echo "<tr><th>Name</th><th>State</th><th>Command</th></tr>\n";
 			
-			for($i = 0; $i < mysql_num_fields($result); $i++) {
-				$meta = mysql_fetch_field($result, $i);
-				echo '<th>' . $meta->name . '</th>';
-			}
-			
-			echo '<th>Command</th>';
-			
-			echo "</tr>\n";
-			
-			while($row = mysql_fetch_row($result)) {
+			while($row = mysql_fetch_object($result)) {
 				echo '<tr>';
 				
-				for($i = 0; $i < mysql_num_fields($result); $i++) {
-					echo "<td>";
-					if($i == 3) echo stateToStr($row[3]);
-					else echo $row[$i];
-					echo "</td>";
-				}
+				echo '<td>' . $row->Name . '</td>';
+				echo '<td>' . $row->State . '</td>';
 				
 				echo '<td>';
-				
-				if($row[2] == DeviceType::PowerSwitch) { ?>
+				if($row->Type == DeviceType::PowerSwitch) { ?>
 					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-						<input type="hidden" name="dserial" value="<? echo $row[0]; ?>">
-						<input type="hidden" name="toggle" value="<? echo !$row[3]; ?>">
-						<input type="submit" value="Turn <? echo stateToStr(!$row[3]); ?>">
+						<input type="hidden" name="dserial" value="<? echo $row->Serial; ?>">
+						<input type="hidden" name="status" value="<? echo $row->Status; ?>">
+						<input type="submit" value="Turn <? echo stateToStr(!$row->Status); ?>">
 					</form>
 				<? }
-				
 				echo '</td>';
+				
 				echo "</tr>\n";
 			}
 ?>

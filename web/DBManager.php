@@ -220,16 +220,23 @@ function updateOffTime($dserial, $offdailytime) {
 ################################### Device related functions
 # Function to get list of devices
 function getDevicesResult() {
-	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, type as Type, name as Name, active as Active FROM Devices");
+	return db_query("SELECT name as Name, lpad(hex(serial),16,'0') as Serial, type as Type, active as Active FROM Devices");
 }
 
 function getStatesResult() {
-	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, name as Name, type as Type, status as Status, message as Message FROM Devices");
+	return db_query("SELECT lpad(hex(serial),16,'0') as Serial, name as Name, type as Type, status as Status, message as State FROM Devices");
 }
 
 function stateToStr($state) {
-	if($state) return 'On';
-	return 'Off';
+	if($state == DeviceState::On) return 'On';
+	if($state == DeviceState::Off)return 'Off';
+	return '';
+}
+
+function typeToStr($type) {
+	if($type == DeviceType::PowerSwitch) return 'PowerSwitch';
+	if($type == DeviceType::Sensor) return 'Sensor';
+	return '';
 }
 
 # Function to add new device to database
