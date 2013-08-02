@@ -61,10 +61,59 @@
 			# Return to self rendering
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
+		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
+			if($_REQUEST['command'] == "addemail"){
+				if($isAdmin) addEmail($_REQUEST['email']);
+			}
+			else if($_REQUEST['command'] == "removeemail"){
+				if($isAdmin) removeEmail($_REQUEST['email']);
+			}
+			else if($_REQUEST['command'] == "changeemail"){
+				if($isAdmin) changeEmail($_REQUEST['newemail'],$_REQUEST['email']);
+			}
+			header('Location: ' . $_SERVER['PHP_SELF']);
+		}
 ?>
-		<h2>Cameras Recording Time</h2>
-		<p>Specify how long you want to record on all cameras when a door is opened (door must be activated).</p>
+
+		<h2>Notification Manager</h2>
+		<p>Provide your emails to get notification when door is opened (door must be activated).</p>
 		
+		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+			Email: <input type="text" name="email">
+			<input type="hidden" name="command" value="addemail">
+			<input type="submit" value="Add">
+		</form>
+
+		<table border="1">
+			<tr><th>Action</th><th>Email</th></tr>
+<?
+		$result = getEmails();
+		
+		while($row = mysql_fetch_object($result)) {
+?>
+			<tr>
+				<td>
+					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+							<input type="hidden" name="email" value="<? echo $row->email; ?>">
+							<input type="hidden" name="command" value="removeemail">
+							<input type="submit" value="Remove">
+					</form>
+				</td>
+				<td>
+					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
+						<input type="text" name="newemail" value="<? echo $row->email; ?>">
+						<input type="hidden" name="email" value="<? echo $row->email; ?>">
+						<input type="hidden" name="command" value="changeemail">
+						<input type="submit" value="Change name">
+					</form>
+				</td>
+			</tr>
+<?
+		}
+?>
+		</table>
+		
+		<p>Specify how long you want to record for all your cameras when door is opened (door must be activated).</p>
 		<table border="1">
 <?
 		# Getting list of record time

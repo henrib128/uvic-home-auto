@@ -33,18 +33,6 @@
 			if($isAdmin) sleep(1);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
-		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
-			if($_REQUEST['command'] == "addemail"){
-				if($isAdmin) addEmail($_REQUEST['email']);
-			}
-			else if($_REQUEST['command'] == "removeemail"){
-				if($isAdmin) removeEmail($_REQUEST['email']);
-			}
-			else if($_REQUEST['command'] == "changeemail"){
-				if($isAdmin) changeEmail($_REQUEST['newemail'],$_REQUEST['email']);
-			}
-			header('Location: ' . $_SERVER['PHP_SELF']);
-		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['nodeaddress'])) {
 			if($_REQUEST['command'] == "addnode"){
 				if($isAdmin) addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
@@ -174,44 +162,6 @@
 		<p>This table is automatically refreshed every second for latest updates on your devices.</p>
 		
 		<iframe src="/states.php" style="border:0;width:100%;height:100%;scrolling:no"></iframe> 
-
-		<h2>Notification Manager</h2>
-		<p>Provide your emails to get notification when door opens (door must be activated).</p>
-		
-		<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-			Email: <input type="text" name="email">
-			<input type="hidden" name="command" value="addemail">
-			<input type="submit" value="Add">
-		</form>
-
-		<table border="1">
-			<tr><th>Action</th><th>Email</th></tr>
-<?
-		$result = getEmails();
-		
-		while($row = mysql_fetch_object($result)) {
-?>
-			<tr>
-				<td>
-					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-							<input type="hidden" name="email" value="<? echo $row->email; ?>">
-							<input type="hidden" name="command" value="removeemail">
-							<input type="submit" value="Remove">
-					</form>
-				</td>
-				<td>
-					<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-						<input type="text" name="newemail" value="<? echo $row->email; ?>">
-						<input type="hidden" name="email" value="<? echo $row->email; ?>">
-						<input type="hidden" name="command" value="changeemail">
-						<input type="submit" value="Change name">
-					</form>
-				</td>
-			</tr>
-<?
-		}
-?>
-		</table>
 
 		<?php include("footer.php"); ?>
 	</body>
