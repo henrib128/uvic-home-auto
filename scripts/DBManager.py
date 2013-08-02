@@ -56,14 +56,14 @@ def initDatabase():
 	dbcur.execute("CREATE TABLE Playbacks(nodename VARCHAR(50), recordfolder VARCHAR(100))")
 
 	# Create DoorTriggers table, drop previous table if existed
-	dbcur.execute("SHOW TABLES LIKE DoorTriggers")
+	dbcur.execute("SHOW TABLES LIKE 'DoorTriggers'")
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE DoorTriggers")
 	dbcur.execute("CREATE TABLE DoorTriggers(doorserial BIGINT UNSIGNED PRIMARY KEY, switchserial BIGINT UNSIGNED, action TINYINT)")
 
 	# Create SwitchTriggers table, drop previous table if existed
-	dbcur.execute("SHOW TABLES LIKE SwitchTriggers")
+	dbcur.execute("SHOW TABLES LIKE 'SwitchTriggers'")
 	result=dbcur.fetchone()
 	if not (result is None or result[0] is None):
 		dbcur.execute("DROP TABLE SwitchTriggers")
