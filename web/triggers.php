@@ -65,7 +65,9 @@
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 ?>
-		<h2>Camera Trigger Manager</h2>
+		<h2>Cameras Recording Time</h2>
+		<p>Specify how long you want to record on all cameras when a door is opened (door must be activated).</p>
+		
 		<table border="1">
 <?
 		require_once('DBManager.php');
@@ -110,7 +112,9 @@
 ?>		
 		</table>
 		
-		<h2>Door Trigger Manager</h2>
+		<h2>Door Sensor Triggers</h2>
+		<p>Associate your door to a power switch to have it turned on or off everytime the door is opened and closed (door must be activated). Open On means the switch will be turned on when door opens (and turned off when door closes). Open Off means the opposite. None to disable it.</p>
+		
 		<table border="1">		
 <?
 		require_once('DBManager.php');
@@ -178,7 +182,9 @@
 ?>
 		</table>
 
-		<h2>Switch Trigger Manager</h2>
+		<h2>Power Switch Triggers</h2>
+		<p>You can schedule your power switch to automatically turn on and off at a specific time of the day every day. i.e. 1430 for 2:30 pm.</p>
+		
 		<table border="1">		
 <?
 		require_once('DBManager.php');
