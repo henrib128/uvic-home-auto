@@ -76,7 +76,7 @@
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
-			echo '<td>' . $meta->name . '</td>';
+			echo '<th>' . $meta->name . '</th>';
 		}
 		echo "</tr>\n";
 		
@@ -115,11 +115,11 @@
 
 		echo '<tr>';
 		# Extra command collumn at the front
-		echo '<td>Command</td>';
+		echo '<th>Command</th>';
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
-			echo '<td>' . $meta->name . '</td>';
+			echo '<th>' . $meta->name . '</th>';
 		}
 		echo "</tr>\n";
 		
@@ -182,11 +182,11 @@
 
 		echo '<tr>';
 		# Extra command collumn at the front
-		echo '<td>Command</td>';
+		echo '<th>Command</th>';
 		for($i = 0; $i < mysql_num_fields($result); $i++) {
 			# Get collumn header
 			$meta = mysql_fetch_field($result, $i);
-			echo '<td>' . $meta->name . '</td>';
+			echo '<th>' . $meta->name . '</th>';
 		}
 		echo "</tr>\n";
 		
