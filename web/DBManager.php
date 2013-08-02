@@ -46,7 +46,7 @@ function db_query($query) {
 }
 
 function getUsers() {
-	return db_query("SELECT username as Username, is_admin as 'Administrator' FROM Users");
+	return db_query("SELECT username, is_admin FROM Users");
 }
 
 function changePass($username, $pass) {
@@ -237,6 +237,11 @@ function typeToStr($type) {
 	if($type == DeviceType::PowerSwitch) return 'PowerSwitch';
 	if($type == DeviceType::Sensor) return 'Sensor';
 	return '';
+}
+
+function yesNo($b) {
+	if($b) return 'Yes';
+	return 'No';
 }
 
 # Function to add new device to database
