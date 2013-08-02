@@ -171,8 +171,7 @@ class XbeeMonitor(object):
 														self.sendRemoteHexApply(switchserialHex,'D0','05')
 									else:
 										# Door Open
-										print "Door is opapi = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='163200$
-ened!"
+										print "Door is opened!"
 										
 										# Update door status
 										db.updateDeviceStatus(dserial,1)
@@ -204,8 +203,7 @@ ened!"
 														self.sendRemoteHexApply(switchserialHex,'D0','04')
 																			
 											# Spawn new thread to perform door open actions
-											DoorOpenThreaapi = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='163200$
-d(dserial).start()
+											DoorOpenThread(dserial).start()
 											
 										elif dactive == 0:
 											# Door is unactive, do nothing
@@ -260,8 +258,7 @@ d(dserial).start()
 										print "Response from D0: Switch is on"
 										db.updateDeviceStatus(dserial,1)
 										db.updateDeviceMessage(dserial,"SwitchOn")
-									else:api = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='163200$
-
+									else:
 										# Unknown parameter
 										print "Response error: Unknown frame parameter %s" % fparameterString
 										db.updateDeviceMessage(dserial,"UnknownStatus")									
@@ -310,8 +307,7 @@ d(dserial).start()
 			self.ser.open()
 			self.xbee = XBee(self.ser, callback=self.processFrame)
 
-		except Exception, e:api = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='163200$
-
+		except Exception, e:
 			print "error open serial port: " + str(e)
 			exit()
 
@@ -341,6 +337,19 @@ class DoorOpenThread(threading.Thread):
 		
 		# Getting device name
 		dname = db.getDevice(self.dserial)[2]
+		
+		# Send email notifications
+		emails = db.getEmails()
+		for email in emails:
+			print email[0]
+			#sendEmail(email[0],dname,localtime,link)
+			self.sendEmail(email[0],dname)
+			
+		#Send Twitter direct message
+		api = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='1632009878-fz4krrdmMSm6Fs1tLpfbzQlwS0UuUpC1ft5nkdJ',access_token_secret='bwn78QdcmhrRmW2QwnbjRWtj5f1OgAVms6AEimTwQg')
+		tstatus = api.PostUpdate('Sensor ' + dname + ' has been triggered on ' + timestamp)
+		#directMessage = api.PostDirectMessage('@PiMationUVic', 'Sensor ' + dname + ' has been triggered on ' + timestamp)
+		print tstatus
 		
 		# First get a list of all nodes in the system and add new socket if not existed
 		nodes = db.getNodes()
@@ -384,19 +393,6 @@ class DoorOpenThread(threading.Thread):
 		# Close all socket connections to remote cameras
 		for (nodename,camclient) in self.camnodes.items():
 			camclient.close()
-
-		# Send email notifications
-		emails = db.getEmails()
-		for email in emails:
-			print email[0]
-			#sendEmail(email[0],dname,localtime,link)
-			self.sendEmail(email[0],dname)
-			
-		#Send Twitter direct message
-		api = twitter.Api(consumer_key='rovCalWcvqgzQpCp1ca5Rg',consumer_secret='Sas5tE0ljI3vYS7QXng3CB6yL3Fac4KaIaepLDFjkA',access_token_key='1632009878-fz4krrdmMSm6Fs1tLpfbzQlwS0UuUpC1ft5nkdJ',access_token_secret='bwn78QdcmhrRmW2QwnbjRWtj5f1OgAVms6AEimTwQg')
-		tstatus = api.PostUpdate('Sensor ' + dname + ' has been triggered on ' + timestamp)
-		#directMessage = api.PostDirectMessage('@PiMationUVic', 'Sensor ' + dname + ' has been triggered on ' + timestamp)
-		print tstatus
 		
 	def sendEmail(self,_email,_dname):
 	
