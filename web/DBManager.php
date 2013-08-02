@@ -385,6 +385,12 @@ function deletePlayback($cam, $path) {
 
 # Function to send STARTRECORD command
 function startRecord($cam, $path) {
+	$non_path_pattern = "/(\ )|(\.\.)/";
+	
+	if(preg_match($non_path_pattern, $path)) {
+		die('Ivalid path');
+	}
+
 	# Check if the path is empty
 	if($path == ""){
 		# Empty record folder, assign it to default value using timestamp
