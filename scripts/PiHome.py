@@ -188,9 +188,9 @@ if __name__ == "__main__":
 	#db.initDatabase()
 
 	# Populate database with some test values
-	mainnodename = 'Main Pi'
-	mainnodeaddr = getLocalIp()
-	db.addNode(mainnodename,mainnodeaddr)
+	#mainnodename = 'Main Pi'
+	#mainnodeaddr = getLocalIp()
+	#db.addNode(mainnodename,mainnodeaddr)
 	#db.addNode('Rear Cam','142.104.167.186')
 	#db.addEmail('trihuynh87@gmail.com')
 	#testswitch = '0013a20040a57ae9'
