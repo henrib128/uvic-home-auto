@@ -163,7 +163,7 @@ def addXbeeDevice(_xbm,_dserial):
 		print "Done sleep mode"
 
 		# 7. Write changes to EndDevice
-		if not checkCommandResponse(_xbm,'dapply',_dserial,'WR',''):	
+		if not checkCommandResponse(_xbm,'dnotapply',_dserial,'WR',''):	
 			_message = "Failed to write to end device"
 			print _message
 			return _message
