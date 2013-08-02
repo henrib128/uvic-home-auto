@@ -34,6 +34,7 @@ def checkCommandResponse(_xbm,_txtype,_dserial,_command,_param):
 
 		if response: 
 			OK = True
+			time.sleep(1)
 			break
 
 		# Wait for 2 sec before retry
@@ -166,14 +167,14 @@ def addXbeeDevice(_xbm,_dserial):
 			_message = "Failed to write to end device"
 			print _message
 			return _message
-		print "Done sleep write and apply changes"
+		print "Done sleep write"
 
 		# 8. Apply changes to enable SLEEP MODE
-		#if not checkCommandResponse(_xbm,'dapply',_dserial,'AC',''):
-		#	_message = "Failed to apply changes to end device"
-		#	print _message
-		#	return _message
-		#print "Done apply changes"
+		if not checkCommandResponse(_xbm,'dapply',_dserial,'AC',''):
+			_message = "Failed to apply changes to end device"
+			print _message
+			return _message
+		print "Done apply changes"
 
 		# Everything went through! Return okay
 		_message = "New device is added successfully"
