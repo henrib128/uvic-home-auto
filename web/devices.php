@@ -13,47 +13,47 @@
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command']) && isset($_REQUEST['dserial']) && isset($_REQUEST['dname'])) {
 			if($_REQUEST['command'] == "adddevice"){
-				addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
-				sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
+				if($isAdmin) addDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				if($isAdmin) sendCommandToPiHome($_REQUEST['command'], $_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "removedevice"){
-				removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				if($isAdmin) removeDevice('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
 			else if($_REQUEST['command'] == "toggleactive"){
-				toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);
+				if($isAdmin) toggleDeviceActive('0x'.$_REQUEST['dserial'], $_REQUEST['dname'], $_REQUEST['dactive']);
 			}
 			else if($_REQUEST['command'] == "changedevicename"){
-				changeDeviceName('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
+				if($isAdmin) changeDeviceName('0x'.$_REQUEST['dserial'], $_REQUEST['dname']);
 			}
 			
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['dserial']) && isset($_REQUEST['toggle'])) {
-			setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
-			sleep(1);
+			if($isAdmin) setDeviceState($_REQUEST['dserial'], $_REQUEST['toggle']);
+			if($isAdmin) sleep(1);
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['email'])) {
 			if($_REQUEST['command'] == "addemail"){
-				addEmail($_REQUEST['email']);
+				if($isAdmin) addEmail($_REQUEST['email']);
 			}
 			else if($_REQUEST['command'] == "removeemail"){
-				removeEmail($_REQUEST['email']);
+				if($isAdmin) removeEmail($_REQUEST['email']);
 			}
 			else if($_REQUEST['command'] == "changeemail"){
-				changeEmail($_REQUEST['newemail'],$_REQUEST['email']);
+				if($isAdmin) changeEmail($_REQUEST['newemail'],$_REQUEST['email']);
 			}
 			header('Location: ' . $_SERVER['PHP_SELF']);
 		}
 		else if(isset($_REQUEST['command']) && isset($_REQUEST['nodename']) && isset($_REQUEST['nodeaddress'])) {
 			if($_REQUEST['command'] == "addnode"){
-				addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
+				if($isAdmin) addNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
 			}
 			else if($_REQUEST['command'] == "delnode"){
-				removeNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
+				if($isAdmin) removeNode($_REQUEST['nodename'], $_REQUEST['nodeaddress']);
 			}
 			else if($_REQUEST['command'] == "changenodename"){
-				changeNodeName($_REQUEST['nodename'], $_REQUEST['nodenewname']);
+				if($isAdmin) changeNodeName($_REQUEST['nodename'], $_REQUEST['nodenewname']);
 			}
 			
 			header('Location: ' . $_SERVER['PHP_SELF']);

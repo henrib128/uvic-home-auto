@@ -35,11 +35,11 @@
 			$loc = 'Location: ' . $_SERVER['PHP_SELF'];
 			
 			if($act == 'Record') {
-				startRecord($cam_rec, $path);
+				if($isAdmin) startRecord($cam_rec, $path);
 				header($loc . '?cam_rec=' . urlencode($cam_rec));
 			}
 			else if($act == 'Stop') {
-				camReset($cam_rec);
+				if($isAdmin) camReset($cam_rec);
 				header($loc);
 			}
 			else die('invalid action 2');

@@ -458,5 +458,6 @@ function setDeviceState($dserial, $state) {
 }
 
 db_connect();
+$isAdmin = isAdmin();
 
 ?>

@@ -11,42 +11,39 @@
 		<h1>Welcome to Pimation Trigger Manager!</h1>
 
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		# Pre action to take care of self-direct requests
 		if(isset($_REQUEST['command']) && isset($_REQUEST['dserial'])) {
 			if($_REQUEST['command'] == "addtrigger" && $_REQUEST['dtype'] == 1){
 				# First add new entry to Door Trigger table
-				addDoorTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) addDoorTrigger('0x'.$_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "addtrigger" && $_REQUEST['dtype'] == 0){
 				# First add new entry to Door Trigger table
-				addSwitchTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) addSwitchTrigger('0x'.$_REQUEST['dserial']);
 			}			
 			else if($_REQUEST['command'] == "updateswitch"){
 				# Upadate trigger table
-				updateDoorSwitch('0x'.$_REQUEST['dserial'],'0x'.$_REQUEST['sserial']);
+				if($isAdmin) updateDoorSwitch('0x'.$_REQUEST['dserial'],'0x'.$_REQUEST['sserial']);
 			}
 			else if($_REQUEST['command'] == "updatedooraction" && isset($_REQUEST['dooraction'])){
 				# Upadate trigger table
-				updateDoorAction('0x'.$_REQUEST['dserial'],$_REQUEST['dooraction']);
+				if($isAdmin) updateDoorAction('0x'.$_REQUEST['dserial'],$_REQUEST['dooraction']);
 			}
 			else if($_REQUEST['command'] == "updateontime"){
 				# Upadate trigger table
-				updateOnTime('0x'.$_REQUEST['dserial'],$_REQUEST['ondailytime']);
+				if($isAdmin) updateOnTime('0x'.$_REQUEST['dserial'],$_REQUEST['ondailytime']);
 			}	
 			else if($_REQUEST['command'] == "updateofftime"){
 				# Upadate trigger table
-				updateOffTime('0x'.$_REQUEST['dserial'],$_REQUEST['offdailytime']);
+				if($isAdmin) updateOffTime('0x'.$_REQUEST['dserial'],$_REQUEST['offdailytime']);
 			}						
 			else if($_REQUEST['command'] == "removedoortrigger"){
 				# Upadate trigger table
-				removeDoorTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) removeDoorTrigger('0x'.$_REQUEST['dserial']);
 			}
 			else if($_REQUEST['command'] == "removeswitchtrigger"){
 				# Upadate trigger table
-				removeSwitchTrigger('0x'.$_REQUEST['dserial']);
+				if($isAdmin) removeSwitchTrigger('0x'.$_REQUEST['dserial']);
 			}
 
 			# Return to self rendering
@@ -59,7 +56,7 @@
 						
 			if($command == "updaterecordtime"){
 				# Update record time table
-				updateRecordTime($newrecordtime, $oldrecordtime);
+				if($isAdmin) updateRecordTime($newrecordtime, $oldrecordtime);
 			}		
 			# Return to self rendering
 			header('Location: ' . $_SERVER['PHP_SELF']);
@@ -70,9 +67,6 @@
 		
 		<table border="1">
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		# Getting list of record time
 		$result = getRecordTime();
 		
@@ -117,9 +111,6 @@
 		
 		<table border="1">		
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		$result = getDoorTriggers();
 
 		echo '<tr>';
@@ -187,9 +178,6 @@
 		
 		<table border="1">		
 <?
-		require_once('DBManager.php');
-		db_connect();
-		
 		$result = getSwitchTriggers();
 
 		echo '<tr>';

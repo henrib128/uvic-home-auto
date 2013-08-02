@@ -28,3 +28,6 @@ require_once('DBManager.php');
 	</table>
 </ul>
 <div id="main">
+<? if(!$isAdmin) { ?>
+<p style="color:red;font-size:150%;font-weight:bold;">Welcome guest.<br>Note: All buttons have been disabled except for switch control in Devices</p>
+<? } ?>
