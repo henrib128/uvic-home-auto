@@ -26,6 +26,7 @@
 		<? include("header.php"); ?>
 		
 		<h1>Welcome to Pimation Camera Manager!</h1>
+		<p>Here you can view live videos of all your cameras. You can also make a recording of your camera and save it later for review at Playbacks tab.</p>
 <?
 		if(isset($_REQUEST['action']) && isset($_REQUEST['cam']) && isset($_REQUEST['path'])) {
 			$act = $_REQUEST['action'];
@@ -48,10 +49,11 @@
 		$i = 0;
 		while($cam = mysql_fetch_array($result)) {
 			$cam = $cam[0];
-			echo "<h1>" . $cam . "</h1><br>\n";
+			echo "<h1>" . $cam . "</h1>";
 ?>
+			<p>Give the recording a name and click 'Record' to start recording. Click 'Stop' when you are done. If no name is given, it will be named with the current time, i.e record_YY_MM_DD.HH_MM_SS (see in Playbacks tab).</p>
 			<form action="<? echo $_SERVER['PHP_SELF']; ?>" method="post">
-				Record Folder: <input type="text" name="path"><br>
+				Name of recording: <input type="text" name="path"><br>
 				<input type="hidden" name="cam" value="<? echo $cam; ?>" />
 				<input type="submit" name="action" value="Record" />
 				<input type="submit" name="action" value="Stop" />
