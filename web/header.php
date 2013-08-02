@@ -21,7 +21,7 @@ require_once('DBManager.php');
 				<li><a href="/triggers.php">Triggers</a></li>
 				<li><a href="/cams.php">Live Cams</a></li>
 				<li><a href="/playbacks.php">Playbacks</a></li>
-				<li><a href="/logout" onclick="document.getElementById('logout_form').submit(); return false;">Logout</a></li>
+				<!--<li><a href="/logout" onclick="document.getElementById('logout_form').submit(); return false;">Logout</a></li>!-->
 			</td>
 			</form>
 		</tr>
